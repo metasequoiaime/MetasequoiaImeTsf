@@ -3,6 +3,7 @@
 #include "Globals.h"
 #include "FanyUtils.h"
 #include <utf8cpp/utf8.h>
+#include <fmt/xchar.h>
 
 using namespace std;
 
@@ -15,34 +16,24 @@ std::string GetIMEDataDirPath()
     return IMEDataPath;
 }
 
-void SendUnicode(const wchar_t data)
-{
-    INPUT input[4];
-    HWND current_hwnd = GetForegroundWindow();
-    SetFocus(current_hwnd);
-
-    input[0].type = INPUT_KEYBOARD;
-    input[0].ki.wVk = 0;
-    input[0].ki.wScan = data;
-    input[0].ki.dwFlags = KEYEVENTF_UNICODE;
-    input[0].ki.time = 0;
-    input[0].ki.dwExtraInfo = GetMessageExtraInfo();
-    SendInput(1, &input[0], sizeof(INPUT));
-
-    input[1].type = INPUT_KEYBOARD;
-    input[1].ki.wVk = 0;
-    input[1].ki.wScan = data;
-    input[1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-    input[1].ki.time = 0;
-    input[1].ki.dwExtraInfo = GetMessageExtraInfo();
-    SendInput(1, &input[1], sizeof(INPUT));
-}
-
 void SendKeys(std::wstring pinyin)
 {
     for (wchar_t ch : pinyin)
     {
-        SendUnicode(ch);
+        INPUT in[2]{};
+
+        in[0].type = INPUT_KEYBOARD;
+        in[0].ki.wScan = ch;
+        in[0].ki.dwFlags = KEYEVENTF_UNICODE;
+
+        in[1] = in[0];
+        in[1].ki.dwFlags |= KEYEVENTF_KEYUP;
+
+        UINT sent = SendInput(2, in, sizeof(INPUT));
+        if (sent != 2)
+        {
+            OutputDebugString(fmt::format(L"SendKeys failed.\n").c_str());
+        }
     }
 }
 

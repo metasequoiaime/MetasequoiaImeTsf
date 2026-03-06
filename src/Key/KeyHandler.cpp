@@ -13,6 +13,11 @@
 #include "Ipc.h"
 #include "FanyDefines.h"
 
+namespace
+{
+std::wstring g_toggleImeFallbackBuffer;
+}
+
 //////////////////////////////////////////////////////////////////////
 //
 // CMetasequoiaIME class
@@ -80,6 +85,7 @@ VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pC
 
 HRESULT CMetasequoiaIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 {
+    g_toggleImeFallbackBuffer.clear();
     _DeleteCandidateList(FALSE, pContext);
 
     // just terminate the composition
@@ -96,6 +102,7 @@ HRESULT CMetasequoiaIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pCont
 
 HRESULT CMetasequoiaIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 {
+    g_toggleImeFallbackBuffer.clear();
     GlobalIme::word_for_creating_word = L"";
     _RemoveDummyCompositionForComposing(ec, _pComposition);
 
@@ -109,16 +116,35 @@ HRESULT CMetasequoiaIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContex
 HRESULT CMetasequoiaIME::_HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *pContext)
 {
     CStringRange keyStrokebuffer = _pCompositionProcessorEngine->GetKeystrokeBuffer();
+    std::wstring commitString;
+
+    _RemoveDummyCompositionForComposing(ec, _pComposition);
     if (keyStrokebuffer.GetLength())
     {
-        std::wstring keyStrokeString(keyStrokebuffer.Get(), keyStrokebuffer.GetLength());
-        FanyUtils::SendKeys(keyStrokeString);
+        commitString.assign(keyStrokebuffer.Get(), keyStrokebuffer.GetLength());
+        CStringRange commitStringRange;
+        commitStringRange.Set(commitString.c_str(), commitString.length());
+        OutputDebugString(fmt::format(L"commitString: {}", commitString).c_str());
+
+        HRESULT hr = _AddCharAndFinalize(ec, pContext, &commitStringRange);
+        if (FAILED(hr))
+        {
+            FanyUtils::SendKeys(commitString);
+        }
     }
-    _RemoveDummyCompositionForComposing(ec, _pComposition);
+    else if (!g_toggleImeFallbackBuffer.empty())
+    {
+        commitString = g_toggleImeFallbackBuffer;
+        // 实测这个在管理员窗口也是可以正常运行的
+        FanyUtils::SendKeys(commitString);
+    }
 
-    _DeleteCandidateList(FALSE, pContext);
+    g_toggleImeFallbackBuffer.clear();
 
+    // _DeleteCandidateList(FALSE, pContext);
     _TerminateComposition(ec, pContext);
+
+    // _HandleComplete(ec, pContext);
 
     // CCompositionProcessorEngine *pCompositionProcessorEngine;
     // pCompositionProcessorEngine = _pCompositionProcessorEngine;
@@ -181,6 +207,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContex
 #endif
     // Add virtual key to composition processor engine
     pCompositionProcessorEngine->AddVirtualKey(wch);
+    g_toggleImeFallbackBuffer.push_back(wch);
 
     _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext);
 
@@ -531,6 +558,11 @@ HRESULT CMetasequoiaIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfCo
     pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
     DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
+
+    if (!g_toggleImeFallbackBuffer.empty())
+    {
+        g_toggleImeFallbackBuffer.pop_back();
+    }
 
     if (vKeyLen)
     {
