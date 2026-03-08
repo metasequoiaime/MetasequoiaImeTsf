@@ -24,6 +24,49 @@ FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
 /* Data size transfered from Server process */
 static const int ServerDtPipeDataSize = 512;
 
+namespace
+{
+inline bool IsValidPipeHandle(HANDLE hPipeHandle)
+{
+    return hPipeHandle != nullptr && hPipeHandle != INVALID_HANDLE_VALUE;
+}
+
+void ClosePipeHandleIfValid(HANDLE &hPipeHandle)
+{
+    if (IsValidPipeHandle(hPipeHandle))
+    {
+        CloseHandle(hPipeHandle);
+    }
+    hPipeHandle = nullptr;
+}
+
+bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName)
+{
+    if (IsValidPipeHandle(hPipeHandle))
+    {
+        return true;
+    }
+
+    HANDLE openedPipe = CreateFile(   //
+        pipeName,                     //
+        GENERIC_READ | GENERIC_WRITE, //
+        0,                            //
+        nullptr,                      //
+        OPEN_EXISTING,                //
+        0,                            //
+        nullptr                       //
+    );
+
+    if (openedPipe == INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    hPipeHandle = openedPipe;
+    return true;
+}
+} // namespace
+
 int InitIpc()
 {
     //
@@ -80,185 +123,22 @@ int InitIpc()
 
 int InitNamedpipe()
 {
-    if (hPipe == nullptr)
-    {
-        hPipe = CreateFile(               //
-            FANY_IME_NAMED_PIPE,          //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-
-        if (hPipe == INVALID_HANDLE_VALUE)
-        {
-            hPipe = nullptr;
-        }
-        else
-        {
-            // TODO: Log
-        }
-    }
-
-    if (hFromServerPipe == nullptr)
-    {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
-        {
-            hFromServerPipe = nullptr;
-        }
-        else
-        {
-            // TODO: Log
-        }
-    }
-
-    if (Global::hToTsfWorkerThreadPipe == nullptr)
-    {
-        Global::hToTsfWorkerThreadPipe = CreateFile(  //
-            FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
-            GENERIC_READ | GENERIC_WRITE,             //
-            0,                                        //
-            nullptr,                                  //
-            OPEN_EXISTING,                            //
-            0,                                        //
-            nullptr                                   //
-        );
-
-        if (Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
-        {
-            Global::hToTsfWorkerThreadPipe = nullptr;
-        }
-        else
-        {
-            // TODO: Log
-        }
-    }
-
-    if (hPipe == nullptr || hPipe == INVALID_HANDLE_VALUE || hFromServerPipe == nullptr ||
-        hFromServerPipe == INVALID_HANDLE_VALUE || Global::hToTsfWorkerThreadPipe == nullptr ||
-        Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
-    {
-        hPipe = nullptr;
-        hFromServerPipe = nullptr;
-        Global::hToTsfWorkerThreadPipe = nullptr;
-        return 0;
-    }
-
-    return 1;
+    return ConnectToAllNamedpipe();
 }
 
 int ConnectToAllNamedpipe()
 {
-    hPipe = CreateFile(               //
-        FANY_IME_NAMED_PIPE,          //
-        GENERIC_READ | GENERIC_WRITE, //
-        0,                            //
-        nullptr,                      //
-        OPEN_EXISTING,                //
-        0,                            //
-        nullptr                       //
-    );
+    bool mainPipeReady = TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE);
+    bool toTsfPipeReady = TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE);
+    bool toTsfWorkerPipeReady =
+        TryOpenClientPipe(Global::hToTsfWorkerThreadPipe, FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE);
 
-    if (hPipe == INVALID_HANDLE_VALUE)
-    {
-        hPipe = nullptr;
-    }
-    else
-    {
-        // TODO: Log
-    }
-
-    hFromServerPipe = CreateFile(     //
-        FANY_IME_TO_TSF_NAMED_PIPE,   //
-        GENERIC_READ | GENERIC_WRITE, //
-        0,                            //
-        nullptr,                      //
-        OPEN_EXISTING,                //
-        0,                            //
-        nullptr                       //
-    );
-
-    if (hFromServerPipe == INVALID_HANDLE_VALUE)
-    {
-        hFromServerPipe = nullptr;
-    }
-    else
-    {
-        // TODO: Log
-    }
-
-    Global::hToTsfWorkerThreadPipe = CreateFile(  //
-        FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
-        GENERIC_READ | GENERIC_WRITE,             //
-        0,                                        //
-        nullptr,                                  //
-        OPEN_EXISTING,                            //
-        0,                                        //
-        nullptr                                   //
-    );
-
-    if (Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
-    {
-        Global::hToTsfWorkerThreadPipe = nullptr;
-    }
-    else
-    {
-        // TODO: Log
-    }
-
-    if (hPipe == nullptr || hPipe == INVALID_HANDLE_VALUE || hFromServerPipe == nullptr ||
-        hFromServerPipe == INVALID_HANDLE_VALUE || Global::hToTsfWorkerThreadPipe == nullptr ||
-        Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
-    {
-        hPipe = nullptr;
-        hFromServerPipe = nullptr;
-        Global::hToTsfWorkerThreadPipe = nullptr;
-        return 0;
-    }
-
-    return 1;
+    return (mainPipeReady && toTsfPipeReady && toTsfWorkerPipeReady) ? 1 : 0;
 }
 
 int ConnectToTsfNamedpipe()
 {
-    if (hFromServerPipe == nullptr || hFromServerPipe == INVALID_HANDLE_VALUE)
-    {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
-        {
-            hFromServerPipe = nullptr;
-        }
-        else
-        {
-            // TODO: Log
-        }
-    }
-    if (hFromServerPipe == nullptr || hFromServerPipe == INVALID_HANDLE_VALUE)
-    {
-        return 0;
-    }
-    return 1;
+    return TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE) ? 1 : 0;
 }
 
 int CloseIpc()
@@ -309,12 +189,9 @@ int CloseIpc()
 
 int CloseNamedpipe()
 {
-    CloseHandle(hPipe);
-    hPipe = nullptr;
-    CloseHandle(hFromServerPipe);
-    hFromServerPipe = nullptr;
-    CloseHandle(Global::hToTsfWorkerThreadPipe);
-    Global::hToTsfWorkerThreadPipe = nullptr;
+    ClosePipeHandleIfValid(hPipe);
+    ClosePipeHandleIfValid(hFromServerPipe);
+    ClosePipeHandleIfValid(Global::hToTsfWorkerThreadPipe);
     return 0;
 }
 

@@ -19,6 +19,18 @@
 
 #pragma comment(lib, "Shcore.lib")
 
+namespace
+{
+constexpr UINT_PTR TIMER_CONNECT_ALL_NAMEDPIPE = 1;
+constexpr UINT_PTR TIMER_CONNECT_TO_TSF_NAMEDPIPE = 2;
+constexpr UINT CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS = 50;
+constexpr int CONNECT_ALL_NAMEDPIPE_MAX_RETRY = 3;
+constexpr int CONNECT_TO_TSF_NAMEDPIPE_MAX_RETRY = 1;
+int g_connectAllNamedpipeRetryCount = 0;
+int g_connectToTsfNamedpipeRetryCount = 0;
+
+} // namespace
+
 //+---------------------------------------------------------------------------
 //
 // CreateInstance
@@ -493,6 +505,10 @@ STDAPI CMetasequoiaIME::Deactivate()
     /* 清理消息窗口 */
     if (_msgWndHandle)
     {
+        KillTimer(_msgWndHandle, TIMER_CONNECT_ALL_NAMEDPIPE);
+        KillTimer(_msgWndHandle, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
+        g_connectAllNamedpipeRetryCount = 0;
+        g_connectToTsfNamedpipeRetryCount = 0;
         DestroyWindow(_msgWndHandle);
         _msgWndHandle = nullptr;
     }
@@ -647,34 +663,77 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
     }
     case WM_ConnectNamedpipe: {
         OutputDebugString(fmt::format(L"Try to connect named pipe via WM_ConnectNamedpipe").c_str());
+        KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
+        g_connectAllNamedpipeRetryCount = 0;
         SendToAuxNamedpipe(L"kill");
-        for (int retry = 0; retry < 3; ++retry)
-        {
-            // 如果用户已经切换走了，就不用继续重试
-            if (!Global::g_connected)
-            {
-                break;
-            }
-            OutputDebugString(
-                fmt::format(L"Try to connect named pipe via WM_ConnectNamedpipe, retry: {}", retry).c_str());
-            Sleep(50);
-            if (ConnectToAllNamedpipe())
-            {
-                OutputDebugString(fmt::format(L"Connected to named pipe").c_str());
-                break;
-            }
-        }
+        // 即使是第一次连接，也要等一会儿再试，要给 server 端留时间来处理 kill
+        SetTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE, CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS, nullptr);
         break;
     }
     case WM_DisconnectNamedpipe: {
+        OutputDebugString(fmt::format(L"WM_DisconnectNamedpipe.\n").c_str());
+        KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
+        KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
+        g_connectAllNamedpipeRetryCount = 0;
+        g_connectToTsfNamedpipeRetryCount = 0;
         CloseNamedpipe();
         break;
     }
     case WM_ConnectToTsfNamedpipe: {
         OutputDebugString(fmt::format(L"Try to Connect to TSF named pipe").c_str());
-        Sleep(50);
-        if (ConnectToTsfNamedpipe())
+        KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
+        g_connectToTsfNamedpipeRetryCount = 0;
+        // Keep old behavior: wait once before first connect try, but do it asynchronously.
+        SetTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE, CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS, nullptr);
+        break;
+    }
+    case WM_TIMER: {
+        if (wParam == TIMER_CONNECT_ALL_NAMEDPIPE)
         {
+            // 如果用户已经切换走了，就不用继续重试
+            if (!Global::g_connected)
+            {
+                KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
+                g_connectAllNamedpipeRetryCount = 0;
+                break;
+            }
+
+            OutputDebugString(
+                fmt::format(L"Retry connect all named pipes: {}", g_connectAllNamedpipeRetryCount).c_str());
+            if (ConnectToAllNamedpipe())
+            {
+                KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
+                g_connectAllNamedpipeRetryCount = 0;
+                OutputDebugString(fmt::format(L"Yes Connected to named pipe :)").c_str());
+                break;
+            }
+
+            g_connectAllNamedpipeRetryCount++;
+            if (g_connectAllNamedpipeRetryCount >= CONNECT_ALL_NAMEDPIPE_MAX_RETRY)
+            {
+                KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
+                g_connectAllNamedpipeRetryCount = 0;
+            }
+            break;
+        }
+
+        if (wParam == TIMER_CONNECT_TO_TSF_NAMEDPIPE)
+        {
+            OutputDebugString(
+                fmt::format(L"Retry connect to tsf named pipe: {}", g_connectToTsfNamedpipeRetryCount).c_str());
+            if (ConnectToTsfNamedpipe())
+            {
+                KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
+                g_connectToTsfNamedpipeRetryCount = 0;
+                break;
+            }
+
+            g_connectToTsfNamedpipeRetryCount++;
+            if (g_connectToTsfNamedpipeRetryCount >= CONNECT_TO_TSF_NAMEDPIPE_MAX_RETRY)
+            {
+                KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
+                g_connectToTsfNamedpipeRetryCount = 0;
+            }
             break;
         }
         break;
