@@ -134,6 +134,21 @@ BOOL CMetasequoiaIME::_IsKeyEaten(        //
 
     if (isOpen) // Chinese mode
     {
+        const bool isComposing = _IsComposing() ? true : false;
+        const bool isCapsLockOn = (GetKeyState(VK_CAPITAL) & 0x0001) != 0;
+        const bool isUppercaseAlphabet = (wch >= L'A' && wch <= L'Z') && (*pCodeOut >= L'A' && *pCodeOut <= L'Z');
+        const bool isInputInProgress =
+            isComposing || (_candidateMode != CANDIDATE_NONE) ||
+            (pCompositionProcessorEngine && pCompositionProcessorEngine->GetVirtualKeyLength() > 0);
+
+        // CapsLock ON + uppercase(没有按 Shift) alphabet:
+        // - start of input: don't eat
+        // - middle of input: eat
+        if (isCapsLockOn && isUppercaseAlphabet && !isInputInProgress)
+        {
+            return isTouchKeyboardSpecialKeys;
+        }
+
         //
         // The candidate or phrase list handles the keys through ITfKeyEventSink.
         //
@@ -142,7 +157,7 @@ BOOL CMetasequoiaIME::_IsKeyEaten(        //
         auto ret = pCompositionProcessorEngine->IsVirtualKeyNeed( //
             *pCodeOut,                                            //
             pwch,                                                 //
-            _IsComposing(),                                       //
+            isComposing,                                          //
             _candidateMode,                                       //
             _isCandidateWithWildcard,                             //
             pKeyState                                             //
