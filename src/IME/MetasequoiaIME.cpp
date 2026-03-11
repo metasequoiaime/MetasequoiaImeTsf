@@ -258,7 +258,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     _dwActivateFlags = dwFlags;
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: CMetasequoiaIME::ActivateEx\n");
+    OutputDebugString(L"[msime]: CMetasequoiaIME::ActivateEx");
 #endif
     /*
     std::wstring processName = FanyUtils::GetCurrentProcessName();
@@ -376,7 +376,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     }
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: CMetasequoiaIME::ActivateEx\n");
+    OutputDebugString(L"[msime]: CMetasequoiaIME::ActivateEx");
 #endif
 
     return S_OK;
@@ -414,7 +414,7 @@ STDAPI CMetasequoiaIME::Deactivate()
         {
             // 向 server 端发送一个输入法真的切换到了别的输入法的消息
             // 只有接收到这个消息，才可以隐藏 ftb
-            OutputDebugString(fmt::format(L"[msime]: Truely deactivate IME and switch to another.\n").c_str());
+            OutputDebugString(fmt::format(L"[msime]: Truely deactivate IME and switch to another.").c_str());
             SendIMEDeactivationEventToUIProcessViaNamedPipe();
         }
 
@@ -439,7 +439,7 @@ STDAPI CMetasequoiaIME::Deactivate()
     // CloseNamedpipe();
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: CMetasequoiaIME::Deactivate\n");
+    OutputDebugString(L"[msime]: CMetasequoiaIME::Deactivate");
 #endif
 
     if (_pCompositionProcessorEngine)
@@ -671,7 +671,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_DisconnectNamedpipe: {
-        OutputDebugString(fmt::format(L"[msime]: WM_DisconnectNamedpipe.\n").c_str());
+        OutputDebugString(fmt::format(L"[msime]: WM_DisconnectNamedpipe.").c_str());
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;

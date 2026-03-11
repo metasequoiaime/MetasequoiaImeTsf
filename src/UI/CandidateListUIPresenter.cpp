@@ -91,7 +91,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                 std::wstring curWord = data.substr(data.find(L',') + 1);
 #ifdef FANY_DEBUG
                 OutputDebugString(
-                    fmt::format(L"[msime]: create_word, pureFullPinyin: {}, curWord: {}\n", pureFullPinyin, curWord)
+                    fmt::format(L"[msime]: create_word, pureFullPinyin: {}, curWord: {}", pureFullPinyin, curWord)
                         .c_str());
 #endif
                 GlobalIme::word_for_creating_word = curWord;
@@ -130,7 +130,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             }
 #ifdef FANY_DEBUG
             OutputDebugString(
-                fmt::format(L"[msime]: create_word: current word part {}\n", GlobalIme::word_for_creating_word)
+                fmt::format(L"[msime]: create_word: current word part {}", GlobalIme::word_for_creating_word)
                     .c_str());
 #endif
             return hr;
@@ -923,7 +923,7 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     if (FAILED(hr))
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: MakeCandidateWindow failed\n").c_str());
+        OutputDebugString(fmt::format(L"[msime]: MakeCandidateWindow failed").c_str());
 #endif
         // goto Exit;
     }
@@ -1174,7 +1174,7 @@ void CCandidateListUIPresenter::_MoveWindowToTextExt()
 
 VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
 {
-    // OutputDebugString(fmt::format(L"[msime]: LayoutChangeNotification\n").c_str());
+    // OutputDebugString(fmt::format(L"[msime]: LayoutChangeNotification").c_str());
 #ifdef FANY_DEBUG
     // TODO: Log _LayoutChangeNotification firefox cnt: Global::firefox_like_cnt
 #endif

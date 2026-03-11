@@ -285,7 +285,7 @@ HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
     if (Global::Keycode == VK_SPACE)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateComposing\n");
+        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateComposing");
 #endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
@@ -363,7 +363,7 @@ HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
     if (Global::Keycode == VK_SPACE)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateCandidate\n");
+        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateCandidate");
 #endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
@@ -387,7 +387,7 @@ HRESULT CKeyStateCandidate::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStateCandidate\n");
+    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStateCandidate");
 #endif
     // return _pTextService->_HandleCandidateSelectByNumber(dto.ec, dto.pContext, dto.code);
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
@@ -423,7 +423,7 @@ HRESULT CKeyStatePhrase::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 HRESULT CKeyStatePhrase::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStatePhrase\n");
+    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStatePhrase");
 #endif
     // return _pTextService->_HandlePhraseSelectByNumber(dto.ec, dto.pContext, dto.code);
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);

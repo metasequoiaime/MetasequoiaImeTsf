@@ -1920,7 +1920,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_NONE)) // 26 basic English chars
         {
 #ifdef FANY_DEBUG
-            OutputDebugString(L"[msime]: Basic 26 chars key pressed.\n");
+            OutputDebugString(L"[msime]: Basic 26 chars key pressed.");
 #endif
             return TRUE;
         }
@@ -2150,7 +2150,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
             case VK_RETURN:
                 // Do something when user press return key
 #ifdef FANY_DEBUG
-                OutputDebugString(L"[msime]: VK_RETURN pressed.\n");
+                OutputDebugString(L"[msime]: VK_RETURN pressed.");
 #endif
                 if (pKeyState)
                 {
