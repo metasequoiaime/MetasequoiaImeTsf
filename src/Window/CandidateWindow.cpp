@@ -571,7 +571,7 @@ void CCandidateWindow::_DrawListWithWebview2(_In_ UINT iIndex)
             DWORD error = GetLastError();
             std::wstring errorString = L"FindWindow failed with error: " + std::to_wstring(error);
 #ifdef FANY_DEBUG
-            OutputDebugString(errorString.c_str());
+            OutputDebugString(fmt::format(L"[msime]: {}", errorString).c_str());
 #endif
         }
         COPYDATASTRUCT cds;
@@ -586,13 +586,14 @@ void CCandidateWindow::_DrawListWithWebview2(_In_ UINT iIndex)
             {
                 std::wstring errorString = L"SendMessage CandidateWString failed with error: " + std::to_wstring(error);
 #ifdef FANY_DEBUG
-                OutputDebugString(errorString.c_str());
+                OutputDebugString(fmt::format(L"[msime]: {}", errorString).c_str());
 #endif
             }
             else
             {
 #ifdef FANY_DEBUG
-                OutputDebugString(L"SendMessage CandidateWString success, but result is 0");
+                OutputDebugString(
+                    fmt::format(L"[msime]: SendMessage CandidateWString success, but result is 0").c_str());
 #endif
             }
         }

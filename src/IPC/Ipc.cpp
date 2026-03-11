@@ -470,7 +470,7 @@ void SendToNamedpipe()
         // Global::hToTsfWorkerThreadPipe = INVALID_HANDLE_VALUE;
         /* 向 Server 端发送 kill 同时重置两个管道的 connect */
         SendToAuxNamedpipe(L"kill");
-        OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually01.").c_str());
+        OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually01.").c_str());
         // }
 
         //
@@ -498,7 +498,7 @@ void SendToNamedpipe()
         if (hPipe == INVALID_HANDLE_VALUE)
         {
             // TODO: Log
-            OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually02.").c_str());
+            OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually02.").c_str());
             return;
         }
         else
@@ -518,7 +518,7 @@ void SendToNamedpipe()
         if (!ret || bytesWritten != sizeof(namedpipeData))
         {
             // TODO: Error handling
-            OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually03.").c_str());
+            OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually03.").c_str());
         }
 
         return;
@@ -638,13 +638,13 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     {
 // TODO: Do not log
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"current waited: {}", waited).c_str());
+        OutputDebugString(fmt::format(L"[msime]: current waited: {}", waited).c_str());
 #endif
         if (PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
         {
             auto ret = ReadDataFromServerViaNamedPipe();
 #ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"PeekNamedPipe: {}", waited).c_str());
+            OutputDebugString(fmt::format(L"[msime]: PeekNamedPipe: {}", waited).c_str());
 #endif
             return ret;
         }
@@ -711,7 +711,9 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     else
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(namedpipeDataFromServer.candidate_string);
+        OutputDebugString(fmt::format(L"[msime]: ReadDataFromServerViaNamedPipe: {}", //
+                                      namedpipeDataFromServer.candidate_string)
+                              .c_str());
 #endif
         return &namedpipeDataFromServer;
     }
@@ -753,7 +755,7 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     }
     if (!hAuxPipe || hAuxPipe == INVALID_HANDLE_VALUE)
     {
-        OutputDebugString(fmt::format(L"SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
+        OutputDebugString(fmt::format(L"[msime]: SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
         return;
     }
     DWORD bytesWritten = 0;

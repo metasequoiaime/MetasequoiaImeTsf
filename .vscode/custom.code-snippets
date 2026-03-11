@@ -12,7 +12,7 @@
     "scope": "c,cpp",
     "prefix": "dlog",
     "body": [
-      "OutputDebugString(L\"$0\");",
+      "OutputDebugString(L\"[msime]: $0\");",
     ],
     "description": "Debugview log"
   },
@@ -20,7 +20,7 @@
     "scope": "c,cpp",
     "prefix": "flog",
     "body": [
-      "OutputDebugString(fmt::format(L\"$0\").c_str());",
+      "OutputDebugString(fmt::format(L\"[msime]: $0\").c_str());",
     ],
     "description": "Debugview log with fmt"
   }

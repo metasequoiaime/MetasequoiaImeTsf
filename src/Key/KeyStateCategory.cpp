@@ -92,7 +92,7 @@ HRESULT CKeyStateCategory::KeyStateHandler(KEYSTROKE_FUNCTION function, KeyHandl
         return HandleKeyFinalizeCandidatelist(dto);
     case FUNCTION_FINALIZE_CANDIDATELISTForVKReturn:
 #ifdef FANY_DEBUG
-        OutputDebugString(L"Use VK_RETURN to commit original keystroke string.");
+        OutputDebugString(L"[msime]: Use VK_RETURN to commit original keystroke string.");
 #endif
         return HandleKeyFinalizeCandidatelistForVKReturn(dto);
 
@@ -285,7 +285,7 @@ HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
     if (Global::Keycode == VK_SPACE)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(L"HandleKeyConvert in CKeyStateComposing\n");
+        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateComposing\n");
 #endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
@@ -345,7 +345,7 @@ HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelist(KeyHandlerEditSession
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelistForVKReturn(KeyHandlerEditSessionDTO dto)
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"Will commit original keystroke string.");
+    OutputDebugString(L"[msime]: Will commit original keystroke string.");
 #endif
     return _pTextService->_HandleCandidateFinalizeForVKReturn(dto.ec, dto.pContext);
 }
@@ -363,7 +363,7 @@ HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
     if (Global::Keycode == VK_SPACE)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(L"HandleKeyConvert in CKeyStateCandidate\n");
+        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateCandidate\n");
 #endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
@@ -387,7 +387,7 @@ HRESULT CKeyStateCandidate::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"HandleKeySelectByNumber in CKeyStateCandidate\n");
+    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStateCandidate\n");
 #endif
     // return _pTextService->_HandleCandidateSelectByNumber(dto.ec, dto.pContext, dto.code);
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
@@ -423,7 +423,7 @@ HRESULT CKeyStatePhrase::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 HRESULT CKeyStatePhrase::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"HandleKeySelectByNumber in CKeyStatePhrase\n");
+    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStatePhrase\n");
 #endif
     // return _pTextService->_HandlePhraseSelectByNumber(dto.ec, dto.pContext, dto.code);
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);

@@ -474,8 +474,8 @@ STDAPI CMetasequoiaIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
     *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"fanyfull ITfKeyEventSink::OnKeyUp");
-    OutputDebugString(fmt::format(L"Global::PureShiftKeyUp: {}", Global::PureShiftKeyUp).c_str());
+    OutputDebugString(L"[msime]: ITfKeyEventSink::OnKeyUp");
+    OutputDebugString(fmt::format(L"[msime]: Global::PureShiftKeyUp: {}", Global::PureShiftKeyUp).c_str());
 #endif
 
     // if (code == VK_SHIFT)

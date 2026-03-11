@@ -1289,10 +1289,6 @@ BOOL CCompositionProcessorEngine::SetupDictionaryFile()
 
     dictionaryDbPathW = pwszDBFileName;
 
-#ifdef FANY_DEBUG
-    OutputDebugString(pwszDBFileName);
-#endif
-
     // create CFileMapping object
     if (_pDictionaryFile == nullptr)
     {
@@ -1924,7 +1920,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_NONE)) // 26 basic English chars
         {
 #ifdef FANY_DEBUG
-            OutputDebugString(L"Basic 26 chars key pressed.\n");
+            OutputDebugString(L"[msime]: Basic 26 chars key pressed.\n");
 #endif
             return TRUE;
         }
@@ -2154,7 +2150,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
             case VK_RETURN:
                 // Do something when user press return key
 #ifdef FANY_DEBUG
-                OutputDebugString(L"VK_RETURN pressed.\n");
+                OutputDebugString(L"[msime]: VK_RETURN pressed.\n");
 #endif
                 if (pKeyState)
                 {
@@ -2537,7 +2533,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
     }
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"Unknown keystroke.");
+    OutputDebugString(L"[msime]: Unknown keystroke.");
 #endif
     return FALSE;
 }
@@ -2555,8 +2551,8 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyKeystrokeComposition( //
 )
 {
 #ifdef FANY_DEBUG
-    OutputDebugString(L"Fany Here: IsVirtualKeyKeystrokeComposition 26.");
-    std::wstring modifiers = fmt::format(L"Global Modifiers: {}", Global::ModifiersValue);
+    OutputDebugString(L"[msime]: Fany Here: IsVirtualKeyKeystrokeComposition 26.");
+    std::wstring modifiers = fmt::format(L"[msime]: Global Modifiers: {}", Global::ModifiersValue);
     OutputDebugString(modifiers.c_str());
 #endif
     if (pKeyState == nullptr)
@@ -2695,7 +2691,7 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
         else if (GetVirtualKeyLength() > 0)
         {
 #ifdef FANY_DEBUG
-            OutputDebugString(L"GetVirtualKeyLength() > 0");
+            OutputDebugString(L"[msime]: GetVirtualKeyLength() > 0");
 #endif
             pKeyState->Category = CATEGORY_CANDIDATE;
             pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;

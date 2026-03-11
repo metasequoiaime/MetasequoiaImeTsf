@@ -68,7 +68,7 @@ VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pC
     if (_pCandidateListUIPresenter)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"create_word: dispose window?").c_str());
+        OutputDebugString(fmt::format(L"[msime]: create_word: dispose window?").c_str());
 #endif
         _pCandidateListUIPresenter->_EndCandidateList();
 
@@ -124,7 +124,7 @@ HRESULT CMetasequoiaIME::_HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *
         commitString.assign(keyStrokebuffer.Get(), keyStrokebuffer.GetLength());
         CStringRange commitStringRange;
         commitStringRange.Set(commitString.c_str(), commitString.length());
-        OutputDebugString(fmt::format(L"commitString: {}", commitString).c_str());
+        OutputDebugString(fmt::format(L"[msime]: commitString: {}", commitString).c_str());
 
         HRESULT hr = _AddCharAndFinalize(ec, pContext, &commitStringRange);
         if (FAILED(hr))
@@ -203,7 +203,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContex
     }
 
 #ifdef FANY_DEBUG
-    OutputDebugString(L"Fany AddVirtualKey Here.");
+    OutputDebugString(L"[msime]: AddVirtualKey Here.");
 #endif
     // Add virtual key to composition processor engine
     pCompositionProcessorEngine->AddVirtualKey(wch);
@@ -240,9 +240,9 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     {
 #ifdef FANY_DEBUG
         // TODO: Log reading strings
-        OutputDebugString(fmt::format(L"create_word count: {}", readingStrings.Count()).c_str());
+        OutputDebugString(fmt::format(L"[msime]: create_word count: {}", readingStrings.Count()).c_str());
         std::wstring readingStr = readingStrings.GetAt(0)->ToWString();
-        OutputDebugString(fmt::format(L"create_word: {}", readingStr).c_str());
+        OutputDebugString(fmt::format(L"[msime]: create_word: {}", readingStr).c_str());
 #endif
     }
 
@@ -250,7 +250,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     for (UINT index = 0; index < readingStrings.Count(); index++)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"create_word here test!!!").c_str());
+        OutputDebugString(fmt::format(L"[msime]: create_word here test!!!").c_str());
 #endif
         CStringRange curReadingStr;
         std::wstring readingStr = readingStrings.GetAt(0)->ToWString();

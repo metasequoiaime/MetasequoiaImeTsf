@@ -71,9 +71,6 @@ void CMetasequoiaIME::_SetComposition(_In_ ITfComposition *pComposition)
 HRESULT CMetasequoiaIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext,
                                               _In_ CStringRange *pstrAddString)
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(fmt::format(L"You entered _AddComposingAndChar{}\n", pstrAddString->Get()).c_str());
-#endif
     HRESULT hr = S_OK;
 
     ULONG fetched = 0;

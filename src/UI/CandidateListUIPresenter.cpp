@@ -43,7 +43,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     CStringRange candidateString(keyStrokebuffer);
 
 #ifdef FANY_DEBUG
-    OutputDebugString(fmt::format(L"create_word, keystrokeBuffer: {}", keyStrokebuffer.ToWString()).c_str());
+    OutputDebugString(fmt::format(L"[msime]: create_word, keystrokeBuffer: {}", keyStrokebuffer.ToWString()).c_str());
 #endif
 
     // _pCandidateListUIPresenter would be null in uwp/metro apps
@@ -63,7 +63,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         {
             GlobalIme::word_for_creating_word = L"";
 #ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"create_word, normal???").c_str());
+            OutputDebugString(fmt::format(L"[msime]: create_word, normal???").c_str());
 #endif
             candidateString.Set(receivedData->candidate_string, wcslen(receivedData->candidate_string));
             hr = _AddComposingAndChar(ec, pContext, &candidateString);
@@ -91,7 +91,8 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                 std::wstring curWord = data.substr(data.find(L',') + 1);
 #ifdef FANY_DEBUG
                 OutputDebugString(
-                    fmt::format(L"create_word, pureFullPinyin: {}, curWord: {}\n", pureFullPinyin, curWord).c_str());
+                    fmt::format(L"[msime]: create_word, pureFullPinyin: {}, curWord: {}\n", pureFullPinyin, curWord)
+                        .c_str());
 #endif
                 GlobalIme::word_for_creating_word = curWord;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
@@ -129,7 +130,8 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             }
 #ifdef FANY_DEBUG
             OutputDebugString(
-                fmt::format(L"create_word: current word part {}\n", GlobalIme::word_for_creating_word).c_str());
+                fmt::format(L"[msime]: create_word: current word part {}\n", GlobalIme::word_for_creating_word)
+                    .c_str());
 #endif
             return hr;
         }
@@ -164,7 +166,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalizeForVKReturn(TfEditCookie ec, _I
 
 #ifdef FANY_DEBUG
     std::wstring msg(candidateString.Get(), candidateLen);
-    OutputDebugString(msg.c_str());
+    OutputDebugString(fmt::format(L"[msime]: {}", msg).c_str());
 #endif
 
     if (candidateLen)
@@ -281,11 +283,11 @@ HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext
         pTempCandListUIPresenter->_SetText(&candidatePhraseList, FALSE);
 
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"Fany here candidateString = {}", candidateString.Get()).c_str());
+        OutputDebugString(fmt::format(L"[msime]: Fany here candidateString = {}", candidateString.Get()).c_str());
 #endif
 
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"Create word here?").c_str());
+        OutputDebugString(fmt::format(L"[msime]: Create word here?").c_str());
 #endif
 
         // Add composing character
@@ -921,7 +923,7 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     if (FAILED(hr))
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(L"MakeCandidateWindow failed\n");
+        OutputDebugString(fmt::format(L"[msime]: MakeCandidateWindow failed\n").c_str());
 #endif
         // goto Exit;
     }
@@ -1172,7 +1174,7 @@ void CCandidateListUIPresenter::_MoveWindowToTextExt()
 
 VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
 {
-    // OutputDebugString(L"LayoutChangeNotification\n");
+    // OutputDebugString(fmt::format(L"[msime]: LayoutChangeNotification\n").c_str());
 #ifdef FANY_DEBUG
     // TODO: Log _LayoutChangeNotification firefox cnt: Global::firefox_like_cnt
 #endif
