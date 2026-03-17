@@ -1,15 +1,17 @@
 # Metasequoia IME TSF(水杉输入法 TSF 端)
 
-This is TSF end of [MetasequoiaIME](https://github.com/fanlumaster/MetasequoiaIME).
+This is the main part of the Metasequoia IME. To learn more about this project, please visit the docs site:
+
+- [Metasequoia IME](https://github.com/metasequoiaime/MetasequoiaIME).
 
 ## How to build
 
 ### Prerequisites
 
-- Visual Studio 2022
+- Visual Studio 2026
 - CMake
 - vcpkg
-- Python3
+- Python3.10+
 - gsudo
 
 Make sure vcpkg and gsudo is installed by **Scoop**.
@@ -21,7 +23,7 @@ Make sure vcpkg and gsudo is installed by **Scoop**.
 First, clone the repository,
 
 ```powershell
-git clone --recursive https://github.com/fanlumaster/MetasequoiaImeTsf.git
+git clone --recursive https://github.com/metasequoiaime/MetasequoiaImeTsf.git
 ```
 
 Then, prepare the environment,
