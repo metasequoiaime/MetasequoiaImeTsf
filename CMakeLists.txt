@@ -15,6 +15,7 @@ add_compile_options(/Zc:__cplusplus)
 
 # add_definitions(
 #     /DFANY_DEBUG=1
+#     /DFANY_IPC_DEBUG=1
 # )
 
 # fmt

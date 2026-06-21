@@ -17,6 +17,14 @@
 #include "Global/FanyDefines.h"
 #include "Utils/FanyUtils.h"
 
+#ifdef FANY_IPC_DEBUG
+#define FANY_IPC_LOG_RAW(message) OutputDebugString(message)
+#define FANY_IPC_LOGF(...) OutputDebugString(fmt::format(__VA_ARGS__).c_str())
+#else
+#define FANY_IPC_LOG_RAW(message) ((void)0)
+#define FANY_IPC_LOGF(...) ((void)0)
+#endif
+
 #pragma comment(lib, "Shcore.lib")
 
 namespace
@@ -693,6 +701,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: Try to connect named pipe via WM_ConnectNamedpipe").c_str());
 #endif
+        FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_ConnectNamedpipe: start reconnect-all sequence");
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
         SendToAuxNamedpipe(L"kill");
@@ -704,6 +713,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: WM_DisconnectNamedpipe.").c_str());
 #endif
+        FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_DisconnectNamedpipe: closing all client pipe handles");
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
@@ -715,6 +725,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: Try to Connect to TSF named pipe").c_str());
 #endif
+        FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_ConnectToTsfNamedpipe: start reconnect-to-tsf sequence");
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectToTsfNamedpipeRetryCount = 0;
         // Keep old behavior: wait once before first connect try, but do it asynchronously.
@@ -727,6 +738,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             // 如果用户已经切换走了，就不用继续重试
             if (!Global::g_connected)
             {
+                FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-all aborted because threadmgr is disconnected");
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
                 break;
@@ -740,6 +752,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             {
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
+                FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-all succeeded");
 #ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Yes Connected to named pipe :)").c_str());
 #endif
@@ -749,6 +762,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             g_connectAllNamedpipeRetryCount++;
             if (g_connectAllNamedpipeRetryCount >= CONNECT_ALL_NAMEDPIPE_MAX_RETRY)
             {
+                FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-all reached max retry count");
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
             }
@@ -766,12 +780,14 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             {
                 KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
                 g_connectToTsfNamedpipeRetryCount = 0;
+                FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-to-tsf succeeded");
                 break;
             }
 
             g_connectToTsfNamedpipeRetryCount++;
             if (g_connectToTsfNamedpipeRetryCount >= CONNECT_TO_TSF_NAMEDPIPE_MAX_RETRY)
             {
+                FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-to-tsf reached max retry count");
                 KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
                 g_connectToTsfNamedpipeRetryCount = 0;
             }

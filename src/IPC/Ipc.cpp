@@ -10,6 +10,16 @@
 #include "MetasequoiaIME.h"
 #include <fmt/xchar.h>
 
+#ifdef FANY_IPC_DEBUG
+#define FANY_IPC_LOG_RAW(message) OutputDebugString(message)
+#define FANY_IPC_LOGW(message) OutputDebugString((message).c_str())
+#define FANY_IPC_LOGF(...) OutputDebugString(fmt::format(__VA_ARGS__).c_str())
+#else
+#define FANY_IPC_LOG_RAW(message) ((void)0)
+#define FANY_IPC_LOGW(message) ((void)0)
+#define FANY_IPC_LOGF(...) ((void)0)
+#endif
+
 static HANDLE hMapFile = nullptr;
 static void *pBuf;
 static FanyImeSharedMemoryData *sharedData;
@@ -29,6 +39,38 @@ namespace
 inline bool IsValidPipeHandle(HANDLE hPipeHandle)
 {
     return hPipeHandle != nullptr && hPipeHandle != INVALID_HANDLE_VALUE;
+}
+
+void LogCreateFileFailure(const wchar_t *pipeName)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] CreateFile failed: pipe={}, gle={}", pipeName, GetLastError());
+}
+
+void LogCreateFileSuccess(const wchar_t *pipeName)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] CreateFile connected: pipe={}", pipeName);
+}
+
+void LogWriteFailure(const wchar_t *pipeName, DWORD bytesWritten, DWORD expectedBytes)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] WriteFile failed: pipe={}, gle={}, bytes_written={}, expected_bytes={}", pipeName,
+                  GetLastError(), bytesWritten, expectedBytes);
+}
+
+void LogReadFailure(const wchar_t *pipeName, DWORD bytesRead)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] ReadFile failed or empty: pipe={}, gle={}, bytes_read={}", pipeName,
+                  GetLastError(), bytesRead);
+}
+
+void LogPeekFailure(const wchar_t *pipeName)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] PeekNamedPipe failed: pipe={}, gle={}", pipeName, GetLastError());
+}
+
+void LogAuxMessage(const std::wstring &message)
+{
+    FANY_IPC_LOGF(L"[msime]: [ipc] SendToAuxNamedpipe: {}", message);
 }
 
 void ClosePipeHandleIfValid(HANDLE &hPipeHandle)
@@ -59,10 +101,12 @@ bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName)
 
     if (openedPipe == INVALID_HANDLE_VALUE)
     {
+        LogCreateFileFailure(pipeName);
         return false;
     }
 
     hPipeHandle = openedPipe;
+    LogCreateFileSuccess(pipeName);
     return true;
 }
 } // namespace
@@ -438,12 +482,12 @@ void SendToNamedpipe()
 
         if (hPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+            LogCreateFileFailure(FANY_IME_NAMED_PIPE);
             return;
         }
         else
         {
-            // TODO: Log
+            LogCreateFileSuccess(FANY_IME_NAMED_PIPE);
         }
     }
 
@@ -459,6 +503,7 @@ void SendToNamedpipe()
     {
         /* Error handling: 必须将 hPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
         DWORD err = GetLastError();
+        LogWriteFailure(FANY_IME_NAMED_PIPE, bytesWritten, sizeof(namedpipeData));
         // if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
         // {
         /* 将两个方向的管道同时置为无效 */
@@ -499,7 +544,7 @@ void SendToNamedpipe()
 
         if (hPipe == INVALID_HANDLE_VALUE)
         {
-// TODO: Log
+            LogCreateFileFailure(FANY_IME_NAMED_PIPE);
 #ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually02.").c_str());
 #endif
@@ -507,7 +552,7 @@ void SendToNamedpipe()
         }
         else
         {
-            // TODO: Log
+            LogCreateFileSuccess(FANY_IME_NAMED_PIPE);
         }
 
         DWORD bytesWritten = 0;
@@ -521,7 +566,7 @@ void SendToNamedpipe()
 
         if (!ret || bytesWritten != sizeof(namedpipeData))
         {
-// TODO: Error handling
+            LogWriteFailure(FANY_IME_NAMED_PIPE, bytesWritten, sizeof(namedpipeData));
 #ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually03.").c_str());
 #endif
@@ -560,12 +605,12 @@ void ClearNamedpipeDataIfExists()
         );
         if (hFromServerPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             return;
         }
         else
         {
-            // TODO: Log
+            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
         }
     }
 
@@ -584,6 +629,10 @@ void ClearNamedpipeDataIfExists()
 
         if (!peekOk || bytesAvailable == 0)
         {
+            if (!peekOk)
+            {
+                LogPeekFailure(FANY_IME_TO_TSF_NAMED_PIPE);
+            }
             break; // no more data or pipe error
         }
 
@@ -597,6 +646,7 @@ void ClearNamedpipeDataIfExists()
 
         if (!readOk || bytesRead == 0)
         {
+            LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
             break;
         }
     }
@@ -626,7 +676,7 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
         );
         if (hFromServerPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
@@ -634,7 +684,7 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
         }
         else
         {
-            // TODO: Log
+            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
         }
     }
 
@@ -661,6 +711,7 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     /* Error handling: 必须将 hFromServerPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
     CloseHandle(hFromServerPipe);
     hFromServerPipe = INVALID_HANDLE_VALUE;
+    FANY_IPC_LOGF(L"[msime]: [ipc] TryReadDataFromServerPipeWithTimeout timeout after {} ms", timeoutMs);
 
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
     // Pipe timeout error
@@ -690,7 +741,7 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
         );
         if (hFromServerPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             namedpipeDataFromServer.msg_type = 0;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
@@ -698,7 +749,7 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
         }
         else
         {
-            // TODO: Log
+            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
         }
     }
 
@@ -712,7 +763,7 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     );
     if (!readResult || bytesRead == 0) // Disconnected or error
     {
-        // TODO: Log
+        LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
     }
     else
     {
@@ -764,8 +815,10 @@ void SendToAuxNamedpipe(std::wstring pipeData)
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
 #endif
+        LogCreateFileFailure(FANY_IME_AUX_NAMED_PIPE);
         return;
     }
+    LogAuxMessage(pipeData);
     DWORD bytesWritten = 0;
     BOOL ret = WriteFile(                    //
         hAuxPipe,                            //
@@ -776,7 +829,7 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     );
     if (!ret || bytesWritten != pipeData.length() * sizeof(wchar_t))
     {
-        // TODO: Error handling
+        LogWriteFailure(FANY_IME_AUX_NAMED_PIPE, bytesWritten, pipeData.length() * sizeof(wchar_t));
     }
     CloseHandle(hAuxPipe);
 }
