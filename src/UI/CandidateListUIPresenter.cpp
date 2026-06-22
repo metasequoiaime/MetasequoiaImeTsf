@@ -14,7 +14,6 @@
 #include <winuser.h>
 #include "Ipc.h"
 #include "fmt/xchar.h"
-#include "FanyUtils.h"
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -82,27 +81,21 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         // Server 端自己会判断并处理的
         else if (receivedData->msg_type == Global::DataFromServerMsgType::NeedToCreateWord)
         {
-            /* 更新 TSF 的 preedit 的前面的部分为已选定的拼音，并且，去除辅助码部分 */
+            /* server directly passes remaining raw input and current committed text. */
             std::wstring data = receivedData->candidate_string;
-            if (data.find(L',') != std::wstring::npos)
+            const size_t separator = data.find(L'\t');
+            if (separator != std::wstring::npos)
             {
-                /* pureFullPinyin 一直都是最初的那个完整的拼音 */
-                std::wstring pureFullPinyin = data.substr(0, data.find(L','));
-                std::wstring curWord = data.substr(data.find(L',') + 1);
-#ifdef FANY_DEBUG
+                std::wstring remainingRawInput = data.substr(0, separator);
+                std::wstring curWord = data.substr(separator + 1);
+                #ifdef FANY_DEBUG
                 OutputDebugString(
-                    fmt::format(L"[msime]: create_word, pureFullPinyin: {}, curWord: {}", pureFullPinyin, curWord)
+                    fmt::format(L"[msime]: create_word, remainingRawInput: {}, curWord: {}", remainingRawInput, curWord)
                         .c_str());
-#endif
+                #endif
                 GlobalIme::word_for_creating_word = curWord;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
-
-                //
-                // 计算出现在的拼音部分，比如，server 端传过来了 davsai 和 大塚，那么，TSF 端的拼音部分就是 ai
-                //
-                std::wstring preeditStr =
-                    pureFullPinyin.substr(FanyUtils::count_utf8_chars(FanyUtils::wstring_to_string(curWord)) * 2);
 
                 DWORD_PTR vKeyLen = pCompositionProcessorEngine->GetVirtualKeyLength();
 
@@ -114,9 +107,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                         pCompositionProcessorEngine->RemoveVirtualKey(curVkeyLen - 1);
                     }
                 }
-                for (DWORD_PTR i = 0; i < preeditStr.length(); i++)
+                for (DWORD_PTR i = 0; i < remainingRawInput.length(); i++)
                 {
-                    pCompositionProcessorEngine->AddVirtualKey(preeditStr[i]);
+                    pCompositionProcessorEngine->AddVirtualKey(remainingRawInput[i]);
                 }
 
                 if (pCompositionProcessorEngine->GetVirtualKeyLength())
