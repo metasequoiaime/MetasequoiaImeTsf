@@ -624,6 +624,19 @@ bool IsCommitWithFirstCandidatePunctuationInCandidateMode(WCHAR wch, CANDIDATE_M
     }
     return wch != 0 && Global::CommitWithFirstCandPunc.count(wch) > 0;
 }
+
+bool IsManualPinyinSeparatorInComposition(WCHAR wch, BOOL fComposing, CANDIDATE_MODE candidateMode, DWORD_PTR keystrokeLength)
+{
+    if (wch != L'\'')
+    {
+        return false;
+    }
+    if (keystrokeLength == 0)
+    {
+        return false;
+    }
+    return fComposing || candidateMode != CANDIDATE_NONE;
+}
 }
 
 //+---------------------------------------------------------------------------
@@ -1925,6 +1938,16 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
     {
         fComposing = FALSE;
+    }
+
+    if (IsManualPinyinSeparatorInComposition(pwch ? *pwch : 0, fComposing, candidateMode, _keystrokeBuffer.GetLength()))
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
     }
 
     if (IsCommitWithFirstCandidatePunctuationInCandidateMode(pwch ? *pwch : 0, candidateMode))
