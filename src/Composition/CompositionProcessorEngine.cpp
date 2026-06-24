@@ -614,6 +614,18 @@ BOOL CCompositionProcessorEngine::IsPunctuation(WCHAR wch)
     return FALSE;
 }
 
+namespace
+{
+bool IsCommitWithFirstCandidatePunctuationInCandidateMode(WCHAR wch, CANDIDATE_MODE candidateMode)
+{
+    if (candidateMode == CANDIDATE_NONE)
+    {
+        return false;
+    }
+    return wch != 0 && Global::CommitWithFirstCandPunc.count(wch) > 0;
+}
+}
+
 //+---------------------------------------------------------------------------
 //
 // GetPunctuationPair
@@ -1913,6 +1925,16 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         candidateMode == CANDIDATE_WITH_NEXT_COMPOSITION)
     {
         fComposing = FALSE;
+    }
+
+    if (IsCommitWithFirstCandidatePunctuationInCandidateMode(pwch ? *pwch : 0, candidateMode))
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_PUNCTUATION;
+        }
+        return TRUE;
     }
 
     if (fComposing || candidateMode == CANDIDATE_INCREMENTAL || candidateMode == CANDIDATE_NONE)
