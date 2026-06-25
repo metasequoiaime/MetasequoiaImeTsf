@@ -98,12 +98,6 @@ inline BOOL IsTooSimilar(COLORREF cr1, COLORREF cr2)
 //---------------------------------------------------------------------
 extern HINSTANCE dllInstanceHandle;
 
-extern ATOM AtomCandidateWindow;
-extern ATOM AtomShadowWindow;
-extern ATOM AtomScrollBarWindow;
-
-BOOL RegisterWindowClass();
-
 extern LONG dllRefCount;
 
 extern CRITICAL_SECTION CS;

@@ -330,8 +330,7 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
 {
     HRESULT hr = S_OK;
 
-    if (((_candidateMode == CANDIDATE_PHRASE) && (_pCandidateListUIPresenter)) ||
-        ((_candidateMode == CANDIDATE_NONE) && (_pCandidateListUIPresenter)))
+    if ((_candidateMode == CANDIDATE_NONE) && (_pCandidateListUIPresenter))
     {
         // Recreate candidate list
         _pCandidateListUIPresenter->_EndCandidateList();
@@ -345,8 +344,8 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
     if (_pCandidateListUIPresenter == nullptr)
     {
         _pCandidateListUIPresenter = new (std::nothrow)
-            CCandidateListUIPresenter(this, Global::AtomCandidateWindow, CATEGORY_CANDIDATE,
-                                      pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+            CCandidateListUIPresenter(this, CATEGORY_CANDIDATE, pCompositionProcessorEngine->GetCandidateListIndexRange(),
+                                      FALSE);
         if (!_pCandidateListUIPresenter)
         {
             return E_OUTOFMEMORY;
@@ -479,7 +478,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCont
         if (_pCandidateListUIPresenter == nullptr)
         {
             _pCandidateListUIPresenter = new (std::nothrow)
-                CCandidateListUIPresenter(this, Global::AtomCandidateWindow, CATEGORY_CANDIDATE,
+                CCandidateListUIPresenter(this, CATEGORY_CANDIDATE,
                                           pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
             if (!_pCandidateListUIPresenter)
             {

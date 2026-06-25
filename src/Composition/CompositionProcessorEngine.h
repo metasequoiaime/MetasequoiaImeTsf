@@ -2,10 +2,8 @@
 
 #include "MetasequoiaIME.h"
 #include "sal.h"
-#include "TableDictionaryEngine.h"
 #include "KeyHandlerEditSession.h"
 #include "MetasequoiaIMEBaseStructure.h"
-#include "FileMapping.h"
 #include "Compartment.h"
 #include "define.h"
 
@@ -57,8 +55,6 @@ class CCompositionProcessorEngine
         _Inout_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList, //
         BOOL isIncrementalWordSearch, BOOL isWildcardSearch               //
     );
-    void GetCandidateStringInConverted(CStringRange &searchString,
-                                       _In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList);
 
     // Preserved key handler
     void OnPreservedKey(ITfContext *pContext, REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr,
@@ -98,20 +94,9 @@ class CCompositionProcessorEngine
     {
         return (wch == L'*' ? TRUE : FALSE);
     }
-    BOOL IsMakePhraseFromText()
-    {
-        // return _hasMakePhraseFromText;
-        return 0;
-    }
     BOOL IsKeystrokeSort()
     {
         return _isKeystrokeSort;
-    }
-
-    // Dictionary engine
-    BOOL IsDictionaryAvailable()
-    {
-        return (_pTableDictionaryEngine ? TRUE : FALSE);
     }
 
     // Language bar control
@@ -170,9 +155,6 @@ class CCompositionProcessorEngine
     void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
     void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
 
-    BOOL SetupDictionaryFile();
-    CFile *GetDictionaryFile();
-
   private:
     struct _KEYSTROKE
     {
@@ -189,7 +171,6 @@ class CCompositionProcessorEngine
     };
     _KEYSTROKE _keystrokeTable[26];
 
-    CTableDictionaryEngine *_pTableDictionaryEngine;
     CStringRange _keystrokeBuffer;
 
     BOOL _hasWildcardIncludedInKeystrokeBuffer;
@@ -242,14 +223,11 @@ class CCompositionProcessorEngine
     // Configuration data
     BOOL _isWildcard : 1;
     BOOL _isDisableWildcardAtFirst : 1;
-    BOOL _hasMakePhraseFromText : 1;
     BOOL _isKeystrokeSort : 1;
     BOOL _isComLessMode : 1;
     CCandidateRange _candidateListIndexRange;
     UINT _candidateListPhraseModifier;
     UINT _candidateWndWidth;
-
-    CFileMapping *_pDictionaryFile;
 
     static const int OUT_OF_FILE_INDEX = -1;
 };

@@ -134,11 +134,6 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     HRESULT _HandleCandidateArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
     HRESULT _HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode);
 
-    // key event handlers for phrase object.
-    HRESULT _HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext);
-    HRESULT _HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext, _In_ KEYSTROKE_FUNCTION keyFunction);
-    HRESULT _HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode);
-
     BOOL _IsSecureMode(void)
     {
         return (_dwActivateFlags & TF_TMAE_SECUREMODE) ? TRUE : FALSE;

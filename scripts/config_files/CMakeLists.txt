@@ -27,12 +27,9 @@ include_directories("./src")
 include_directories("./src/Candidate")
 include_directories("./src/Compartment")
 include_directories("./src/Composition")
-include_directories("./src/DictEngine")
 include_directories("./src/DisplayAttribute")
-include_directories("./src/Drawing")
 include_directories("./src/Edit")
 include_directories("./src/FanyLog")
-include_directories("./src/File")
 include_directories("./src/Global")
 include_directories("./src/Header")
 include_directories("./src/IME")
@@ -62,19 +59,9 @@ add_library(${PROJECT_NAME} SHARED
     # Composition
     "./src/Composition/Composition.cpp"
     "./src/Composition/CompositionProcessorEngine.cpp"
-    "./src/Composition/CompositionProcessorEngine.cpp"
     "./src/Composition/CompositionProcessorEngine.h"
     "./src/Composition/EndComposition.cpp"
     "./src/Composition/StartComposition.cpp"
-    # DictEngine
-    "./src/DictEngine/BaseDictionaryEngine.cpp"
-    "./src/DictEngine/BaseDictionaryEngine.h"
-    "./src/DictEngine/DictionaryParser.cpp"
-    "./src/DictEngine/DictionaryParser.h"
-    "./src/DictEngine/DictionarySearch.cpp"
-    "./src/DictEngine/DictionarySearch.h"
-    "./src/DictEngine/TableDictionaryEngine.cpp"
-    "./src/DictEngine/TableDictionaryEngine.h"
     # DisplayAttribute
     "./src/DisplayAttribute/DisplayAttribute.cpp"
     "./src/DisplayAttribute/DisplayAttributeInfo.cpp"
@@ -83,20 +70,12 @@ add_library(${PROJECT_NAME} SHARED
     "./src/DisplayAttribute/DisplayString.h"
     "./src/DisplayAttribute/EnumDisplayAttributeInfo.cpp"
     "./src/DisplayAttribute/EnumDisplayAttributeInfo.h"
-    # Drawing
-    "./src/Drawing/D2DSource.cpp"
-    "./src/Drawing/D2DSource.h"
     # Edit
     "./src/Edit/EditSession.cpp"
     "./src/Edit/EditSession.h"
     "./src/Edit/GetTextExtentEditSession.cpp"
     "./src/Edit/GetTextExtentEditSession.h"
     "./src/Edit/TextEditSink.cpp"
-    # File
-    "./src/File/File.cpp"
-    "./src/File/File.h"
-    "./src/File/FileMapping.cpp"
-    "./src/File/FileMapping.h"
     # Global
     "./src/Global/FanyDefines.h"
     "./src/Global/Globals.cpp"
@@ -152,14 +131,8 @@ add_library(${PROJECT_NAME} SHARED
     # Window
     "./src/Window/BaseWindow.cpp"
     "./src/Window/BaseWindow.h"
-    "./src/Window/ButtonWindow.cpp"
-    "./src/Window/ButtonWindow.h"
     "./src/Window/CandidateWindow.cpp"
     "./src/Window/CandidateWindow.h"
-    "./src/Window/ScrollBarWindow.cpp"
-    "./src/Window/ScrollBarWindow.h"
-    "./src/Window/ShadowWindow.cpp"
-    "./src/Window/ShadowWindow.h"
     # Main
     "./src/DllMain.cpp"
     "./src/Server.cpp"

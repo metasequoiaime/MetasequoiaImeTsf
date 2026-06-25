@@ -1,7 +1,6 @@
 #include "Globals.h"
 #include "Private.h"
 #include "resource.h"
-#include "BaseWindow.h"
 #include "define.h"
 #include "MetasequoiaIMEBaseStructure.h"
 #include <unordered_set>
@@ -127,35 +126,6 @@ extern const int PunctuationOffIcoIndex = IME_PUNCTUATION_OFF_INDEX;
 extern const WCHAR LangbarImeModeDescription[] = L"Conversion mode";
 extern const WCHAR LangbarDoubleSingleByteDescription[] = L"Character width";
 extern const WCHAR LangbarPunctuationDescription[] = L"Punctuation";
-
-//---------------------------------------------------------------------
-// windows class / titile / atom
-//---------------------------------------------------------------------
-extern const WCHAR CandidateClassName[] = L"MetasequoiaIME.CandidateWindow";
-ATOM AtomCandidateWindow;
-
-extern const WCHAR ShadowClassName[] = L"MetasequoiaIME.ShadowWindow";
-ATOM AtomShadowWindow;
-
-extern const WCHAR ScrollBarClassName[] = L"MetasequoiaIME.ScrollBarWindow";
-ATOM AtomScrollBarWindow;
-
-BOOL RegisterWindowClass()
-{
-    if (!CBaseWindow::_InitWindowClass(CandidateClassName, &AtomCandidateWindow))
-    {
-        return FALSE;
-    }
-    if (!CBaseWindow::_InitWindowClass(ShadowClassName, &AtomShadowWindow))
-    {
-        return FALSE;
-    }
-    if (!CBaseWindow::_InitWindowClass(ScrollBarClassName, &AtomScrollBarWindow))
-    {
-        return FALSE;
-    }
-    return TRUE;
-}
 
 //---------------------------------------------------------------------
 // defined full width characters for Double/Single byte conversion

@@ -25,7 +25,7 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
                                   public ITfIntegratableCandidateListUIElement
 {
   public:
-    CCandidateListUIPresenter(_In_ CMetasequoiaIME *pTextService, ATOM atom, KEYSTROKE_CATEGORY Category,
+    CCandidateListUIPresenter(_In_ CMetasequoiaIME *pTextService, KEYSTROKE_CATEGORY Category,
                               _In_ CCandidateRange *pIndexRange, BOOL hideWindow);
     virtual ~CCandidateListUIPresenter();
 
@@ -93,8 +93,6 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     virtual HRESULT OnSetThreadFocus();
     virtual HRESULT OnKillThreadFocus();
 
-    void RemoveSpecificCandidateFromList(_In_ LCID Locale, _Inout_ CMetasequoiaImeArray<CCandidateListItem> &candidateList,
-                                         _In_ CStringRange &srgCandidateString);
     void AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey);
 
   private:
@@ -127,7 +125,6 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
 
   private:
     HWND _parentWndHandle;
-    ATOM _atom;
     CCandidateRange *_pIndexRange;
     KEYSTROKE_CATEGORY _Category;
     DWORD _updatedFlags;

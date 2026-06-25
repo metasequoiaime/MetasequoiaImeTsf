@@ -200,9 +200,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext
     HRESULT hrReturn = E_FAIL;
     DWORD_PTR candidateLen = 0;
     const WCHAR *pCandidateString = nullptr;
-    BSTR pbstr = nullptr;
     CStringRange candidateString;
-    CMetasequoiaImeArray<CCandidateListItem> candidatePhraseList;
 
     if (nullptr == _pCandidateListUIPresenter)
     {
@@ -218,103 +216,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext
     }
 
     candidateString.Set(pCandidateString, candidateLen);
-
-    BOOL fMakePhraseFromText = _pCompositionProcessorEngine->IsMakePhraseFromText();
-    if (fMakePhraseFromText) // NOTICE: always no
-    {
-        _pCompositionProcessorEngine->GetCandidateStringInConverted(candidateString, &candidatePhraseList);
-        LCID locale = _pCompositionProcessorEngine->GetLocale();
-
-        _pCandidateListUIPresenter->RemoveSpecificCandidateFromList(locale, candidatePhraseList, candidateString);
-    }
-
-    // We have a candidate list if candidatePhraseList.Cnt is not 0
-    // If we are showing reverse conversion, use CCandidateListUIPresenter
-    CANDIDATE_MODE tempCandMode = CANDIDATE_NONE;
-    CCandidateListUIPresenter *pTempCandListUIPresenter = nullptr;
-    if (candidatePhraseList.Count()) // NOTICE: always 0
-    {
-        tempCandMode = CANDIDATE_WITH_NEXT_COMPOSITION;
-
-        pTempCandListUIPresenter = new (std::nothrow)
-            CCandidateListUIPresenter(this, Global::AtomCandidateWindow, CATEGORY_CANDIDATE,
-                                      _pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
-        if (nullptr == pTempCandListUIPresenter)
-        {
-            hrReturn = E_OUTOFMEMORY;
-            goto Exit;
-        }
-    }
-
-    // call _Start*Line for CCandidateListUIPresenter or CReadingLine
-    // we don't cache the document manager object so get it from pContext.
-    ITfDocumentMgr *pDocumentMgr = nullptr;
-    HRESULT hrStartCandidateList = E_FAIL;
-    if (pContext->GetDocumentMgr(&pDocumentMgr) == S_OK)
-    {
-        ITfRange *pRange = nullptr;
-        if (_pComposition->GetRange(&pRange) == S_OK)
-        {
-            if (pTempCandListUIPresenter)
-            {
-                hrStartCandidateList = pTempCandListUIPresenter->_StartCandidateList(
-                    _tfClientId, pDocumentMgr, pContext, ec, pRange,
-                    _pCompositionProcessorEngine->GetCandidateWindowWidth());
-            }
-
-            pRange->Release();
-        }
-        pDocumentMgr->Release();
-    }
-
-    // set up candidate list if it is being shown
-    if (SUCCEEDED(hrStartCandidateList)) // NOTICE: always false
-    {
-        pTempCandListUIPresenter->_SetTextColor(RGB(0, 0x80, 0), GetSysColor(COLOR_WINDOW)); // Text color is green
-        pTempCandListUIPresenter->_SetFillColor((HBRUSH)(COLOR_WINDOW + 1)); // Background color is window
-        pTempCandListUIPresenter->_SetText(&candidatePhraseList, FALSE);
-
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: Fany here candidateString = {}", candidateString.Get()).c_str());
-#endif
-
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: Create word here?").c_str());
-#endif
-
-        // Add composing character
-        hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
-
-        // close candidate list
-        if (_pCandidateListUIPresenter)
-        {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
-            _pCandidateListUIPresenter = nullptr;
-
-            _candidateMode = CANDIDATE_NONE;
-            _isCandidateWithWildcard = FALSE;
-        }
-
-        if (hrReturn == S_OK)
-        {
-            // copy temp candidate
-            _pCandidateListUIPresenter = pTempCandListUIPresenter;
-
-            _candidateMode = tempCandMode;
-            _isCandidateWithWildcard = FALSE;
-        }
-    }
-    else
-    {
-        // When VK_SPACE, number(for selecting candidate) comes here
-        hrReturn = _HandleCandidateFinalize(ec, pContext);
-    }
-
-    if (pbstr)
-    {
-        SysFreeString(pbstr);
-    }
+    hrReturn = _HandleCandidateFinalize(ec, pContext);
 
 Exit:
     return hrReturn;
@@ -365,80 +267,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ IT
     return S_FALSE;
 }
 
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseFinalize
-//
-//----------------------------------------------------------------------------
-
-HRESULT CMetasequoiaIME::_HandlePhraseFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
-{
-    HRESULT hr = S_OK;
-
-    DWORD phraseLen = 0;
-    const WCHAR *pPhraseString = nullptr;
-
-    phraseLen = (DWORD)_pCandidateListUIPresenter->_GetSelectedCandidateString(&pPhraseString);
-
-    CStringRange phraseString;
-    phraseString.Set(pPhraseString, phraseLen);
-
-    if (phraseLen)
-    {
-        if ((hr = _AddCharAndFinalize(ec, pContext, &phraseString)) != S_OK)
-        {
-            return hr;
-        }
-    }
-
-    _HandleComplete(ec, pContext);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseArrowKey
-//
-//----------------------------------------------------------------------------
-
-HRESULT CMetasequoiaIME::_HandlePhraseArrowKey(TfEditCookie ec, _In_ ITfContext *pContext,
-                                               _In_ KEYSTROKE_FUNCTION keyFunction)
-{
-    ec;
-    pContext;
-
-    _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
-
-    return S_OK;
-}
-
-//+---------------------------------------------------------------------------
-//
-// _HandlePhraseSelectByNumber
-//
-//----------------------------------------------------------------------------
-
-HRESULT CMetasequoiaIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
-{
-    // isSelectAsNumber starts from 0
-    int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
-    if (iSelectAsNumber == -1)
-    {
-        return S_FALSE;
-    }
-
-    if (_pCandidateListUIPresenter)
-    {
-        if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
-        {
-            return _HandlePhraseFinalize(ec, pContext);
-        }
-    }
-
-    return S_FALSE;
-}
-
 //////////////////////////////////////////////////////////////////////
 //
 // CCandidateListUIPresenter class
@@ -451,13 +279,11 @@ HRESULT CMetasequoiaIME::_HandlePhraseSelectByNumber(TfEditCookie ec, _In_ ITfCo
 //
 //----------------------------------------------------------------------------
 
-CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CMetasequoiaIME *pTextService, ATOM atom,
+CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CMetasequoiaIME *pTextService,
                                                      KEYSTROKE_CATEGORY Category, _In_ CCandidateRange *pIndexRange,
                                                      BOOL hideWindow)
     : CTfTextLayoutSink(pTextService)
 {
-    _atom = atom;
-
     _pIndexRange = pIndexRange;
 
     _parentWndHandle = nullptr;
@@ -1328,26 +1154,6 @@ HRESULT CCandidateListUIPresenter::OnKillThreadFocus()
     return S_OK;
 }
 
-void CCandidateListUIPresenter::RemoveSpecificCandidateFromList(     //
-    _In_ LCID Locale,                                                //
-    _Inout_ CMetasequoiaImeArray<CCandidateListItem> &candidateList, //
-    _In_ CStringRange &candidateString                               //
-)
-{
-    for (UINT index = 0; index < candidateList.Count();)
-    {
-        CCandidateListItem *pLI = candidateList.GetAt(index);
-
-        if (CStringRange::Compare(Locale, &candidateString, &pLI->_ItemString) == CSTR_EQUAL)
-        {
-            candidateList.RemoveAt(index);
-            continue;
-        }
-
-        index++;
-    }
-}
-
 void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTION arrowKey)
 {
     switch (arrowKey)
@@ -1464,7 +1270,7 @@ HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContext
         }
     }
 
-    if (!_pCandidateWnd->_Create(_atom, wndWidth, parentWndHandle))
+    if (!_pCandidateWnd->_Create(wndWidth, parentWndHandle))
     {
         hr = E_OUTOFMEMORY;
         goto Exit;

@@ -22,11 +22,6 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID pvReserved)
             return FALSE;
         }
 
-        if (!Global::RegisterWindowClass())
-        {
-            return FALSE;
-        }
-
         break;
 
     case DLL_PROCESS_DETACH:

@@ -173,25 +173,6 @@ class CKeyStateCandidate : public CKeyStateCategory
     HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
 };
 
-class CKeyStatePhrase : public CKeyStateCategory
-{
-  public:
-    CKeyStatePhrase(_In_ CMetasequoiaIME *pTextService);
-
-  protected:
-    //_HandleCancel
-    HRESULT HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto);
-
-    //_HandleCancel
-    HRESULT HandleKeyCancel(KeyHandlerEditSessionDTO dto);
-
-    //_HandlePhraseArrowKey
-    HRESULT HandleKeyArrow(KeyHandlerEditSessionDTO dto);
-
-    //_HandlePhraseSelectByNumber
-    HRESULT HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto);
-};
-
 // degeneration class
 class CKeyStateNull : public CKeyStateCategory
 {

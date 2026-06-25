@@ -40,10 +40,6 @@ CKeyStateCategory *CKeyStateCategoryFactory::MakeKeyStateCategory(KEYSTROKE_CATE
         pKeyState = new (std::nothrow) CKeyStateCandidate(pTextService);
         break;
 
-    case CATEGORY_PHRASE:
-        pKeyState = new (std::nothrow) CKeyStatePhrase(pTextService);
-        break;
-
     default:
         pKeyState = new (std::nothrow) CKeyStateNull(pTextService);
         break;
@@ -393,38 +389,3 @@ HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
 }
 
-/*
-class CKeyStatePhrase
-*/
-
-CKeyStatePhrase::CKeyStatePhrase(_In_ CMetasequoiaIME *pTextService) : CKeyStateCategory(pTextService)
-{
-}
-
-// HandleKeyFinalizeCandidatelist
-HRESULT CKeyStatePhrase::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
-{
-    return _pTextService->_HandlePhraseFinalize(dto.ec, dto.pContext);
-}
-
-// HandleKeyCancel
-HRESULT CKeyStatePhrase::HandleKeyCancel(KeyHandlerEditSessionDTO dto)
-{
-    return _pTextService->_HandleCancel(dto.ec, dto.pContext);
-}
-
-// HandleKeyArrow
-HRESULT CKeyStatePhrase::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
-{
-    return _pTextService->_HandlePhraseArrowKey(dto.ec, dto.pContext, dto.arrowKey);
-}
-
-// HandleKeySelectByNumber
-HRESULT CKeyStatePhrase::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
-{
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStatePhrase");
-#endif
-    // return _pTextService->_HandlePhraseSelectByNumber(dto.ec, dto.pContext, dto.code);
-    return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
-}

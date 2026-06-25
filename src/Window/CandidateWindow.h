@@ -3,8 +3,6 @@
 #include "Private.h"
 #include "BaseWindow.h"
 #include "MetasequoiaIME.h"
-#include "ShadowWindow.h"
-#include "ScrollBarWindow.h"
 #include "MetasequoiaIMEBaseStructure.h"
 
 enum CANDWND_ACTION
@@ -21,7 +19,7 @@ class CCandidateWindow : public CBaseWindow
                      _In_ BOOL isStoreAppMode, _In_ CMetasequoiaIME *pTextService);
     virtual ~CCandidateWindow();
 
-    BOOL _Create(ATOM atom, _In_ UINT wndWidth, _In_opt_ HWND parentWndHandle);
+    BOOL _Create(_In_ UINT wndWidth, _In_opt_ HWND parentWndHandle);
     void _Destroy();
 
     void _Move(int x, int y);
@@ -29,12 +27,7 @@ class CCandidateWindow : public CBaseWindow
 
     VOID _SetTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
     VOID _SetFillColor(_In_ HBRUSH hBrush);
-
     LRESULT CALLBACK _WindowProcCallback(_In_ HWND wndHandle, UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
-    void _OnPaint(_In_ HDC dcHandle, _In_ PAINTSTRUCT *pps);
-    void _OnPaintWithWebview2();
-    void _OnLButtonDown(POINT pt);
-    void _OnMouseMove(POINT pt);
 
     void _AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode);
     void _ClearList();
@@ -63,24 +56,10 @@ class CCandidateWindow : public CBaseWindow
     HRESULT _GetCurrentPage(_Inout_ int *pCurrentPage);
 
   private:
-    void _HandleMouseMsg(_In_ UINT mouseMsg, _In_ POINT point);
-    void _DrawList(_In_ HDC dcHandle, _In_ UINT iIndex, _In_ RECT *prc);
-    void _DrawListWithWebview2(_In_ UINT iIndex);
-    void _DrawBorder(_In_ HWND wndHandle, _In_ int cx);
-    BOOL _SetSelectionOffset(_In_ int offSet);
     BOOL _AdjustPageIndexForSelection();
     HRESULT _CurrentPageHasEmptyItems(_Inout_ BOOL *pfHasEmptyItems);
-
-    // LightDismiss feature support, it will fire messages lightdismiss-related to the light dismiss layout.
-    void _FireMessageToLightDismiss(_In_ HWND wndHandle, _In_ WINDOWPOS *pWndPos);
-
-    BOOL _CreateMainWindow(ATOM atom, _In_opt_ HWND parentWndHandle);
-    BOOL _CreateBackGroundShadowWindow();
-
     HRESULT _AdjustPageIndex(_Inout_ UINT &currentPage, _Inout_ UINT &currentPageIndex);
-
     void _ResizeWindow();
-    void _DeleteShadowWnd();
 
     friend COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
 
@@ -94,7 +73,6 @@ class CCandidateWindow : public CBaseWindow
     COLORREF _crBkColor;
     HBRUSH _brshBkColor;
 
-    TEXTMETRIC _TextMetric;
     int _cyRow;
     int _cxTitle;
     UINT _wndWidth;
@@ -103,9 +81,6 @@ class CCandidateWindow : public CBaseWindow
 
     CANDWNDCALLBACK _pfnCallback;
     void *_pObj;
-
-    CShadowWindow *_pShadowWnd;
-    // CScrollBarWindow *_pVScrollBarWnd;
 
     BOOL _dontAdjustOnEmptyItemPage;
     BOOL _isStoreAppMode;
