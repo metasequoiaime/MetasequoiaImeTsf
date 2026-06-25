@@ -41,7 +41,6 @@ include_directories("./src/Tf")
 include_directories("./src/Thread")
 include_directories("./src/UI")
 include_directories("./src/Utils")
-include_directories("./src/Window")
 
 add_library(${PROJECT_NAME} SHARED
     # Candidate
@@ -121,6 +120,8 @@ add_library(${PROJECT_NAME} SHARED
     "./src/Thread/ThreadFocusSink.cpp"
     "./src/Thread/ThreadMgrEventSink.cpp"
     # UI
+    "./src/UI/CandidateSessionState.cpp"
+    "./src/UI/CandidateSessionState.h"
     "./src/UI/CandidateListUIPresenter.cpp"
     "./src/UI/CandidateListUIPresenter.h"
     # Utils
@@ -128,11 +129,6 @@ add_library(${PROJECT_NAME} SHARED
     "./src/Utils/CommonUtils.h"
     "./src/Utils/FanyUtils.cpp"
     "./src/Utils/FanyUtils.h"
-    # Window
-    "./src/Window/BaseWindow.cpp"
-    "./src/Window/BaseWindow.h"
-    "./src/Window/CandidateWindow.cpp"
-    "./src/Window/CandidateWindow.h"
     # Main
     "./src/DllMain.cpp"
     "./src/Server.cpp"

@@ -1,81 +1,34 @@
 #include "Private.h"
-#include "BaseWindow.h"
+#include "CandidateSessionState.h"
 #include <corecrt_wstring.h>
-#include <string>
-#include "CandidateWindow.h"
 
-COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
-
-CCandidateWindow::CCandidateWindow(_In_ CANDWNDCALLBACK pfnCallback, _In_ void *pv, _In_ CCandidateRange *pIndexRange,
-                                   _In_ BOOL isStoreAppMode, _In_ CMetasequoiaIME *pTextService)
+CCandidateSessionState::CCandidateSessionState(_In_ CCandidateRange *pIndexRange)
 {
     _currentSelection = 0;
-
-    _SetTextColor(CANDWND_ITEM_COLOR, GetSysColor(COLOR_WINDOW));
-    _SetFillColor((HBRUSH)(COLOR_WINDOW + 1));
-
     _pIndexRange = pIndexRange;
-    _pfnCallback = pfnCallback;
-    _pObj = pv;
-    _cyRow = CANDWND_ROW_WIDTH;
-    _cxTitle = 0;
-    _wndWidth = 0;
     _dontAdjustOnEmptyItemPage = FALSE;
-    _isStoreAppMode = isStoreAppMode;
-    _pTextService = pTextService;
 }
 
-CCandidateWindow::~CCandidateWindow()
+CCandidateSessionState::~CCandidateSessionState()
 {
-    _ClearList();
+    Clear();
 }
 
-BOOL CCandidateWindow::_Create(_In_ UINT wndWidth, _In_opt_ HWND parentWndHandle)
+void CCandidateSessionState::Clear()
 {
-    parentWndHandle;
-    _wndWidth = wndWidth;
-    _ResizeWindow();
-    return TRUE;
+    for (UINT index = 0; index < _candidateList.Count(); index++)
+    {
+        CCandidateListItem *pItemList = _candidateList.GetAt(index);
+        delete[] pItemList->_ItemString.Get();
+        delete[] pItemList->_FindKeyCode.Get();
+    }
+    _currentSelection = 0;
+    _candidateList.Clear();
+    _pageIndex.Clear();
+    _dontAdjustOnEmptyItemPage = FALSE;
 }
 
-void CCandidateWindow::_Destroy()
-{
-    CBaseWindow::_Destroy();
-}
-
-void CCandidateWindow::_ResizeWindow()
-{
-    CBaseWindow::_Resize(0, 0, 20, 10);
-}
-
-void CCandidateWindow::_Move(int x, int y)
-{
-    CBaseWindow::_Move(x, y);
-}
-
-void CCandidateWindow::_Show(BOOL isShowWnd)
-{
-    CBaseWindow::_Show(isShowWnd);
-}
-
-VOID CCandidateWindow::_SetTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor)
-{
-    _crTextColor = _AdjustTextColor(crColor, crBkColor);
-    _crBkColor = crBkColor;
-}
-
-VOID CCandidateWindow::_SetFillColor(_In_ HBRUSH hBrush)
-{
-    _brshBkColor = hBrush;
-}
-
-LRESULT CALLBACK CCandidateWindow::_WindowProcCallback(_In_ HWND wndHandle, UINT uMsg, _In_ WPARAM wParam,
-                                                       _In_ LPARAM lParam)
-{
-    return DefWindowProc(wndHandle, uMsg, wParam, lParam);
-}
-
-void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode)
+void CCandidateSessionState::AddCandidate(_Inout_ CCandidateListItem *pCandidateItem, _In_ BOOL isAddFindKeyCode)
 {
     DWORD_PTR dwItemString = pCandidateItem->_ItemString.GetLength();
     const WCHAR *pwchString = nullptr;
@@ -96,10 +49,7 @@ void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _I
         pwchWildcard = new (std::nothrow) WCHAR[itemWildcard];
         if (!pwchWildcard)
         {
-            if (pwchString)
-            {
-                delete[] pwchString;
-            }
+            delete[] pwchString;
             return;
         }
         memcpy((void *)pwchWildcard, pCandidateItem->_FindKeyCode.Get(), itemWildcard * sizeof(WCHAR));
@@ -123,27 +73,24 @@ void CCandidateWindow::_AddString(_Inout_ CCandidateListItem *pCandidateItem, _I
     }
 }
 
-void CCandidateWindow::_ClearList()
+UINT CCandidateSessionState::GetCount() const
 {
-    for (UINT index = 0; index < _candidateList.Count(); index++)
-    {
-        CCandidateListItem *pItemList = _candidateList.GetAt(index);
-        delete[] pItemList->_ItemString.Get();
-        delete[] pItemList->_FindKeyCode.Get();
-    }
-    _currentSelection = 0;
-    _candidateList.Clear();
-    _PageIndex.Clear();
+    return _candidateList.Count();
 }
 
-void CCandidateWindow::_SetScrollInfo(_In_ int nMax, _In_ int nPage)
+UINT CCandidateSessionState::GetSelection() const
+{
+    return _currentSelection;
+}
+
+void CCandidateSessionState::SetScrollInfo(_In_ int nMax, _In_ int nPage)
 {
     nMax;
     nPage;
 }
 
-DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex,
-                                            _Outptr_result_maybenull_z_ const WCHAR **ppwchCandidateString)
+DWORD CCandidateSessionState::GetCandidateString(_In_ int iIndex,
+                                                 _Outptr_result_maybenull_z_ const WCHAR **ppwchCandidateString)
 {
     if (iIndex < 0)
     {
@@ -166,7 +113,8 @@ DWORD CCandidateWindow::_GetCandidateString(_In_ int iIndex,
     return (DWORD)pItemList->_ItemString.GetLength();
 }
 
-DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
+DWORD CCandidateSessionState::GetSelectedCandidateString(
+    _Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
 {
     if (_currentSelection >= _candidateList.Count())
     {
@@ -182,7 +130,7 @@ DWORD CCandidateWindow::_GetSelectedCandidateString(_Outptr_result_maybenull_ co
     return (DWORD)pItemList->_ItemString.GetLength();
 }
 
-BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
+BOOL CCandidateSessionState::SetSelectionInPage(_In_ int nPos)
 {
     if (nPos < 0)
     {
@@ -196,18 +144,17 @@ BOOL CCandidateWindow::_SetSelectionInPage(int nPos)
     }
 
     int currentPage = 0;
-    if (FAILED(_GetCurrentPage(&currentPage)))
+    if (FAILED(GetCurrentPage(&currentPage)))
     {
         return FALSE;
     }
 
-    _currentSelection = *_PageIndex.GetAt(currentPage) + nPos;
+    _currentSelection = *_pageIndex.GetAt(currentPage) + nPos;
     return TRUE;
 }
 
-BOOL CCandidateWindow::_MoveSelection(_In_ int offSet, _In_ BOOL isNotify)
+BOOL CCandidateSessionState::MoveSelection(_In_ int offSet)
 {
-    isNotify;
     if (_currentSelection + offSet >= _candidateList.Count())
     {
         return FALSE;
@@ -218,9 +165,8 @@ BOOL CCandidateWindow::_MoveSelection(_In_ int offSet, _In_ BOOL isNotify)
     return TRUE;
 }
 
-BOOL CCandidateWindow::_SetSelection(_In_ int selectedIndex, _In_ BOOL isNotify)
+BOOL CCandidateSessionState::SetSelection(_In_ int selectedIndex)
 {
-    isNotify;
     if (selectedIndex == -1)
     {
         selectedIndex = _candidateList.Count() - 1;
@@ -238,53 +184,52 @@ BOOL CCandidateWindow::_SetSelection(_In_ int selectedIndex, _In_ BOOL isNotify)
     }
 
     _currentSelection = static_cast<UINT>(selectedIndex);
-    return _AdjustPageIndexForSelection();
+    return AdjustPageIndexForSelection();
 }
 
-void CCandidateWindow::_SetSelection(_In_ int nIndex)
+void CCandidateSessionState::SetSelectionSilently(_In_ int nIndex)
 {
     _currentSelection = nIndex;
 }
 
-BOOL CCandidateWindow::_MovePage(_In_ int offSet, _In_ BOOL isNotify)
+BOOL CCandidateSessionState::MovePage(_In_ int offSet)
 {
-    isNotify;
     if (offSet == 0)
     {
         return TRUE;
     }
 
     int currentPage = 0;
-    if (FAILED(_GetCurrentPage(&currentPage)))
+    if (FAILED(GetCurrentPage(&currentPage)))
     {
         return FALSE;
     }
 
     int newPage = currentPage + offSet;
-    if ((newPage < 0) || (newPage >= static_cast<int>(_PageIndex.Count())))
+    if ((newPage < 0) || (newPage >= static_cast<int>(_pageIndex.Count())))
     {
         return FALSE;
     }
 
-    if (_currentSelection % _pIndexRange->Count() == 0 && _currentSelection == *_PageIndex.GetAt(currentPage))
+    if (_currentSelection % _pIndexRange->Count() == 0 && _currentSelection == *_pageIndex.GetAt(currentPage))
     {
         _dontAdjustOnEmptyItemPage = TRUE;
     }
 
-    int selectionOffset = _currentSelection - *_PageIndex.GetAt(currentPage);
-    _currentSelection = *_PageIndex.GetAt(newPage) + selectionOffset;
+    int selectionOffset = _currentSelection - *_pageIndex.GetAt(currentPage);
+    _currentSelection = *_pageIndex.GetAt(newPage) + selectionOffset;
     _currentSelection = _candidateList.Count() > _currentSelection ? _currentSelection : _candidateList.Count() - 1;
 
     return TRUE;
 }
 
-HRESULT CCandidateWindow::_GetPageIndex(UINT *pIndex, _In_ UINT uSize, _Inout_ UINT *puPageCnt)
+HRESULT CCandidateSessionState::GetPageIndex(UINT *pIndex, _In_ UINT uSize, _Inout_ UINT *puPageCnt)
 {
     HRESULT hr = S_OK;
 
-    if (uSize > _PageIndex.Count())
+    if (uSize > _pageIndex.Count())
     {
-        uSize = _PageIndex.Count();
+        uSize = _pageIndex.Count();
     }
     else
     {
@@ -295,22 +240,22 @@ HRESULT CCandidateWindow::_GetPageIndex(UINT *pIndex, _In_ UINT uSize, _Inout_ U
     {
         for (UINT i = 0; i < uSize; i++)
         {
-            *pIndex = *_PageIndex.GetAt(i);
+            *pIndex = *_pageIndex.GetAt(i);
             pIndex++;
         }
     }
 
-    *puPageCnt = _PageIndex.Count();
+    *puPageCnt = _pageIndex.Count();
     return hr;
 }
 
-HRESULT CCandidateWindow::_SetPageIndex(UINT *pIndex, _In_ UINT uPageCnt)
+HRESULT CCandidateSessionState::SetPageIndex(UINT *pIndex, _In_ UINT uPageCnt)
 {
-    _PageIndex.Clear();
+    _pageIndex.Clear();
 
     for (UINT i = 0; i < uPageCnt; i++)
     {
-        UINT *pLastNewPageIndex = _PageIndex.Append();
+        UINT *pLastNewPageIndex = _pageIndex.Append();
         if (pLastNewPageIndex != nullptr)
         {
             *pLastNewPageIndex = *pIndex;
@@ -321,7 +266,7 @@ HRESULT CCandidateWindow::_SetPageIndex(UINT *pIndex, _In_ UINT uPageCnt)
     return S_OK;
 }
 
-HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
+HRESULT CCandidateSessionState::GetCurrentPage(_Inout_ UINT *pCurrentPage)
 {
     HRESULT hr = S_OK;
 
@@ -332,20 +277,20 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
 
     *pCurrentPage = 0;
 
-    if (_PageIndex.Count() == 0)
+    if (_pageIndex.Count() == 0)
     {
         return E_UNEXPECTED;
     }
 
-    if (_PageIndex.Count() == 1)
+    if (_pageIndex.Count() == 1)
     {
         return S_OK;
     }
 
     UINT i = 0;
-    for (i = 1; i < _PageIndex.Count(); i++)
+    for (i = 1; i < _pageIndex.Count(); i++)
     {
-        UINT uPageIndex = *_PageIndex.GetAt(i);
+        UINT uPageIndex = *_pageIndex.GetAt(i);
         if (uPageIndex > _currentSelection)
         {
             break;
@@ -356,7 +301,7 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ UINT *pCurrentPage)
     return hr;
 }
 
-HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ int *pCurrentPage)
+HRESULT CCandidateSessionState::GetCurrentPage(_Inout_ int *pCurrentPage)
 {
     if (nullptr == pCurrentPage)
     {
@@ -364,7 +309,7 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ int *pCurrentPage)
     }
 
     UINT needCastCurrentPage = 0;
-    HRESULT hr = _GetCurrentPage(&needCastCurrentPage);
+    HRESULT hr = GetCurrentPage(&needCastCurrentPage);
     if (FAILED(hr))
     {
         return hr;
@@ -374,7 +319,7 @@ HRESULT CCandidateWindow::_GetCurrentPage(_Inout_ int *pCurrentPage)
     return S_OK;
 }
 
-BOOL CCandidateWindow::_AdjustPageIndexForSelection()
+BOOL CCandidateSessionState::AdjustPageIndexForSelection()
 {
     UINT candidateListPageCnt = _pIndexRange->Count();
     UINT newPageCnt = 0;
@@ -422,34 +367,24 @@ BOOL CCandidateWindow::_AdjustPageIndexForSelection()
         pNewPageIndex[i] = pNewPageIndex[i - 1] + candidateListPageCnt;
     }
 
-    _SetPageIndex(pNewPageIndex, newPageCnt);
+    SetPageIndex(pNewPageIndex, newPageCnt);
     delete[] pNewPageIndex;
 
     return TRUE;
 }
 
-COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor)
-{
-    if (!Global::IsTooSimilar(crColor, crBkColor))
-    {
-        return crColor;
-    }
-
-    return crColor ^ RGB(255, 255, 255);
-}
-
-HRESULT CCandidateWindow::_CurrentPageHasEmptyItems(_Inout_ BOOL *hasEmptyItems)
+HRESULT CCandidateSessionState::CurrentPageHasEmptyItems(_Inout_ BOOL *hasEmptyItems)
 {
     int candidateListPageCnt = _pIndexRange->Count();
     UINT currentPage = 0;
 
-    if (FAILED(_GetCurrentPage(&currentPage)))
+    if (FAILED(GetCurrentPage(&currentPage)))
     {
         return S_FALSE;
     }
 
-    if ((currentPage == 0 || currentPage == _PageIndex.Count() - 1) && (_PageIndex.Count() > 0) &&
-        (*_PageIndex.GetAt(currentPage) > (UINT)(_candidateList.Count() - candidateListPageCnt)))
+    if ((currentPage == 0 || currentPage == _pageIndex.Count() - 1) && (_pageIndex.Count() > 0) &&
+        (*_pageIndex.GetAt(currentPage) > (UINT)(_candidateList.Count() - candidateListPageCnt)))
     {
         *hasEmptyItems = TRUE;
     }
@@ -461,15 +396,15 @@ HRESULT CCandidateWindow::_CurrentPageHasEmptyItems(_Inout_ BOOL *hasEmptyItems)
     return S_OK;
 }
 
-HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT &currentPage, _Inout_ UINT &currentPageIndex)
+HRESULT CCandidateSessionState::AdjustPageIndex(_Inout_ UINT &currentPage, _Inout_ UINT &currentPageIndex)
 {
     HRESULT hr = E_FAIL;
     UINT candidateListPageCnt = _pIndexRange->Count();
 
-    currentPageIndex = *_PageIndex.GetAt(currentPage);
+    currentPageIndex = *_pageIndex.GetAt(currentPage);
 
     BOOL hasEmptyItems = FALSE;
-    if (FAILED(_CurrentPageHasEmptyItems(&hasEmptyItems)))
+    if (FAILED(CurrentPageHasEmptyItems(&hasEmptyItems)))
     {
         return hr;
     }
@@ -481,25 +416,25 @@ HRESULT CCandidateWindow::_AdjustPageIndex(_Inout_ UINT &currentPage, _Inout_ UI
 
     UINT tempSelection = _currentSelection;
     UINT candNum = _candidateList.Count();
-    UINT pageNum = _PageIndex.Count();
+    UINT pageNum = _pageIndex.Count();
 
     if ((currentPageIndex > candNum - candidateListPageCnt) && (pageNum > 0) && (currentPage == (pageNum - 1)))
     {
         _currentSelection = candNum - candidateListPageCnt;
-        _AdjustPageIndexForSelection();
+        AdjustPageIndexForSelection();
         _currentSelection = tempSelection;
 
-        if (FAILED(_GetCurrentPage(&currentPage)))
+        if (FAILED(GetCurrentPage(&currentPage)))
         {
             return hr;
         }
 
-        currentPageIndex = *_PageIndex.GetAt(currentPage);
+        currentPageIndex = *_pageIndex.GetAt(currentPage);
     }
     else if ((currentPageIndex < candidateListPageCnt) && (currentPage == 0))
     {
         _currentSelection = 0;
-        _AdjustPageIndexForSelection();
+        AdjustPageIndexForSelection();
         _currentSelection = tempSelection;
     }
 

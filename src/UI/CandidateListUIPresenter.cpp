@@ -2,7 +2,6 @@
 #include "Globals.h"
 #include "Private.h"
 #include "MetasequoiaIME.h"
-#include "CandidateWindow.h"
 #include "CandidateListUIPresenter.h"
 #include "CompositionProcessorEngine.h"
 #include "MetasequoiaIMEBaseStructure.h"
@@ -88,11 +87,11 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             {
                 std::wstring remainingRawInput = data.substr(0, separator);
                 std::wstring curWord = data.substr(separator + 1);
-                #ifdef FANY_DEBUG
+#ifdef FANY_DEBUG
                 OutputDebugString(
                     fmt::format(L"[msime]: create_word, remainingRawInput: {}, curWord: {}", remainingRawInput, curWord)
                         .c_str());
-                #endif
+#endif
                 GlobalIme::word_for_creating_word = curWord;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
@@ -282,12 +281,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ IT
 CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CMetasequoiaIME *pTextService,
                                                      KEYSTROKE_CATEGORY Category, _In_ CCandidateRange *pIndexRange,
                                                      BOOL hideWindow)
-    : CTfTextLayoutSink(pTextService)
+    : CTfTextLayoutSink(pTextService), _candidateState(pIndexRange)
 {
     _pIndexRange = pIndexRange;
-
-    _parentWndHandle = nullptr;
-    _pCandidateWnd = nullptr;
 
     _Category = Category;
 
@@ -301,6 +297,8 @@ CCandidateListUIPresenter::CCandidateListUIPresenter(_In_ CMetasequoiaIME *pText
     _pTextService->AddRef();
 
     _refCount = 1;
+    _candidateUiSessionActive = FALSE;
+    _candidateWindowVisible = FALSE;
 }
 
 //+---------------------------------------------------------------------------
@@ -441,13 +439,12 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
 {
     if (_hideWindow)
     {
-        _pCandidateWnd->_Show(FALSE);
+        _candidateWindowVisible = FALSE;
     }
     else
     {
         _MoveWindowToTextExt();
-
-        _pCandidateWnd->_Show(TRUE);
+        _candidateWindowVisible = TRUE;
     }
 
     return S_OK;
@@ -455,10 +452,7 @@ HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
 
 HRESULT CCandidateListUIPresenter::ToHideCandidateWindow()
 {
-    if (_pCandidateWnd)
-    {
-        _pCandidateWnd->_Show(FALSE);
-    }
+    _candidateWindowVisible = FALSE;
 
     _updatedFlags = TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE;
     _UpdateUIElement();
@@ -474,7 +468,7 @@ HRESULT CCandidateListUIPresenter::ToHideCandidateWindow()
 
 STDAPI CCandidateListUIPresenter::IsShown(BOOL *pIsShow)
 {
-    *pIsShow = _pCandidateWnd->_IsWindowVisible();
+    *pIsShow = _candidateWindowVisible;
     return S_OK;
 }
 
@@ -511,14 +505,7 @@ STDAPI CCandidateListUIPresenter::GetDocumentMgr(ITfDocumentMgr **ppdim)
 
 STDAPI CCandidateListUIPresenter::GetCount(UINT *pCandidateCount)
 {
-    if (_pCandidateWnd)
-    {
-        *pCandidateCount = _pCandidateWnd->_GetCount();
-    }
-    else
-    {
-        *pCandidateCount = 0;
-    }
+    *pCandidateCount = _candidateState.GetCount();
     return S_OK;
 }
 
@@ -530,14 +517,7 @@ STDAPI CCandidateListUIPresenter::GetCount(UINT *pCandidateCount)
 
 STDAPI CCandidateListUIPresenter::GetSelection(UINT *pSelectedCandidateIndex)
 {
-    if (_pCandidateWnd)
-    {
-        *pSelectedCandidateIndex = _pCandidateWnd->_GetSelection();
-    }
-    else
-    {
-        *pSelectedCandidateIndex = 0;
-    }
+    *pSelectedCandidateIndex = _candidateState.GetSelection();
     return S_OK;
 }
 
@@ -549,7 +529,7 @@ STDAPI CCandidateListUIPresenter::GetSelection(UINT *pSelectedCandidateIndex)
 
 STDAPI CCandidateListUIPresenter::GetString(UINT uIndex, BSTR *pbstr)
 {
-    if (!_pCandidateWnd || (uIndex > _pCandidateWnd->_GetCount()))
+    if (uIndex >= _candidateState.GetCount())
     {
         return E_FAIL;
     }
@@ -557,7 +537,7 @@ STDAPI CCandidateListUIPresenter::GetString(UINT uIndex, BSTR *pbstr)
     DWORD candidateLen = 0;
     const WCHAR *pCandidateString = nullptr;
 
-    candidateLen = _pCandidateWnd->_GetCandidateString(uIndex, &pCandidateString);
+    candidateLen = _candidateState.GetCandidateString(static_cast<int>(uIndex), &pCandidateString);
 
     *pbstr = (candidateLen == 0) ? nullptr : SysAllocStringLen(pCandidateString, candidateLen);
 
@@ -572,16 +552,7 @@ STDAPI CCandidateListUIPresenter::GetString(UINT uIndex, BSTR *pbstr)
 
 STDAPI CCandidateListUIPresenter::GetPageIndex(UINT *pIndex, UINT uSize, UINT *puPageCnt)
 {
-    if (!_pCandidateWnd)
-    {
-        if (pIndex)
-        {
-            *pIndex = 0;
-        }
-        *puPageCnt = 0;
-        return S_OK;
-    }
-    return _pCandidateWnd->_GetPageIndex(pIndex, uSize, puPageCnt);
+    return _candidateState.GetPageIndex(pIndex, uSize, puPageCnt);
 }
 
 //+---------------------------------------------------------------------------
@@ -592,11 +563,7 @@ STDAPI CCandidateListUIPresenter::GetPageIndex(UINT *pIndex, UINT uSize, UINT *p
 
 STDAPI CCandidateListUIPresenter::SetPageIndex(UINT *pIndex, UINT uPageCnt)
 {
-    if (!_pCandidateWnd)
-    {
-        return E_FAIL;
-    }
-    return _pCandidateWnd->_SetPageIndex(pIndex, uPageCnt);
+    return _candidateState.SetPageIndex(pIndex, uPageCnt);
 }
 
 //+---------------------------------------------------------------------------
@@ -607,12 +574,7 @@ STDAPI CCandidateListUIPresenter::SetPageIndex(UINT *pIndex, UINT uPageCnt)
 
 STDAPI CCandidateListUIPresenter::GetCurrentPage(UINT *puPage)
 {
-    if (!_pCandidateWnd)
-    {
-        *puPage = 0;
-        return S_OK;
-    }
-    return _pCandidateWnd->_GetCurrentPage(puPage);
+    return _candidateState.GetCurrentPage(puPage);
 }
 
 //+---------------------------------------------------------------------------
@@ -623,10 +585,7 @@ STDAPI CCandidateListUIPresenter::GetCurrentPage(UINT *puPage)
 
 STDAPI CCandidateListUIPresenter::SetSelection(UINT nIndex)
 {
-    if (_pCandidateWnd)
-    {
-        _pCandidateWnd->_SetSelection(nIndex);
-    }
+    _candidateState.SetSelectionSilently(nIndex);
 
     return S_OK;
 }
@@ -782,19 +741,14 @@ void CCandidateListUIPresenter::_EndCandidateList()
 
 void CCandidateListUIPresenter::_NotifyUI()
 {
-    CStringRange keyStringBuffer = _pTextService->GetCompositionProcessorEngine()->GetKeystrokeBuffer();
-    std::wstring pinyinString(keyStringBuffer.Get(), keyStringBuffer.GetLength());
-    Global::PinyinLength = pinyinString.length();
-    WriteDataToSharedMemory(   //
-        Global::Keycode,       //
-        Global::wch,           //
-        Global::ModifiersDown, //
-        Global::Point,         //
-        Global::PinyinLength,  //
-        Global::PinyinString,  //
-        0b111111               //
-    );
-    SendShowCandidateWndEventToUIProcess();
+    if (_candidateUiSessionActive)
+    {
+        UpdateCandidateUiSession();
+    }
+    else
+    {
+        BeginCandidateUiSession();
+    }
 }
 
 //+---------------------------------------------------------------------------
@@ -830,7 +784,7 @@ void CCandidateListUIPresenter::AddCandidateToCandidateListUI(     //
 {
     for (UINT index = 0; index < pCandidateList->Count(); index++)
     {
-        _pCandidateWnd->_AddString(pCandidateList->GetAt(index), isAddFindKeyCode);
+        _candidateState.AddCandidate(pCandidateList->GetAt(index), isAddFindKeyCode);
     }
 }
 
@@ -848,11 +802,11 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(       //
             puPageIndex[i] = i * candCntInPage;
         }
 
-        _pCandidateWnd->_SetPageIndex(puPageIndex, bufferSize);
+        _candidateState.SetPageIndex(puPageIndex, bufferSize);
         delete[] puPageIndex;
     }
-    _pCandidateWnd->_SetScrollInfo(pCandidateList->Count(),
-                                   candCntInPage); // nMax:range of max, nPage:number of items in page
+    _candidateState.SetScrollInfo(pCandidateList->Count(),
+                                  candCntInPage); // nMax:range of max, nPage:number of items in page
 }
 //+---------------------------------------------------------------------------
 //
@@ -862,7 +816,7 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(       //
 
 void CCandidateListUIPresenter::_ClearList()
 {
-    _pCandidateWnd->_ClearList();
+    _candidateState.Clear();
 }
 
 //+---------------------------------------------------------------------------
@@ -874,12 +828,13 @@ void CCandidateListUIPresenter::_ClearList()
 
 void CCandidateListUIPresenter::_SetTextColor(COLORREF crColor, COLORREF crBkColor)
 {
-    _pCandidateWnd->_SetTextColor(crColor, crBkColor);
+    crColor;
+    crBkColor;
 }
 
 void CCandidateListUIPresenter::_SetFillColor(HBRUSH hBrush)
 {
-    _pCandidateWnd->_SetFillColor(hBrush);
+    hBrush;
 }
 
 //+---------------------------------------------------------------------------
@@ -891,7 +846,7 @@ void CCandidateListUIPresenter::_SetFillColor(HBRUSH hBrush)
 DWORD_PTR CCandidateListUIPresenter::_GetSelectedCandidateString(
     _Outptr_result_maybenull_ const WCHAR **ppwchCandidateString)
 {
-    return _pCandidateWnd->_GetSelectedCandidateString(ppwchCandidateString);
+    return _candidateState.GetSelectedCandidateString(ppwchCandidateString);
 }
 
 //+---------------------------------------------------------------------------
@@ -902,7 +857,7 @@ DWORD_PTR CCandidateListUIPresenter::_GetSelectedCandidateString(
 
 BOOL CCandidateListUIPresenter::_MoveSelection(_In_ int offSet)
 {
-    BOOL ret = _pCandidateWnd->_MoveSelection(offSet, TRUE);
+    BOOL ret = _candidateState.MoveSelection(offSet);
     if (ret)
     {
         if (_isShowMode)
@@ -927,7 +882,7 @@ BOOL CCandidateListUIPresenter::_MoveSelection(_In_ int offSet)
 
 BOOL CCandidateListUIPresenter::_SetSelection(_In_ int selectedIndex)
 {
-    BOOL ret = _pCandidateWnd->_SetSelection(selectedIndex, TRUE);
+    BOOL ret = _candidateState.SetSelection(selectedIndex);
     if (ret)
     {
         if (_isShowMode)
@@ -950,7 +905,7 @@ BOOL CCandidateListUIPresenter::_SetSelection(_In_ int selectedIndex)
 
 BOOL CCandidateListUIPresenter::_MovePage(_In_ int offSet)
 {
-    BOOL ret = _pCandidateWnd->_MovePage(offSet, TRUE);
+    BOOL ret = _candidateState.MovePage(offSet);
     if (ret)
     {
         if (_isShowMode)
@@ -982,7 +937,8 @@ void CCandidateListUIPresenter::_MoveWindowToTextExt()
         return;
     }
 
-    _pCandidateWnd->_Move(rc.left, rc.bottom);
+    Global::Point[0] = rc.left * Global::DpiScale;
+    Global::Point[1] = rc.bottom * Global::DpiScale;
 }
 //+---------------------------------------------------------------------------
 //
@@ -992,20 +948,12 @@ void CCandidateListUIPresenter::_MoveWindowToTextExt()
 
 VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
 {
+    lpRect;
     // OutputDebugString(fmt::format(L"[msime]: LayoutChangeNotification").c_str());
 #ifdef FANY_DEBUG
     // TODO: Log _LayoutChangeNotification firefox cnt: Global::firefox_like_cnt
 #endif
-    WriteDataToSharedMemory(  //
-        Global::Keycode,      //
-        Global::wch,          //
-        0,                    //
-        Global::Point,        //
-        Global::PinyinLength, //
-        Global::PinyinString, //
-        0b001000              //
-    );
-    SendMoveCandidateWndEventToUIProcess();
+    MoveCandidateUiSession();
 }
 
 //+---------------------------------------------------------------------------
@@ -1085,20 +1033,6 @@ Exit:
 //+---------------------------------------------------------------------------
 //
 // _CandWndCallback
-//
-//----------------------------------------------------------------------------
-
-// static
-HRESULT CCandidateListUIPresenter::_CandWndCallback(_In_ void *pv, _In_ enum CANDWND_ACTION action)
-{
-    CCandidateListUIPresenter *fakeThis = (CCandidateListUIPresenter *)pv;
-
-    return fakeThis->_CandidateChangeNotification(action);
-}
-
-//+---------------------------------------------------------------------------
-//
-// _UpdateUIElement
 //
 //----------------------------------------------------------------------------
 
@@ -1243,60 +1177,68 @@ Exit:
 
 HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth)
 {
-    HRESULT hr = S_OK;
-
-    if (nullptr != _pCandidateWnd)
-    {
-        return hr;
-    }
-
-    _pCandidateWnd = new (std::nothrow)
-        CCandidateWindow(_CandWndCallback, this, _pIndexRange, _pTextService->_IsStoreAppMode(), _pTextService);
-
-    if (_pCandidateWnd == nullptr)
-    {
-        hr = E_OUTOFMEMORY;
-        goto Exit;
-    }
-
-    HWND parentWndHandle = nullptr;
-    ITfContextView *pView = nullptr;
-    if (SUCCEEDED(pContextDocument->GetActiveView(&pView)))
-    {
-        // pView->GetWnd(&parentWndHandle);
-        if (FAILED(pView->GetWnd(&parentWndHandle)) || (parentWndHandle == nullptr))
-        {
-            parentWndHandle = GetFocus();
-        }
-    }
-
-    if (!_pCandidateWnd->_Create(wndWidth, parentWndHandle))
-    {
-        hr = E_OUTOFMEMORY;
-        goto Exit;
-    }
-
-Exit:
-    return hr;
+    pContextDocument;
+    wndWidth;
+    _candidateWindowVisible = FALSE;
+    return S_OK;
 }
 
 void CCandidateListUIPresenter::DisposeCandidateWindow()
 {
-    if (nullptr == _pCandidateWnd)
-    {
-        return;
-    }
-
     //
     // Hide the global candidate window
     //
     // ShowWindow(Global::MainWindowHandle, SW_HIDE);
     // HWND UIHwnd = FindWindow(L"global_candidate_window", NULL);
     // UINT WM_HIDE_MAIN_WINDOW = RegisterWindowMessage(L"WM_HIDE_MAIN_WINDOW");
+    EndCandidateUiSession();
+    _candidateState.Clear();
+    _candidateWindowVisible = FALSE;
+}
+
+void CCandidateListUIPresenter::WriteCandidateUiPayload(_In_ UINT writeFlag)
+{
+    CStringRange keyStringBuffer = _pTextService->GetCompositionProcessorEngine()->GetKeystrokeBuffer();
+    std::wstring pinyinString(keyStringBuffer.Get(), keyStringBuffer.GetLength());
+    Global::PinyinLength = static_cast<int>(pinyinString.length());
+
+    WriteDataToSharedMemory(   //
+        Global::Keycode,       //
+        Global::wch,           //
+        Global::ModifiersDown, //
+        Global::Point,         //
+        Global::PinyinLength,  //
+        Global::PinyinString,  //
+        writeFlag              //
+    );
+}
+
+void CCandidateListUIPresenter::BeginCandidateUiSession()
+{
+    WriteCandidateUiPayload(0b111111);
+    SendShowCandidateWndEventToUIProcess();
+    _candidateUiSessionActive = TRUE;
+}
+
+void CCandidateListUIPresenter::UpdateCandidateUiSession()
+{
+    WriteCandidateUiPayload(0b111111);
+    SendShowCandidateWndEventToUIProcess();
+}
+
+void CCandidateListUIPresenter::MoveCandidateUiSession()
+{
+    WriteCandidateUiPayload(0b001000);
+    SendMoveCandidateWndEventToUIProcess();
+}
+
+void CCandidateListUIPresenter::EndCandidateUiSession()
+{
+    if (!_candidateUiSessionActive)
+    {
+        return;
+    }
+
     SendHideCandidateWndEventToUIProcess();
-
-    _pCandidateWnd->_Destroy();
-
-    delete _pCandidateWnd;
-    _pCandidateWnd = nullptr;
+    _candidateUiSessionActive = FALSE;
 }

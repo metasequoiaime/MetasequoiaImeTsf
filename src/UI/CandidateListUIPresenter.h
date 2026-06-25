@@ -2,13 +2,18 @@
 
 #include "Private.h"
 #include "MetasequoiaIME.h"
-#include "CandidateWindow.h"
+#include "CandidateSessionState.h"
 #include "CompositionProcessorEngine.h"
 #include "MetasequoiaIMEBaseStructure.h"
 #include "KeyHandlerEditSession.h"
 #include "TfTextLayoutSink.h"
 
 class CReadingLine;
+
+enum CANDWND_ACTION
+{
+    CAND_ITEM_SELECT
+};
 
 //+---------------------------------------------------------------------------
 //
@@ -76,7 +81,7 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
     BOOL _SetSelectionInPage(int nPos)
     {
-        return _pCandidateWnd->_SetSelectionInPage(nPos);
+        return _candidateState.SetSelectionInPage(nPos);
     }
 
     BOOL _MoveSelection(_In_ int offSet);
@@ -98,10 +103,6 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
   private:
     virtual HRESULT CALLBACK _CandidateChangeNotification(_In_ enum CANDWND_ACTION action);
 
-    static HRESULT _CandWndCallback(_In_ void *pv, _In_ enum CANDWND_ACTION action);
-
-    friend COLORREF _AdjustTextColor(_In_ COLORREF crColor, _In_ COLORREF crBkColor);
-
     HRESULT _UpdateUIElement();
 
     HRESULT ToShowCandidateWindow();
@@ -114,21 +115,28 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     HRESULT MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth);
     void DisposeCandidateWindow();
 
-    void AddCandidateToCandidateListUI(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
+    void AddCandidateToCandidateListUI(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList,
+                                       BOOL isAddFindKeyCode);
 
     void SetPageIndexWithScrollInfo(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList);
+    void WriteCandidateUiPayload(_In_ UINT writeFlag);
+    void BeginCandidateUiSession();
+    void UpdateCandidateUiSession();
+    void MoveCandidateUiSession();
+    void EndCandidateUiSession();
 
   protected:
-    CCandidateWindow *_pCandidateWnd;
     BOOL _isShowMode;
     BOOL _hideWindow;
+    BOOL _candidateWindowVisible;
 
   private:
-    HWND _parentWndHandle;
+    CCandidateSessionState _candidateState;
     CCandidateRange *_pIndexRange;
     KEYSTROKE_CATEGORY _Category;
     DWORD _updatedFlags;
     DWORD _uiElementId;
     CMetasequoiaIME *_pTextService;
     LONG _refCount;
+    BOOL _candidateUiSessionActive;
 };
