@@ -75,8 +75,6 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     void _NotifyUI();
     void _SetText(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
     void _ClearList();
-    VOID _SetTextColor(COLORREF crColor, COLORREF crBkColor);
-    VOID _SetFillColor(HBRUSH hBrush);
 
     DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
     BOOL _SetSelectionInPage(int nPos)
@@ -105,15 +103,8 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
 
     HRESULT _UpdateUIElement();
 
-    HRESULT ToShowCandidateWindow();
-
-    HRESULT ToHideCandidateWindow();
-
     HRESULT BeginUIElement();
     HRESULT EndUIElement();
-
-    HRESULT MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth);
-    void DisposeCandidateWindow();
 
     void AddCandidateToCandidateListUI(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList,
                                        BOOL isAddFindKeyCode);

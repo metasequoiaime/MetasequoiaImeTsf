@@ -66,7 +66,6 @@ add_library(${PROJECT_NAME} SHARED
     "./src/DisplayAttribute/DisplayAttributeInfo.cpp"
     "./src/DisplayAttribute/DisplayAttributeInfo.h"
     "./src/DisplayAttribute/DisplayAttributeProvider.cpp"
-    "./src/DisplayAttribute/DisplayString.h"
     "./src/DisplayAttribute/EnumDisplayAttributeInfo.cpp"
     "./src/DisplayAttribute/EnumDisplayAttributeInfo.h"
     # Edit

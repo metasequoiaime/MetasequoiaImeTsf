@@ -426,37 +426,22 @@ STDAPI CCandidateListUIPresenter::Show(BOOL showCandidateWindow)
 {
     if (showCandidateWindow)
     {
-        ToShowCandidateWindow();
+        if (_hideWindow)
+        {
+            _candidateWindowVisible = FALSE;
+        }
+        else
+        {
+            _MoveWindowToTextExt();
+            _candidateWindowVisible = TRUE;
+        }
     }
     else
-    {
-        ToHideCandidateWindow();
-    }
-    return S_OK;
-}
-
-HRESULT CCandidateListUIPresenter::ToShowCandidateWindow()
-{
-    if (_hideWindow)
     {
         _candidateWindowVisible = FALSE;
+        _updatedFlags = TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE;
+        _UpdateUIElement();
     }
-    else
-    {
-        _MoveWindowToTextExt();
-        _candidateWindowVisible = TRUE;
-    }
-
-    return S_OK;
-}
-
-HRESULT CCandidateListUIPresenter::ToHideCandidateWindow()
-{
-    _candidateWindowVisible = FALSE;
-
-    _updatedFlags = TF_CLUIE_SELECTION | TF_CLUIE_CURRENTPAGE;
-    _UpdateUIElement();
-
     return S_OK;
 }
 
@@ -686,6 +671,8 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
 {
     pDocumentMgr;
     tfClientId;
+    pContextDocument;
+    wndWidth;
 
     HRESULT hr = E_FAIL;
 
@@ -695,17 +682,8 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     }
 
     BeginUIElement();
-
-    hr = MakeCandidateWindow(pContextDocument, wndWidth);
-    if (FAILED(hr))
-    {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: MakeCandidateWindow failed").c_str());
-#endif
-        // goto Exit;
-    }
-
-    // Show(_isShowMode);
+    _candidateWindowVisible = FALSE;
+    hr = S_OK;
 
     RECT rcTextExt;
     if (SUCCEEDED(_GetTextExt(&rcTextExt)))
@@ -733,8 +711,9 @@ void CCandidateListUIPresenter::_EndCandidateList()
 {
     EndUIElement();
 
-    /* 告诉 Server 端隐藏候选框窗口 */
-    DisposeCandidateWindow();
+    EndCandidateUiSession();
+    _candidateState.Clear();
+    _candidateWindowVisible = FALSE;
 
     _EndLayout();
 }
@@ -766,7 +745,6 @@ void CCandidateListUIPresenter::_SetText(_In_ CMetasequoiaImeArray<CCandidateLis
 
     if (_isShowMode)
     {
-        // _pCandidateWnd->_InvalidateRect();
         _NotifyUI();
     }
     else
@@ -821,24 +799,6 @@ void CCandidateListUIPresenter::_ClearList()
 
 //+---------------------------------------------------------------------------
 //
-// _SetTextColor
-// _SetFillColor
-//
-//----------------------------------------------------------------------------
-
-void CCandidateListUIPresenter::_SetTextColor(COLORREF crColor, COLORREF crBkColor)
-{
-    crColor;
-    crBkColor;
-}
-
-void CCandidateListUIPresenter::_SetFillColor(HBRUSH hBrush)
-{
-    hBrush;
-}
-
-//+---------------------------------------------------------------------------
-//
 // _GetSelectedCandidateString
 //
 //----------------------------------------------------------------------------
@@ -862,7 +822,6 @@ BOOL CCandidateListUIPresenter::_MoveSelection(_In_ int offSet)
     {
         if (_isShowMode)
         {
-            // _pCandidateWnd->_InvalidateRect();
             _NotifyUI();
         }
         else
@@ -910,7 +869,6 @@ BOOL CCandidateListUIPresenter::_MovePage(_In_ int offSet)
     {
         if (_isShowMode)
         {
-            // _pCandidateWnd->_InvalidateRect();
             _NotifyUI();
         }
         else
@@ -1167,33 +1125,6 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
 
 Exit:
     return hr;
-}
-
-//+---------------------------------------------------------------------------
-// MakeCandidateWindow
-//
-// Create the candidate window
-//----------------------------------------------------------------------------
-
-HRESULT CCandidateListUIPresenter::MakeCandidateWindow(_In_ ITfContext *pContextDocument, _In_ UINT wndWidth)
-{
-    pContextDocument;
-    wndWidth;
-    _candidateWindowVisible = FALSE;
-    return S_OK;
-}
-
-void CCandidateListUIPresenter::DisposeCandidateWindow()
-{
-    //
-    // Hide the global candidate window
-    //
-    // ShowWindow(Global::MainWindowHandle, SW_HIDE);
-    // HWND UIHwnd = FindWindow(L"global_candidate_window", NULL);
-    // UINT WM_HIDE_MAIN_WINDOW = RegisterWindowMessage(L"WM_HIDE_MAIN_WINDOW");
-    EndCandidateUiSession();
-    _candidateState.Clear();
-    _candidateWindowVisible = FALSE;
 }
 
 void CCandidateListUIPresenter::WriteCandidateUiPayload(_In_ UINT writeFlag)
