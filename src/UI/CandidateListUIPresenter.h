@@ -75,6 +75,10 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     void _NotifyUI();
     void _SetText(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
     void _ClearList();
+    UINT _GetCount() const
+    {
+        return _candidateState.GetCount();
+    }
 
     DWORD_PTR _GetSelectedCandidateString(_Outptr_result_maybenull_ const WCHAR **ppwchCandidateString);
     BOOL _SetSelectionInPage(int nPos)

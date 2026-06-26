@@ -4,7 +4,6 @@
 #include "MetasequoiaIME.h"
 #include "CompositionProcessorEngine.h"
 #include "KeyStateCategory.h"
-
 //////////////////////////////////////////////////////////////////////
 //
 //    ITfEditSession

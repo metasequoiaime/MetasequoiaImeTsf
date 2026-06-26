@@ -1,6 +1,8 @@
 #include "Private.h"
 #include "CandidateSessionState.h"
 #include <corecrt_wstring.h>
+#include <debugapi.h>
+#include "fmt/xchar.h"
 
 CCandidateSessionState::CCandidateSessionState(_In_ CCandidateRange *pIndexRange)
 {
@@ -132,13 +134,13 @@ DWORD CCandidateSessionState::GetSelectedCandidateString(
 
 BOOL CCandidateSessionState::SetSelectionInPage(_In_ int nPos)
 {
-    if (nPos < 0)
+    if ((nPos < 0) || (_candidateList.Count() == 0) || (_pageIndex.Count() == 0) || (_pIndexRange == nullptr))
     {
         return FALSE;
     }
 
-    UINT pos = static_cast<UINT>(nPos);
-    if (pos >= _candidateList.Count())
+    const UINT pageSize = _pIndexRange->Count();
+    if (pageSize == 0)
     {
         return FALSE;
     }
@@ -149,12 +151,24 @@ BOOL CCandidateSessionState::SetSelectionInPage(_In_ int nPos)
         return FALSE;
     }
 
-    _currentSelection = *_pageIndex.GetAt(currentPage) + nPos;
+    const UINT pageStart = *_pageIndex.GetAt(currentPage);
+    const UINT selection = pageStart + static_cast<UINT>(nPos);
+    if ((selection >= _candidateList.Count()) || (selection >= pageStart + pageSize))
+    {
+        return FALSE;
+    }
+
+    _currentSelection = selection;
     return TRUE;
 }
 
 BOOL CCandidateSessionState::MoveSelection(_In_ int offSet)
 {
+    if (_candidateList.Count() == 0)
+    {
+        return FALSE;
+    }
+
     if (_currentSelection + offSet >= _candidateList.Count())
     {
         return FALSE;
@@ -199,6 +213,17 @@ BOOL CCandidateSessionState::MovePage(_In_ int offSet)
         return TRUE;
     }
 
+    if ((_candidateList.Count() == 0) || (_pageIndex.Count() == 0) || (_pIndexRange == nullptr))
+    {
+        return FALSE;
+    }
+
+    const UINT pageSize = _pIndexRange->Count();
+    if (pageSize == 0)
+    {
+        return FALSE;
+    }
+
     int currentPage = 0;
     if (FAILED(GetCurrentPage(&currentPage)))
     {
@@ -211,14 +236,21 @@ BOOL CCandidateSessionState::MovePage(_In_ int offSet)
         return FALSE;
     }
 
-    if (_currentSelection % _pIndexRange->Count() == 0 && _currentSelection == *_pageIndex.GetAt(currentPage))
+    if ((_currentSelection % pageSize) == 0 && _currentSelection == *_pageIndex.GetAt(currentPage))
     {
         _dontAdjustOnEmptyItemPage = TRUE;
     }
 
-    int selectionOffset = _currentSelection - *_pageIndex.GetAt(currentPage);
-    _currentSelection = *_pageIndex.GetAt(newPage) + selectionOffset;
-    _currentSelection = _candidateList.Count() > _currentSelection ? _currentSelection : _candidateList.Count() - 1;
+    const UINT currentPageStart = *_pageIndex.GetAt(currentPage);
+    const UINT newPageStart = *_pageIndex.GetAt(newPage);
+    if (newPageStart >= _candidateList.Count())
+    {
+        return FALSE;
+    }
+
+    const UINT selectionOffset = _currentSelection - currentPageStart;
+    const UINT maxSelectionInPage = min(pageSize - 1, _candidateList.Count() - 1 - newPageStart);
+    _currentSelection = newPageStart + min(selectionOffset, maxSelectionInPage);
 
     return TRUE;
 }

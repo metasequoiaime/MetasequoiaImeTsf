@@ -236,6 +236,20 @@ HRESULT CMetasequoiaIME::_HandleCandidateArrowKey( //
     ec;
     pContext;
 
+    if (_pCandidateListUIPresenter == nullptr)
+    {
+        return S_OK;
+    }
+
+    if ((keyFunction == FUNCTION_MOVE_PAGE_UP) || (keyFunction == FUNCTION_MOVE_PAGE_DOWN) ||
+        (keyFunction == FUNCTION_MOVE_PAGE_TOP) || (keyFunction == FUNCTION_MOVE_PAGE_BOTTOM))
+    {
+        if (_pCandidateListUIPresenter->_GetCount() <= 1)
+        {
+            return S_OK;
+        }
+    }
+
     _pCandidateListUIPresenter->AdviseUIChangedByArrowKey(keyFunction);
 
     return S_OK;
@@ -770,8 +784,19 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(       //
     _In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList //
 )
 {
-    UINT candCntInPage = _pIndexRange->Count();
-    UINT bufferSize = pCandidateList->Count() / candCntInPage + 1;
+    if ((pCandidateList == nullptr) || (_pIndexRange == nullptr))
+    {
+        return;
+    }
+
+    const UINT candCntInPage = _pIndexRange->Count();
+    if (candCntInPage == 0)
+    {
+        return;
+    }
+
+    const UINT candidateCount = pCandidateList->Count();
+    const UINT bufferSize = (candidateCount == 0) ? 0 : ((candidateCount - 1) / candCntInPage + 1);
     UINT *puPageIndex = new (std::nothrow) UINT[bufferSize];
     if (puPageIndex != nullptr)
     {
@@ -783,7 +808,12 @@ void CCandidateListUIPresenter::SetPageIndexWithScrollInfo(       //
         _candidateState.SetPageIndex(puPageIndex, bufferSize);
         delete[] puPageIndex;
     }
-    _candidateState.SetScrollInfo(pCandidateList->Count(),
+    else if (bufferSize == 0)
+    {
+        _candidateState.SetPageIndex(nullptr, 0);
+    }
+
+    _candidateState.SetScrollInfo(candidateCount,
                                   candCntInPage); // nMax:range of max, nPage:number of items in page
 }
 //+---------------------------------------------------------------------------

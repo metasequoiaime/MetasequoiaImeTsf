@@ -452,12 +452,31 @@ BOOL CCompositionProcessorEngine::IsPunctuation(WCHAR wch)
 
 namespace
 {
-bool IsCommitWithFirstCandidatePunctuationInCandidateMode(WCHAR wch, CANDIDATE_MODE candidateMode)
+bool IsCommitWithFirstCandidatePunctuationInCandidateMode(UINT uCode, WCHAR wch, CANDIDATE_MODE candidateMode)
 {
     if (candidateMode == CANDIDATE_NONE)
     {
         return false;
     }
+
+    // Candidate paging keys must keep their navigation semantics even if the
+    // corresponding character is also listed in CommitWithFirstCandPunc.
+    switch (uCode)
+    {
+    case VK_PRIOR:
+    case VK_NEXT:
+    case VK_OEM_MINUS:
+    case VK_OEM_PLUS:
+    case VK_SUBTRACT:
+    case VK_ADD:
+    case VK_HOME:
+    case VK_END:
+    case VK_TAB:
+        return false;
+    default:
+        break;
+    }
+
     return wch != 0 && Global::CommitWithFirstCandPunc.count(wch) > 0;
 }
 
@@ -1701,7 +1720,7 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         return TRUE;
     }
 
-    if (IsCommitWithFirstCandidatePunctuationInCandidateMode(pwch ? *pwch : 0, candidateMode))
+    if (IsCommitWithFirstCandidatePunctuationInCandidateMode(uCode, pwch ? *pwch : 0, candidateMode))
     {
         if (pKeyState)
         {

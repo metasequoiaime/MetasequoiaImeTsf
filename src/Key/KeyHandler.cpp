@@ -595,6 +595,15 @@ Exit:
 HRESULT CMetasequoiaIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext,
                                                     KEYSTROKE_FUNCTION keyFunction)
 {
+    if ((keyFunction == FUNCTION_MOVE_PAGE_UP) || (keyFunction == FUNCTION_MOVE_PAGE_DOWN) ||
+        (keyFunction == FUNCTION_MOVE_PAGE_TOP) || (keyFunction == FUNCTION_MOVE_PAGE_BOTTOM))
+    {
+        if ((_pCandidateListUIPresenter == nullptr) || (_pCandidateListUIPresenter->_GetCount() <= 1))
+        {
+            return S_OK;
+        }
+    }
+
     ITfRange *pRangeComposition = nullptr;
     TF_SELECTION tfSelection;
     ULONG fetched = 0;
@@ -607,7 +616,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfCon
     }
 
     // get the composition range
-    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
+    if ((_pComposition == nullptr) || FAILED(_pComposition->GetRange(&pRangeComposition)))
     {
         goto Exit;
     }
