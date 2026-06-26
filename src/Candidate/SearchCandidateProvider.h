@@ -20,7 +20,6 @@ class CSearchCandidateProvider : public ITfFnSearchCandidateProvider
   public:
     // create instance
     static HRESULT CreateInstance(_Outptr_ ITfFnSearchCandidateProvider **ppobj, _In_ ITfTextInputProcessorEx *ptip);
-    static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj, _In_ ITfTextInputProcessorEx *ptip);
 
     // IUnknown methods
     STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);

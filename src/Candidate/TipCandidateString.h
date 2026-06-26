@@ -11,7 +11,6 @@ class CTipCandidateString : public ITfCandidateString
 
   public:
     static HRESULT CreateInstance(_Outptr_ CTipCandidateString **ppobj);
-    static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj);
 
     // IUnknown methods
     virtual STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);

@@ -26,30 +26,8 @@ HRESULT CSearchCandidateProvider::CreateInstance(_Outptr_ ITfFnSearchCandidatePr
         return E_OUTOFMEMORY;
     }
 
+    (*ppobj)->AddRef();
     return S_OK;
-}
-
-/*------------------------------------------------------------------------------
-
-create instance of CSearchCandidateProvider
-
-------------------------------------------------------------------------------*/
-HRESULT CSearchCandidateProvider::CreateInstance(REFIID riid, _Outptr_ void **ppvObj,
-                                                 _In_ ITfTextInputProcessorEx *ptip)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-    *ppvObj = nullptr;
-
-    *ppvObj = new (std::nothrow) CSearchCandidateProvider(ptip);
-    if (nullptr == *ppvObj)
-    {
-        return E_OUTOFMEMORY;
-    }
-
-    return ((CSearchCandidateProvider *)(*ppvObj))->QueryInterface(riid, ppvObj);
 }
 
 /*------------------------------------------------------------------------------
@@ -178,15 +156,18 @@ STDMETHODIMP CSearchCandidateProvider::GetSearchCandidates(BSTR bstrQuery, BSTR 
         }
         for (int iCand = 0; iCand < cCand; iCand++)
         {
-            ITfCandidateString *pCandStr = nullptr;
-            CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void **)&pCandStr);
+            CTipCandidateString *pCandStr = nullptr;
+            hr = CTipCandidateString::CreateInstance(&pCandStr);
+            if (FAILED(hr) || (pCandStr == nullptr))
+            {
+                return hr;
+            }
 
-            ((CTipCandidateString *)pCandStr)->SetIndex(iCand);
-            ((CTipCandidateString *)pCandStr)
-                ->SetString(candidateList.GetAt(iCand)->_ItemString.Get(),
-                            candidateList.GetAt(iCand)->_ItemString.GetLength());
+            pCandStr->SetIndex(iCand);
+            pCandStr->SetString(candidateList.GetAt(iCand)->_ItemString.Get(),
+                                candidateList.GetAt(iCand)->_ItemString.GetLength());
 
-            ((CTipCandidateList *)(*pplist))->SetCandidate(&pCandStr);
+            ((CTipCandidateList *)(*pplist))->SetCandidate(pCandStr);
         }
     }
     hr = S_OK;

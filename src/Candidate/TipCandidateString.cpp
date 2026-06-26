@@ -15,24 +15,8 @@ HRESULT CTipCandidateString::CreateInstance(_Outptr_ CTipCandidateString **ppobj
         return E_OUTOFMEMORY;
     }
 
+    (*ppobj)->AddRef();
     return S_OK;
-}
-
-HRESULT CTipCandidateString::CreateInstance(REFIID riid, _Outptr_ void **ppvObj)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-    *ppvObj = nullptr;
-
-    *ppvObj = new (std::nothrow) CTipCandidateString();
-    if (*ppvObj == nullptr)
-    {
-        return E_OUTOFMEMORY;
-    }
-
-    return ((CTipCandidateString *)(*ppvObj))->QueryInterface(riid, ppvObj);
 }
 
 CTipCandidateString::CTipCandidateString(void)

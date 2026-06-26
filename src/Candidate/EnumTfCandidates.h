@@ -12,9 +12,7 @@ class CEnumTfCandidates : public IEnumTfCandidates
 
   public:
     // create instance
-    static HRESULT CreateInstance(_Out_ CEnumTfCandidates **ppobj,
-                                  _In_ const CMetasequoiaImeArray<ITfCandidateString *> &rgelm, UINT currentNum = 0);
-    static HRESULT CreateInstance(REFIID riid, _Out_ void **ppvObj,
+    static HRESULT CreateInstance(_Outptr_ IEnumTfCandidates **ppEnum,
                                   _In_ const CMetasequoiaImeArray<ITfCandidateString *> &rgelm, UINT currentNum = 0);
 
     // IUnknown methods

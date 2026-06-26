@@ -114,6 +114,7 @@ CMetasequoiaIME::CMetasequoiaIME()
     _pContext = nullptr;
 
     _refCount = 1;
+    _pITfFnSearchCandidateProvider = nullptr;
 
     _msgWndHandle = nullptr;
     _pIpcThread = nullptr;
@@ -889,7 +890,10 @@ HRESULT CMetasequoiaIME::GetFunction(__RPC__in REFGUID rguid, __RPC__in REFIID r
 
     if ((IsEqualGUID(rguid, GUID_NULL)) && (IsEqualGUID(riid, __uuidof(ITfFnSearchCandidateProvider))))
     {
-        hr = _pITfFnSearchCandidateProvider->QueryInterface(riid, (void **)ppunk);
+        if (_pITfFnSearchCandidateProvider != nullptr)
+        {
+            hr = _pITfFnSearchCandidateProvider->QueryInterface(riid, (void **)ppunk);
+        }
     }
     else if (IsEqualGUID(rguid, GUID_NULL))
     {

@@ -40,6 +40,12 @@ BOOL CMetasequoiaIME::_InitFunctionProviderSink()
 
 void CMetasequoiaIME::_UninitFunctionProviderSink()
 {
+    if (_pITfFnSearchCandidateProvider != nullptr)
+    {
+        _pITfFnSearchCandidateProvider->Release();
+        _pITfFnSearchCandidateProvider = nullptr;
+    }
+
     ITfSourceSingle *pSourceSingle = nullptr;
     if (SUCCEEDED(_pThreadMgr->QueryInterface(IID_ITfSourceSingle, (void **)&pSourceSingle)))
     {

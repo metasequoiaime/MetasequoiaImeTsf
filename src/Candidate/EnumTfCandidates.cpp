@@ -1,40 +1,21 @@
 #include "Private.h"
 #include "EnumTfCandidates.h"
 
-HRESULT CEnumTfCandidates::CreateInstance(_Out_ CEnumTfCandidates **ppobj,
+HRESULT CEnumTfCandidates::CreateInstance(_Outptr_ IEnumTfCandidates **ppEnum,
                                           _In_ const CMetasequoiaImeArray<ITfCandidateString *> &rgelm, UINT currentNum)
 {
-    if (ppobj == nullptr)
+    if (ppEnum == nullptr)
     {
         return E_INVALIDARG;
     }
-    *ppobj = nullptr;
-
-    *ppobj = new (std::nothrow) CEnumTfCandidates(rgelm, currentNum);
-    if (*ppobj == nullptr)
+    *ppEnum = new (std::nothrow) CEnumTfCandidates(rgelm, currentNum);
+    if (*ppEnum == nullptr)
     {
         return E_OUTOFMEMORY;
     }
 
+    (*ppEnum)->AddRef();
     return S_OK;
-}
-
-HRESULT CEnumTfCandidates::CreateInstance(REFIID riid, _Out_ void **ppvObj,
-                                          _In_ const CMetasequoiaImeArray<ITfCandidateString *> &rgelm, UINT currentNum)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_POINTER;
-    }
-    *ppvObj = nullptr;
-
-    *ppvObj = new (std::nothrow) CEnumTfCandidates(rgelm, currentNum);
-    if (*ppvObj == nullptr)
-    {
-        return E_OUTOFMEMORY;
-    }
-
-    return ((CEnumTfCandidates *)(*ppvObj))->QueryInterface(riid, ppvObj);
 }
 
 CEnumTfCandidates::CEnumTfCandidates(_In_ const CMetasequoiaImeArray<ITfCandidateString *> &rgelm, UINT currentNum)
@@ -105,6 +86,7 @@ STDMETHODIMP CEnumTfCandidates::Next(ULONG ulCount, _Out_ ITfCandidateString **p
     while ((fetched < ulCount) && (_currentCandidateStrIndex < _rgelm.Count()))
     {
         *ppObj = *_rgelm.GetAt(_currentCandidateStrIndex);
+        (*ppObj)->AddRef();
         _currentCandidateStrIndex++;
         fetched++;
     }
@@ -136,5 +118,5 @@ STDMETHODIMP CEnumTfCandidates::Reset()
 
 STDMETHODIMP CEnumTfCandidates::Clone(_Out_ IEnumTfCandidates **ppEnum)
 {
-    return CreateInstance(__uuidof(IEnumTfCandidates), (void **)ppEnum, _rgelm, _currentCandidateStrIndex);
+    return CreateInstance(ppEnum, _rgelm, _currentCandidateStrIndex);
 }

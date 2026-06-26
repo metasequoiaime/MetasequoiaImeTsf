@@ -15,7 +15,6 @@ class CTipCandidateList : public ITfCandidateList
 
   public:
     static HRESULT CreateInstance(_Outptr_ ITfCandidateList **ppobj, size_t candStrReserveSize = 0);
-    static HRESULT CreateInstance(REFIID riid, _Outptr_ void **ppvObj, size_t candStrReserveSize = 0);
 
     // IUnknown methods
     virtual STDMETHODIMP QueryInterface(REFIID riid, _Outptr_ void **ppvObj);
@@ -28,7 +27,7 @@ class CTipCandidateList : public ITfCandidateList
     virtual STDMETHODIMP GetCandidateNum(_Out_ ULONG *pnCnt);
     virtual STDMETHODIMP SetResult(ULONG nIndex, TfCandidateResult imcr);
 
-    virtual STDMETHODIMP SetCandidate(_In_ ITfCandidateString **ppCandStr);
+    virtual STDMETHODIMP SetCandidate(_In_ ITfCandidateString *pCandStr);
 
   protected:
     long _refCount;

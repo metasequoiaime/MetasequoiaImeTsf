@@ -17,24 +17,8 @@ HRESULT CTipCandidateList::CreateInstance(_Outptr_ ITfCandidateList **ppobj, siz
         return E_OUTOFMEMORY;
     }
 
+    (*ppobj)->AddRef();
     return S_OK;
-}
-
-HRESULT CTipCandidateList::CreateInstance(REFIID riid, _Outptr_ void **ppvObj, size_t candStrReserveSize)
-{
-    if (ppvObj == nullptr)
-    {
-        return E_INVALIDARG;
-    }
-    *ppvObj = nullptr;
-
-    *ppvObj = new (std::nothrow) CTipCandidateList(candStrReserveSize);
-    if (*ppvObj == nullptr)
-    {
-        return E_OUTOFMEMORY;
-    }
-
-    return ((CTipCandidateList *)(*ppvObj))->QueryInterface(riid, ppvObj);
 }
 
 CTipCandidateList::CTipCandidateList(size_t candStrReserveSize)
@@ -49,6 +33,14 @@ CTipCandidateList::CTipCandidateList(size_t candStrReserveSize)
 
 CTipCandidateList::~CTipCandidateList()
 {
+    for (UINT i = 0; i < _tfCandStrList.Count(); i++)
+    {
+        ITfCandidateString **ppCandStr = _tfCandStrList.GetAt(i);
+        if ((ppCandStr != nullptr) && (*ppCandStr != nullptr))
+        {
+            (*ppCandStr)->Release();
+        }
+    }
 }
 
 STDMETHODIMP CTipCandidateList::QueryInterface(REFIID riid, _Outptr_ void **ppvObj)
@@ -97,7 +89,7 @@ STDMETHODIMP_(ULONG) CTipCandidateList::Release()
 
 STDMETHODIMP CTipCandidateList::EnumCandidates(_Outptr_ IEnumTfCandidates **ppEnum)
 {
-    return CEnumTfCandidates::CreateInstance(IID_IEnumTfCandidates, (void **)ppEnum, _tfCandStrList);
+    return CEnumTfCandidates::CreateInstance(ppEnum, _tfCandStrList);
 }
 
 STDMETHODIMP CTipCandidateList::GetCandidate(ULONG nIndex, _Outptr_result_maybenull_ ITfCandidateString **ppCandStr)
@@ -114,33 +106,30 @@ STDMETHODIMP CTipCandidateList::GetCandidate(ULONG nIndex, _Outptr_result_mayben
         return E_FAIL;
     }
 
-    for (UINT i = 0; i < _tfCandStrList.Count(); i++)
+    ITfCandidateString **ppCandStrCur = _tfCandStrList.GetAt(static_cast<UINT>(nIndex));
+    if ((ppCandStrCur == nullptr) || (*ppCandStrCur == nullptr))
     {
-        ITfCandidateString **ppCandStrCur = _tfCandStrList.GetAt(i);
-        ULONG indexCur = 0;
-        if ((nullptr != ppCandStrCur) && (SUCCEEDED((*ppCandStrCur)->GetIndex(&indexCur))))
-        {
-            if (nIndex == indexCur)
-            {
-                BSTR bstr;
-                CTipCandidateString *pTipCandidateStrCur = (CTipCandidateString *)(*ppCandStrCur);
-                pTipCandidateStrCur->GetString(&bstr);
-
-                CTipCandidateString::CreateInstance(IID_ITfCandidateString, (void **)ppCandStr);
-
-                if (nullptr != (*ppCandStr))
-                {
-                    CTipCandidateString *pTipCandidateStr = (CTipCandidateString *)(*ppCandStr);
-                    pTipCandidateStr->SetString((LPCWSTR)bstr, SysStringLen(bstr));
-                }
-
-                SysFreeString(bstr);
-
-                break;
-            }
-        }
+        return E_FAIL;
     }
-    return S_OK;
+
+    BSTR bstr = nullptr;
+    CTipCandidateString *pTipCandidateStrCur = static_cast<CTipCandidateString *>(*ppCandStrCur);
+    if (FAILED(pTipCandidateStrCur->GetString(&bstr)))
+    {
+        return E_FAIL;
+    }
+
+    CTipCandidateString *pCandidateString = nullptr;
+    const HRESULT hr = CTipCandidateString::CreateInstance(&pCandidateString);
+    if (SUCCEEDED(hr) && (pCandidateString != nullptr))
+    {
+        pCandidateString->SetIndex(nIndex);
+        pCandidateString->SetString((LPCWSTR)bstr, SysStringLen(bstr));
+        *ppCandStr = pCandidateString;
+    }
+
+    SysFreeString(bstr);
+    return hr;
 }
 
 STDMETHODIMP CTipCandidateList::GetCandidateNum(_Out_ ULONG *pnCnt)
@@ -162,9 +151,9 @@ STDMETHODIMP CTipCandidateList::SetResult(ULONG nIndex, TfCandidateResult imcr)
     return E_NOTIMPL;
 }
 
-STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString **ppCandStr)
+STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString *pCandStr)
 {
-    if (ppCandStr == nullptr)
+    if (pCandStr == nullptr)
     {
         return E_POINTER;
     }
@@ -172,8 +161,10 @@ STDMETHODIMP CTipCandidateList::SetCandidate(_In_ ITfCandidateString **ppCandStr
     ITfCandidateString **ppCandLast = _tfCandStrList.Append();
     if (ppCandLast)
     {
-        *ppCandLast = *ppCandStr;
+        *ppCandLast = pCandStr;
+        return S_OK;
     }
 
-    return S_OK;
+    pCandStr->Release();
+    return E_FAIL;
 }
