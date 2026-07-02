@@ -3,6 +3,9 @@
 #include "KeyHandlerEditSession.h"
 #include "MetasequoiaIMEBaseStructure.h"
 #include <atomic>
+#include <deque>
+#include <mutex>
+#include <string>
 #include <thread>
 
 class CLangBarItemButton;
@@ -19,6 +22,8 @@ const DWORD WM_UpdateIMEStatus = WM_USER + 6;
 const DWORD WM_UpdateDoubleSingleByte = WM_USER + 7;
 const DWORD WM_UpdatePuncMode = WM_USER + 8;
 const DWORD WM_CommitCandidate = WM_USER + 9;
+const DWORD WM_CleanupCandidatePresenter = WM_USER + 10;
+const DWORD WM_AsyncFinalizeCandidate = WM_USER + 11;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,
@@ -115,6 +120,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
 
     // key event handlers for composition/candidate/phrase common objects.
     HRESULT _HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext);
+    HRESULT _HandleCompleteCommitFirst(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext);
     HRESULT _HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *pContext);
 
@@ -162,6 +168,12 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
                                                      DWORD cchPath);
 
     static void IpcWorkerThread(CMetasequoiaIME *pIME);
+    void _QueuePendingCommitCandidate(_In_z_ const WCHAR *pCommitString);
+    std::wstring _TakePendingCommitCandidate();
+    void _QueuePendingServerCandidate(UINT msgType, _In_z_ const WCHAR *pCandidateString);
+    bool _TakePendingServerCandidate(_Out_ UINT *pMsgType, _Out_ std::wstring *pCandidateString);
+    void _ScheduleCandidatePresenterCleanup(_In_ CCandidateListUIPresenter *pPresenter);
+    void _DrainPendingCandidatePresenterCleanup();
 
   private:
     // functions for the composition object.
@@ -178,6 +190,9 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
 
     HRESULT _AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
     HRESULT _AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
+    HRESULT _InsertTextToComposition(TfEditCookie ec, _In_ ITfContext *pContext, _In_ CStringRange *pstrAddString);
+    HRESULT _SetCompositionTextAndSelection(TfEditCookie ec, _In_ ITfContext *pContext,
+                                            _In_ CStringRange *pstrAddString);
 
     BOOL _FindComposingRange(TfEditCookie ec, _In_ ITfContext *pContext, _In_ ITfRange *pSelection,
                              _Outptr_result_maybenull_ ITfRange **ppRange);
@@ -197,6 +212,9 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     // function for the display attribute
     void _ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext);
     BOOL _SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext, TfGuidAtom gaDisplayAttribute);
+    BOOL _SetCompositionDisplayAttributesForRange(TfEditCookie ec, _In_ ITfContext *pContext,
+                                                  _In_ ITfRange *pRangeComposition,
+                                                  TfGuidAtom gaDisplayAttribute);
     BOOL _InitDisplayAttributeGuidAtom();
 
     BOOL _InitThreadMgrEventSink();
@@ -276,6 +294,12 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     HWND _msgWndHandle;
     std::thread *_pIpcThread;
     std::atomic<bool> _shouldStopIpcThread;
+    std::mutex _pendingCommitCandidateMutex;
+    std::wstring _pendingCommitCandidate;
+    bool _hasPendingServerCandidate;
+    UINT _pendingServerCandidateMsgType;
+    std::wstring _pendingServerCandidateString;
+    std::deque<CCandidateListUIPresenter *> _pendingCandidatePresenterCleanup;
 
     LONG _refCount;
 

@@ -4,6 +4,9 @@
 #include "TfTextLayoutSink.h"
 #include "Ipc.h"
 #include "FanyDefines.h"
+#include <debugapi.h>
+#include <fmt/xchar.h>
+#include "../Utils/PerfTimer.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -30,10 +33,18 @@ CGetTextExtentEditSession::CGetTextExtentEditSession(_In_ CMetasequoiaIME *pText
 
 STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
 {
+    PerfTimer timer;
     RECT rc = {0, 0, 0, 0};
     BOOL isClipped = TRUE;
+    HRESULT hr = S_OK;
+    double getTextExtElapsedMs = 0;
+    double layoutChangeElapsedMs = 0;
 
-    if (SUCCEEDED(_pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped)))
+    PerfTimer getTextExtTimer;
+    hr = _pContextView->GetTextExt(ec, _pRangeComposition, &rc, &isClipped);
+    getTextExtElapsedMs = getTextExtTimer.ElapsedMs();
+
+    if (SUCCEEDED(hr))
     {
 #ifdef FANY_DEBUG
         // TODO: Log rc position
@@ -45,14 +56,24 @@ STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
             Global::firefox_like_cnt++;
             if (Global::firefox_like_cnt == 3)
             {
+                PerfTimer layoutChangeTimer;
                 _pTfTextLayoutSink->_LayoutChangeNotification(&rc);
+                layoutChangeElapsedMs = layoutChangeTimer.ElapsedMs();
             }
         }
         else
         {
+            PerfTimer layoutChangeTimer;
             _pTfTextLayoutSink->_LayoutChangeNotification(&rc);
+            layoutChangeElapsedMs = layoutChangeTimer.ElapsedMs();
         }
     }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] GetTextExtentEditSession::DoEditSession elapsed={:.3f}ms get_text_ext={:.3f}ms layout_change={:.3f}ms hr={:#x} clipped={} rect=({}, {}, {}, {})",
+                          timer.ElapsedMs(), getTextExtElapsedMs, layoutChangeElapsedMs,
+                          static_cast<unsigned int>(hr), isClipped ? 1 : 0, rc.left, rc.top, rc.right, rc.bottom)
+                          .c_str());
 
     return S_OK;
 }

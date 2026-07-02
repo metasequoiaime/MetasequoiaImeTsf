@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -53,12 +54,41 @@ struct FanyImeSharedMemoryData
 struct FanyImeNamedpipeData
 {
     UINT event_type;
+    uint64_t client_id = 0;
     UINT keycode;
     WCHAR wch;
     UINT modifiers_down = 0;
     int point[2] = {100, 100};
     int pinyin_length = 0;
     wchar_t pinyin_string[128];
+};
+
+namespace FanyImePipeEventType
+{
+constexpr UINT KeyEvent = 0;
+constexpr UINT HideCandidateWnd = 1;
+constexpr UINT ShowCandidateWnd = 2;
+constexpr UINT MoveCandidateWnd = 3;
+constexpr UINT LangbarRightClick = 4;
+constexpr UINT ClientHello = 10;
+constexpr UINT ClientActivated = 11;
+constexpr UINT ClientDeactivated = 12;
+constexpr UINT IMESwitch = 7;
+constexpr UINT PuncSwitch = 8;
+constexpr UINT DoubleSingleByteSwitch = 9;
+} // namespace FanyImePipeEventType
+
+namespace FanyImePipeRole
+{
+constexpr UINT Main = 0;
+constexpr UINT ToTsf = 1;
+constexpr UINT ToTsfWorkerThread = 2;
+} // namespace FanyImePipeRole
+
+struct FanyImePipeHello
+{
+    uint64_t client_id = 0;
+    UINT pipe_role = 0;
 };
 
 //
@@ -117,6 +147,8 @@ int SendMoveCandidateWndEventToUIProcess();
 int SendLangbarRightClickEventToUIProcess(const RECT *prcArea);
 int SendIMEActivationEventToUIProcessViaNamedPipe();
 int SendIMEDeactivationEventToUIProcessViaNamedPipe();
+int SendClientActivatedEventToServerViaNamedPipe();
+int SendClientDeactivatedEventToServerViaNamedPipe();
 int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool fullwidthIsOpen, bool puncIsOpen);
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus);
 int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc);
@@ -141,7 +173,7 @@ int SendHideCandidateWndEventToUIProcessViaNamedPipe();
 int SendShowCandidateWndEventToUIProcessViaNamedPipe();
 int SendMoveCandidateWndEventToUIProcessViaNamedPipe();
 int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea);
-void ClearNamedpipeDataIfExists();
+void ClearNamedpipeDataIfExists(bool force = false);
 struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout();
 struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe();
 

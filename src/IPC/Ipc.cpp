@@ -41,6 +41,20 @@ inline bool IsValidPipeHandle(HANDLE hPipeHandle)
     return hPipeHandle != nullptr && hPipeHandle != INVALID_HANDLE_VALUE;
 }
 
+double GetElapsedMilliseconds(const LARGE_INTEGER &startCounter, const LARGE_INTEGER &endCounter,
+                              const LARGE_INTEGER &frequency)
+{
+    return static_cast<double>(endCounter.QuadPart - startCounter.QuadPart) * 1000.0 /
+           static_cast<double>(frequency.QuadPart);
+}
+
+uint64_t GetPipeClientId()
+{
+    static const uint64_t clientId =
+        (static_cast<uint64_t>(GetCurrentProcessId()) << 32) | static_cast<uint64_t>(GetCurrentThreadId());
+    return clientId;
+}
+
 void LogCreateFileFailure(const wchar_t *pipeName)
 {
     FANY_IPC_LOGF(L"[msime]: [ipc] CreateFile failed: pipe={}, gle={}", pipeName, GetLastError());
@@ -82,7 +96,26 @@ void ClosePipeHandleIfValid(HANDLE &hPipeHandle)
     hPipeHandle = nullptr;
 }
 
-bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName)
+bool WritePipeHello(HANDLE hPipeHandle, UINT pipeRole)
+{
+    DWORD bytesWritten = 0;
+    if (pipeRole == FanyImePipeRole::Main)
+    {
+        FanyImeNamedpipeData hello = {};
+        hello.event_type = FanyImePipeEventType::ClientHello;
+        hello.client_id = GetPipeClientId();
+        BOOL ret = WriteFile(hPipeHandle, &hello, sizeof(hello), &bytesWritten, NULL);
+        return ret && bytesWritten == sizeof(hello);
+    }
+
+    FanyImePipeHello hello = {};
+    hello.client_id = GetPipeClientId();
+    hello.pipe_role = pipeRole;
+    BOOL ret = WriteFile(hPipeHandle, &hello, sizeof(hello), &bytesWritten, NULL);
+    return ret && bytesWritten == sizeof(hello);
+}
+
+bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName, UINT pipeRole)
 {
     if (IsValidPipeHandle(hPipeHandle))
     {
@@ -107,6 +140,13 @@ bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName)
 
     hPipeHandle = openedPipe;
     LogCreateFileSuccess(pipeName);
+    if (!WritePipeHello(hPipeHandle, pipeRole))
+    {
+        LogWriteFailure(pipeName, 0, pipeRole == FanyImePipeRole::Main ? sizeof(FanyImeNamedpipeData)
+                                                                       : sizeof(FanyImePipeHello));
+        ClosePipeHandleIfValid(hPipeHandle);
+        return false;
+    }
     return true;
 }
 } // namespace
@@ -172,17 +212,18 @@ int InitNamedpipe()
 
 int ConnectToAllNamedpipe()
 {
-    bool mainPipeReady = TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE);
-    bool toTsfPipeReady = TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE);
+    bool mainPipeReady = TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE, FanyImePipeRole::Main);
+    bool toTsfPipeReady = TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf);
     bool toTsfWorkerPipeReady =
-        TryOpenClientPipe(Global::hToTsfWorkerThreadPipe, FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE);
+        TryOpenClientPipe(Global::hToTsfWorkerThreadPipe, FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE,
+                          FanyImePipeRole::ToTsfWorkerThread);
 
     return (mainPipeReady && toTsfPipeReady && toTsfWorkerPipeReady) ? 1 : 0;
 }
 
 int ConnectToTsfNamedpipe()
 {
-    return TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE) ? 1 : 0;
+    return TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf) ? 1 : 0;
 }
 
 int CloseIpc()
@@ -468,27 +509,11 @@ int SendLangbarRightClickEventToUIProcess(const RECT *prcArea)
 
 void SendToNamedpipe()
 {
-    if (!hPipe || hPipe == INVALID_HANDLE_VALUE) // Try to reconnect
-    {
-        hPipe = CreateFile(               //
-            FANY_IME_NAMED_PIPE,          //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
+    namedpipeData.client_id = GetPipeClientId();
 
-        if (hPipe == INVALID_HANDLE_VALUE)
-        {
-            LogCreateFileFailure(FANY_IME_NAMED_PIPE);
-            return;
-        }
-        else
-        {
-            LogCreateFileSuccess(FANY_IME_NAMED_PIPE);
-        }
+    if (!TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE, FanyImePipeRole::Main))
+    {
+        return;
     }
 
     DWORD bytesWritten = 0;
@@ -502,44 +527,18 @@ void SendToNamedpipe()
     if (!ret || bytesWritten != sizeof(namedpipeData))
     {
         /* Error handling: 必须将 hPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
-        DWORD err = GetLastError();
         LogWriteFailure(FANY_IME_NAMED_PIPE, bytesWritten, sizeof(namedpipeData));
-        // if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
-        // {
-        /* 将两个方向的管道同时置为无效 */
-        CloseHandle(hPipe);
-        CloseHandle(hFromServerPipe);
-        // CloseHandle(Global::hToTsfWorkerThreadPipe);
-        hPipe = INVALID_HANDLE_VALUE;
-        hFromServerPipe = INVALID_HANDLE_VALUE;
-        // Global::hToTsfWorkerThreadPipe = INVALID_HANDLE_VALUE;
-        /* 向 Server 端发送 kill 同时重置两个管道的 connect */
-        SendToAuxNamedpipe(L"kill");
+        ClosePipeHandleIfValid(hPipe);
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually01.").c_str());
 #endif
-        // }
-
-        //
-        // 等待 Server 准备好，再重连几次
-        //
-
-        /* toTsfNamedPipe 放到消息窗口的线程中去处理 */
-        PostMessage(Global::msgWndHandle, WM_ConnectToTsfNamedpipe, 0, 0);
         for (int i = 0; i < 10; ++i)
         {
             Sleep(10);
-            hPipe = CreateFile(               //
-                FANY_IME_NAMED_PIPE,          //
-                GENERIC_READ | GENERIC_WRITE, //
-                0,                            //
-                nullptr,                      //
-                OPEN_EXISTING,                //
-                0,                            //
-                nullptr                       //
-            );
-            if (hPipe != INVALID_HANDLE_VALUE)
+            if (TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE, FanyImePipeRole::Main))
+            {
                 break;
+            }
         }
 
         if (hPipe == INVALID_HANDLE_VALUE)
@@ -555,6 +554,7 @@ void SendToNamedpipe()
             LogCreateFileSuccess(FANY_IME_NAMED_PIPE);
         }
 
+        namedpipeData.client_id = GetPipeClientId();
         DWORD bytesWritten = 0;
         BOOL ret = WriteFile(      //
             hPipe,                 //
@@ -581,41 +581,28 @@ void SendToNamedpipe()
  * server
  *
  */
-void ClearNamedpipeDataIfExists()
+void ClearNamedpipeDataIfExists(bool force)
 {
     bool isSpaceOrNumber = Global::Keycode == VK_SPACE ||                      //
                            (Global::Keycode > '0' && Global::Keycode < '9') || //
                            (Global::CommitWithFirstCandPunc.count(Global::wch) > 0);
     /* Only clear namedpipe data if keycode is space or number, for better performance */
-    if (!isSpaceOrNumber)
+    if (!force && !isSpaceOrNumber)
     {
         return;
     }
 
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
+        if (!TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf))
         {
-            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             return;
-        }
-        else
-        {
-            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
         }
     }
 
     DWORD bytesAvailable = 0;
     DWORD bytesRead = 0;
+    int clearedCount = 0;
     while (true)
     {
         BOOL peekOk = PeekNamedPipe( //
@@ -649,6 +636,12 @@ void ClearNamedpipeDataIfExists()
             LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
             break;
         }
+        clearedCount++;
+    }
+
+    if (force)
+    {
+        OutputDebugString(fmt::format(L"[msime-perf] force-drain to-tsf pipe cleared_count={}", clearedCount).c_str());
     }
 }
 
@@ -661,56 +654,60 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
 {
     std::pair<UINT, std::wstring> ret = {0, L""};
     int timeoutMs = 10; // Default timeout 10ms
-    int intervalMs = 1; // Default interval 1ms
 
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
+        if (!TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf))
         {
-            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
             return &namedpipeDataFromServer;
         }
-        else
-        {
-            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
-        }
     }
 
     DWORD bytesAvailable = 0;
-    int waited = 0;
-    while (waited < timeoutMs)
+    LARGE_INTEGER frequency = {};
+    LARGE_INTEGER startCounter = {};
+    LARGE_INTEGER nowCounter = {};
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&startCounter);
+
+    while (true)
     {
 // TODO: Do not log
 #ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: current waited: {}", waited).c_str());
+        QueryPerformanceCounter(&nowCounter);
+        OutputDebugString(
+            fmt::format(L"[msime]: current waited: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
+                .c_str());
 #endif
         if (PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
         {
             auto ret = ReadDataFromServerViaNamedPipe();
 #ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"[msime]: PeekNamedPipe: {}", waited).c_str());
+            QueryPerformanceCounter(&nowCounter);
+            OutputDebugString(
+                fmt::format(L"[msime]: PeekNamedPipe: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
+                    .c_str());
 #endif
             return ret;
         }
-        Sleep(intervalMs); // TODO: Maybe could use less time
-        waited += intervalMs;
+
+        QueryPerformanceCounter(&nowCounter);
+        if (GetElapsedMilliseconds(startCounter, nowCounter, frequency) >= timeoutMs)
+        {
+            break;
+        }
+
+        // Avoid Sleep(1), which often expands to a full scheduler tick (~15.6ms)
+        // in explorer.exe and makes space-commit latency visibly worse.
+        if (!SwitchToThread())
+        {
+            YieldProcessor();
+        }
     }
 
-    /* Error handling: 必须将 hFromServerPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
-    CloseHandle(hFromServerPipe);
-    hFromServerPipe = INVALID_HANDLE_VALUE;
     FANY_IPC_LOGF(L"[msime]: [ipc] TryReadDataFromServerPipeWithTimeout timeout after {} ms", timeoutMs);
 
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
@@ -730,26 +727,12 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
 {
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
+        if (!TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf))
         {
-            LogCreateFileFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             namedpipeDataFromServer.msg_type = 0;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
             return &namedpipeDataFromServer;
-        }
-        else
-        {
-            LogCreateFileSuccess(FANY_IME_TO_TSF_NAMED_PIPE);
         }
     }
 
@@ -764,6 +747,7 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     if (!readResult || bytesRead == 0) // Disconnected or error
     {
         LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
+        ClosePipeHandleIfValid(hFromServerPipe);
     }
     else
     {
@@ -843,7 +827,7 @@ void SendToAuxNamedpipe(std::wstring pipeData)
  */
 int SendKeyEventToUIProcessViaNamedPipe()
 {
-    namedpipeData.event_type = 0;
+    namedpipeData.event_type = FanyImePipeEventType::KeyEvent;
     SendToNamedpipe();
 
     return 0;
@@ -851,7 +835,7 @@ int SendKeyEventToUIProcessViaNamedPipe()
 
 int SendHideCandidateWndEventToUIProcessViaNamedPipe()
 {
-    namedpipeData.event_type = 1;
+    namedpipeData.event_type = FanyImePipeEventType::HideCandidateWnd;
     SendToNamedpipe();
 
     return 0;
@@ -859,7 +843,7 @@ int SendHideCandidateWndEventToUIProcessViaNamedPipe()
 
 int SendShowCandidateWndEventToUIProcessViaNamedPipe()
 {
-    namedpipeData.event_type = 2;
+    namedpipeData.event_type = FanyImePipeEventType::ShowCandidateWnd;
     SendToNamedpipe();
 
     return 0;
@@ -867,7 +851,7 @@ int SendShowCandidateWndEventToUIProcessViaNamedPipe()
 
 int SendMoveCandidateWndEventToUIProcessViaNamedPipe()
 {
-    namedpipeData.event_type = 3;
+    namedpipeData.event_type = FanyImePipeEventType::MoveCandidateWnd;
     SendToNamedpipe();
 
     return 0;
@@ -875,7 +859,7 @@ int SendMoveCandidateWndEventToUIProcessViaNamedPipe()
 
 int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea)
 {
-    namedpipeData.event_type = 4;
+    namedpipeData.event_type = FanyImePipeEventType::LangbarRightClick;
     /* 利用其他的字段，把图标的坐标传递过去 */
     namedpipeData.point[0] = prcArea->left;
     namedpipeData.point[1] = prcArea->top;
@@ -889,6 +873,24 @@ int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea)
 int SendIMEActivationEventToUIProcessViaNamedPipe()
 {
     SendToAuxNamedpipe(L"IMEActivation");
+
+    return 0;
+}
+
+int SendClientActivatedEventToServerViaNamedPipe()
+{
+    namedpipeData = {};
+    namedpipeData.event_type = FanyImePipeEventType::ClientActivated;
+    SendToNamedpipe();
+
+    return 0;
+}
+
+int SendClientDeactivatedEventToServerViaNamedPipe()
+{
+    namedpipeData = {};
+    namedpipeData.event_type = FanyImePipeEventType::ClientDeactivated;
+    SendToNamedpipe();
 
     return 0;
 }
@@ -941,7 +943,7 @@ int SendIMEDeactivationEventToUIProcessViaNamedPipe()
 
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus)
 {
-    namedpipeData.event_type = 7;
+    namedpipeData.event_type = FanyImePipeEventType::IMESwitch;
     /* 利用其他的字段，把 IME 的中英状态传递过去 */
     namedpipeData.keycode = uImeStatus;
     SendToNamedpipe();
@@ -951,7 +953,7 @@ int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus)
 
 int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc)
 {
-    namedpipeData.event_type = 8;
+    namedpipeData.event_type = FanyImePipeEventType::PuncSwitch;
     /* 利用其他的字段，把标点符号的中英状态传递过去 */
     namedpipeData.keycode = isPunc;
     SendToNamedpipe();
@@ -961,7 +963,7 @@ int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc)
 
 int SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(BOOL isDoubleSingleByte)
 {
-    namedpipeData.event_type = 9;
+    namedpipeData.event_type = FanyImePipeEventType::DoubleSingleByteSwitch;
     /* 利用其他的字段，把全角/半角的状态传递过去 */
     namedpipeData.keycode = isDoubleSingleByte;
     SendToNamedpipe();

@@ -71,6 +71,11 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
                                         _In_ ITfContext *pContextDocument, TfEditCookie ec,
                                         _In_ ITfRange *pRangeComposition, UINT wndWidth);
     void _EndCandidateList();
+    void _PrepareForAsyncCleanup();
+    BOOL _IsAsyncCleanupPending() const
+    {
+        return _asyncCleanupPending;
+    }
 
     void _NotifyUI();
     void _SetText(_In_ CMetasequoiaImeArray<CCandidateListItem> *pCandidateList, BOOL isAddFindKeyCode);
@@ -134,4 +139,5 @@ class CCandidateListUIPresenter : public CTfTextLayoutSink,
     CMetasequoiaIME *_pTextService;
     LONG _refCount;
     BOOL _candidateUiSessionActive;
+    BOOL _asyncCleanupPending;
 };

@@ -38,10 +38,9 @@ void CMetasequoiaIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ I
 //----------------------------------------------------------------------------
 
 BOOL CMetasequoiaIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext,
-                                                  TfGuidAtom gaDisplayAttribute)
+                                                       TfGuidAtom gaDisplayAttribute)
 {
     ITfRange *pRangeComposition = nullptr;
-    ITfProperty *pDisplayAttributeProperty = nullptr;
     HRESULT hr = S_OK;
 
     // we need a range and the context it lives in
@@ -52,6 +51,28 @@ BOOL CMetasequoiaIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITf
     }
 
     hr = E_FAIL;
+    BOOL ret = _SetCompositionDisplayAttributesForRange(ec, pContext, pRangeComposition, gaDisplayAttribute);
+    pRangeComposition->Release();
+    return ret;
+}
+
+//+---------------------------------------------------------------------------
+//
+// _SetCompositionDisplayAttributesForRange
+//
+//----------------------------------------------------------------------------
+
+BOOL CMetasequoiaIME::_SetCompositionDisplayAttributesForRange(TfEditCookie ec, _In_ ITfContext *pContext,
+                                                               _In_ ITfRange *pRangeComposition,
+                                                               TfGuidAtom gaDisplayAttribute)
+{
+    if (pRangeComposition == nullptr)
+    {
+        return FALSE;
+    }
+
+    ITfProperty *pDisplayAttributeProperty = nullptr;
+    HRESULT hr = E_FAIL;
 
     // get our the display attribute property
     if (SUCCEEDED(pContext->GetProperty(GUID_PROP_ATTRIBUTE, &pDisplayAttributeProperty)))
@@ -67,7 +88,6 @@ BOOL CMetasequoiaIME::_SetCompositionDisplayAttributes(TfEditCookie ec, _In_ ITf
         pDisplayAttributeProperty->Release();
     }
 
-    pRangeComposition->Release();
     return (hr == S_OK);
 }
 

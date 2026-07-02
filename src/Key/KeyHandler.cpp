@@ -12,6 +12,7 @@
 #include "FanyUtils.h"
 #include "Ipc.h"
 #include "FanyDefines.h"
+#include "../Utils/PerfTimer.h"
 
 namespace
 {
@@ -58,23 +59,43 @@ BOOL CMetasequoiaIME::_IsRangeCovered(TfEditCookie ec, _In_ ITfRange *pRangeTest
 
 VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pContext)
 {
-    isForce;
+    PerfTimer timer;
     pContext;
 
     CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
     pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    PerfTimer purgeTimer;
     pCompositionProcessorEngine->PurgeVirtualKey();
+    double purgeElapsedMs = purgeTimer.ElapsedMs();
 
+    double endCandidateElapsedMs = 0;
     if (_pCandidateListUIPresenter)
     {
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: create_word: dispose window?").c_str());
 #endif
-        _pCandidateListUIPresenter->_EndCandidateList();
+        PerfTimer endCandidateTimer;
+        CCandidateListUIPresenter *pPresenter = _pCandidateListUIPresenter;
+        _pCandidateListUIPresenter = nullptr;
+        if (isForce || _msgWndHandle == nullptr)
+        {
+            delete pPresenter; // destructor calls _EndCandidateList() once
+        }
+        else
+        {
+            _ScheduleCandidatePresenterCleanup(pPresenter);
+        }
+        endCandidateElapsedMs = endCandidateTimer.ElapsedMs();
 
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _DeleteCandidateList elapsed={:.3f}ms purge_virtual_key={:.3f}ms end_candidate_list={:.3f}ms has_presenter={} force={}",
+                          timer.ElapsedMs(), purgeElapsedMs, endCandidateElapsedMs,
+                          _pCandidateListUIPresenter ? 1 : 0, isForce ? 1 : 0)
+                          .c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -85,11 +106,41 @@ VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pC
 
 HRESULT CMetasequoiaIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pContext)
 {
+    PerfTimer timer;
     g_toggleImeFallbackBuffer.clear();
+    PerfTimer deleteTimer;
     _DeleteCandidateList(FALSE, pContext);
+    double deleteElapsedMs = deleteTimer.ElapsedMs();
 
     // just terminate the composition
+    PerfTimer terminateTimer;
     _TerminateComposition(ec, pContext);
+    double terminateElapsedMs = terminateTimer.ElapsedMs();
+
+    OutputDebugString(fmt::format(L"[msime-perf] _HandleComplete elapsed={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
+                                  timer.ElapsedMs(), deleteElapsedMs, terminateElapsedMs)
+                          .c_str());
+
+    return S_OK;
+}
+
+HRESULT CMetasequoiaIME::_HandleCompleteCommitFirst(TfEditCookie ec, _In_ ITfContext *pContext)
+{
+    PerfTimer timer;
+    g_toggleImeFallbackBuffer.clear();
+
+    PerfTimer deleteTimer;
+    _DeleteCandidateList(FALSE, pContext);
+    double deleteElapsedMs = deleteTimer.ElapsedMs();
+
+    PerfTimer terminateTimer;
+    _TerminateComposition(ec, pContext);
+    double terminateElapsedMs = terminateTimer.ElapsedMs();
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCompleteCommitFirst elapsed={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
+                          timer.ElapsedMs(), deleteElapsedMs, terminateElapsedMs)
+                          .c_str());
 
     return S_OK;
 }
@@ -102,13 +153,25 @@ HRESULT CMetasequoiaIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pCont
 
 HRESULT CMetasequoiaIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContext)
 {
+    PerfTimer timer;
     g_toggleImeFallbackBuffer.clear();
     GlobalIme::word_for_creating_word = L"";
+    PerfTimer removeDummyTimer;
     _RemoveDummyCompositionForComposing(ec, _pComposition);
+    double removeDummyElapsedMs = removeDummyTimer.ElapsedMs();
 
+    PerfTimer deleteTimer;
     _DeleteCandidateList(FALSE, pContext);
+    double deleteElapsedMs = deleteTimer.ElapsedMs();
 
+    PerfTimer terminateTimer;
     _TerminateComposition(ec, pContext);
+    double terminateElapsedMs = terminateTimer.ElapsedMs();
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCancel elapsed={:.3f}ms remove_dummy={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
+                          timer.ElapsedMs(), removeDummyElapsedMs, deleteElapsedMs, terminateElapsedMs)
+                          .c_str());
 
     return S_OK;
 }
@@ -230,13 +293,16 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
                                                        TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
+    PerfTimer timer;
     CMetasequoiaImeArray<CStringRange> readingStrings;
     BOOL isWildcardIncluded = FALSE;
 
     //
     // Get reading string from composition processor engine
     //
+    PerfTimer readingTimer;
     pCompositionProcessorEngine->GetReadingStrings(&readingStrings, &isWildcardIncluded);
+    double readingElapsedMs = readingTimer.ElapsedMs();
 
     if (readingStrings.Count())
     {
@@ -249,6 +315,8 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     }
 
     /* 一般来说，readingStrings 数组中只有一个元素，这个元素就是当前输入的拼音 */
+    double preeditPipeElapsedMs = 0;
+    double addComposingElapsedMs = 0;
     for (UINT index = 0; index < readingStrings.Count(); index++)
     {
 #ifdef FANY_DEBUG
@@ -270,17 +338,26 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
 
         if (GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Pinyin)
         {
+            PerfTimer preeditPipeTimer;
             struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
+            preeditPipeElapsedMs += preeditPipeTimer.ElapsedMs();
             if (receivedData->msg_type == Global::DataFromServerMsgType::Preedit)
             {
                 curReadingStr.Set(receivedData->candidate_string, wcslen(receivedData->candidate_string));
             }
         }
 
+        PerfTimer addComposingTimer;
         hr = _AddComposingAndChar(ec, pContext, &curReadingStr);
+        addComposingElapsedMs += addComposingTimer.ElapsedMs();
 
         if (FAILED(hr))
         {
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] _HandleCompositionInputWorker failed elapsed={:.3f}ms get_reading={:.3f}ms preedit_pipe={:.3f}ms add_composing={:.3f}ms hr={:#x}",
+                                  timer.ElapsedMs(), readingElapsedMs, preeditPipeElapsedMs,
+                                  addComposingElapsedMs, static_cast<unsigned int>(hr))
+                                  .c_str());
             return hr;
         }
     }
@@ -294,29 +371,52 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     // Important: Generate candidate list here
     //
     // There is no need to use neither IncrementalWordSearch nor WildcardSearch, so we set them both FALSE
+    PerfTimer candidateListTimer;
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, FALSE);
+    double candidateListElapsedMs = candidateListTimer.ElapsedMs();
 
+    double createCandidateElapsedMs = 0;
+    double clearListElapsedMs = 0;
+    double setTextElapsedMs = 0;
     if ((candidateList.Count()))
     {
+        PerfTimer createCandidateTimer;
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
+        createCandidateElapsedMs = createCandidateTimer.ElapsedMs();
         if (SUCCEEDED(hr))
         {
+            PerfTimer clearListTimer;
             _pCandidateListUIPresenter->_ClearList();
+            clearListElapsedMs = clearListTimer.ElapsedMs();
+            PerfTimer setTextTimer;
             _pCandidateListUIPresenter->_SetText(&candidateList, TRUE);
+            setTextElapsedMs = setTextTimer.ElapsedMs();
         }
     }
     else if (_pCandidateListUIPresenter)
     {
+        PerfTimer clearListTimer;
         _pCandidateListUIPresenter->_ClearList();
+        clearListElapsedMs = clearListTimer.ElapsedMs();
     }
     else if (readingStrings.Count() && isWildcardIncluded)
     {
+        PerfTimer createCandidateTimer;
         hr = _CreateAndStartCandidate(pCompositionProcessorEngine, ec, pContext);
+        createCandidateElapsedMs = createCandidateTimer.ElapsedMs();
         if (SUCCEEDED(hr))
         {
+            PerfTimer clearListTimer;
             _pCandidateListUIPresenter->_ClearList();
+            clearListElapsedMs = clearListTimer.ElapsedMs();
         }
     }
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCompositionInputWorker elapsed={:.3f}ms get_reading={:.3f}ms preedit_pipe={:.3f}ms add_composing={:.3f}ms get_candidate_list={:.3f}ms create_candidate={:.3f}ms clear_list={:.3f}ms set_text={:.3f}ms candidate_count={} wildcard={} hr={:#x}",
+                          timer.ElapsedMs(), readingElapsedMs, preeditPipeElapsedMs, addComposingElapsedMs,
+                          candidateListElapsedMs, createCandidateElapsedMs, clearListElapsedMs, setTextElapsedMs,
+                          candidateList.Count(), isWildcardIncluded ? 1 : 0, static_cast<unsigned int>(hr))
+                          .c_str());
     return hr;
 }
 //+---------------------------------------------------------------------------
@@ -329,23 +429,32 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
                                                   TfEditCookie ec, _In_ ITfContext *pContext)
 {
     HRESULT hr = S_OK;
+    PerfTimer timer;
+    double recreateElapsedMs = 0;
 
     if ((_candidateMode == CANDIDATE_NONE) && (_pCandidateListUIPresenter))
     {
-        // Recreate candidate list
-        _pCandidateListUIPresenter->_EndCandidateList();
+        // Recreate candidate list — dtor handles _EndCandidateList()
+        PerfTimer recreateTimer;
         delete _pCandidateListUIPresenter;
         _pCandidateListUIPresenter = nullptr;
 
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
+        recreateElapsedMs = recreateTimer.ElapsedMs();
     }
 
+    double allocElapsedMs = 0;
+    double getDocMgrElapsedMs = 0;
+    double getRangeElapsedMs = 0;
+    double startCandidateListElapsedMs = 0;
     if (_pCandidateListUIPresenter == nullptr)
     {
+        PerfTimer allocTimer;
         _pCandidateListUIPresenter = new (std::nothrow)
             CCandidateListUIPresenter(this, CATEGORY_CANDIDATE, pCompositionProcessorEngine->GetCandidateListIndexRange(),
                                       FALSE);
+        allocElapsedMs = allocTimer.ElapsedMs();
         if (!_pCandidateListUIPresenter)
         {
             return E_OUTOFMEMORY;
@@ -356,20 +465,32 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
 
         // we don't cache the document manager object. So get it from pContext.
         ITfDocumentMgr *pDocumentMgr = nullptr;
+        PerfTimer getDocMgrTimer;
         if (SUCCEEDED(pContext->GetDocumentMgr(&pDocumentMgr)))
         {
+            getDocMgrElapsedMs = getDocMgrTimer.ElapsedMs();
             // get the composition range.
             ITfRange *pRange = nullptr;
+            PerfTimer getRangeTimer;
             if (SUCCEEDED(_pComposition->GetRange(&pRange)))
             {
+                getRangeElapsedMs = getRangeTimer.ElapsedMs();
+                PerfTimer startCandidateListTimer;
                 hr = _pCandidateListUIPresenter->_StartCandidateList(
                     _tfClientId, pDocumentMgr, pContext, ec, pRange,
                     pCompositionProcessorEngine->GetCandidateWindowWidth());
+                startCandidateListElapsedMs = startCandidateListTimer.ElapsedMs();
                 pRange->Release();
             }
             pDocumentMgr->Release();
         }
     }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _CreateAndStartCandidate elapsed={:.3f}ms recreate={:.3f}ms alloc_presenter={:.3f}ms get_document_mgr={:.3f}ms get_composition_range={:.3f}ms start_candidate_list={:.3f}ms hr={:#x}",
+                          timer.ElapsedMs(), recreateElapsedMs, allocElapsedMs, getDocMgrElapsedMs,
+                          getRangeElapsedMs, startCandidateListElapsedMs, static_cast<unsigned int>(hr))
+                          .c_str());
 
     return hr;
 }
@@ -383,6 +504,11 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
 HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isCandidateList)
 {
     HRESULT hr = S_OK;
+    PerfTimer timer;
+    double finalizeCandidateElapsedMs = 0;
+    double getSelectionElapsedMs = 0;
+    double getRangeElapsedMs = 0;
+    double endCompositionElapsedMs = 0;
 
     if (isCandidateList && _pCandidateListUIPresenter)
     {
@@ -398,7 +524,9 @@ HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfCon
         if (candidateLen)
         {
             // Finalize character
+            PerfTimer finalizeCandidateTimer;
             hr = _AddCharAndFinalize(ec, pContext, &candidateString);
+            finalizeCandidateElapsedMs = finalizeCandidateTimer.ElapsedMs();
             if (FAILED(hr))
             {
                 return hr;
@@ -413,17 +541,23 @@ HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfCon
             ULONG fetched = 0;
             TF_SELECTION tfSelection;
 
+            PerfTimer getSelectionTimer;
             if (FAILED(pContext->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &tfSelection, &fetched)) || fetched != 1)
             {
                 return S_FALSE;
             }
+            getSelectionElapsedMs = getSelectionTimer.ElapsedMs();
 
             ITfRange *pRangeComposition = nullptr;
+            PerfTimer getRangeTimer;
             if (SUCCEEDED(_pComposition->GetRange(&pRangeComposition)))
             {
+                getRangeElapsedMs = getRangeTimer.ElapsedMs();
                 if (_IsRangeCovered(ec, tfSelection.range, pRangeComposition))
                 {
+                    PerfTimer endCompositionTimer;
                     _EndComposition(pContext);
+                    endCompositionElapsedMs = endCompositionTimer.ElapsedMs();
                 }
 
                 pRangeComposition->Release();
@@ -433,7 +567,16 @@ HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfCon
         }
     }
 
+    PerfTimer cancelTimer;
     _HandleCancel(ec, pContext);
+    double cancelElapsedMs = cancelTimer.ElapsedMs();
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCompositionFinalize elapsed={:.3f}ms is_candidate_list={} finalize_candidate={:.3f}ms get_selection={:.3f}ms get_composition_range={:.3f}ms end_composition={:.3f}ms cancel={:.3f}ms hr={:#x}",
+                          timer.ElapsedMs(), isCandidateList ? 1 : 0, finalizeCandidateElapsedMs,
+                          getSelectionElapsedMs, getRangeElapsedMs, endCompositionElapsedMs, cancelElapsedMs,
+                          static_cast<unsigned int>(hr))
+                          .c_str());
 
     return S_OK;
 }
@@ -447,6 +590,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfCon
 HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfContext *pContext, BOOL isWildcardSearch)
 {
     HRESULT hr = S_OK;
+    PerfTimer timer;
 
     CMetasequoiaImeArray<CCandidateListItem> candidateList;
 
@@ -455,21 +599,28 @@ HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCont
     //
     CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
     pCompositionProcessorEngine = _pCompositionProcessorEngine;
+    PerfTimer getCandidateListTimer;
     pCompositionProcessorEngine->GetCandidateList(&candidateList, FALSE, isWildcardSearch);
+    double getCandidateListElapsedMs = getCandidateListTimer.ElapsedMs();
 
     // If there is no candlidate listin the current reading string, we don't do anything. Just wait for
     // next char to be ready for the conversion with it.
     int nCount = candidateList.Count();
+    double rebuildPresenterElapsedMs = 0;
+    double allocPresenterElapsedMs = 0;
+    double startCandidateListElapsedMs = 0;
+    double setTextElapsedMs = 0;
     if (nCount)
     {
         if (_pCandidateListUIPresenter)
         {
-            _pCandidateListUIPresenter->_EndCandidateList();
-            delete _pCandidateListUIPresenter;
+            PerfTimer rebuildPresenterTimer;
+            delete _pCandidateListUIPresenter; // dtor handles _EndCandidateList()
             _pCandidateListUIPresenter = nullptr;
 
             _candidateMode = CANDIDATE_NONE;
             _isCandidateWithWildcard = FALSE;
+            rebuildPresenterElapsedMs = rebuildPresenterTimer.ElapsedMs();
         }
 
         //
@@ -477,9 +628,11 @@ HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCont
         //
         if (_pCandidateListUIPresenter == nullptr)
         {
+            PerfTimer allocPresenterTimer;
             _pCandidateListUIPresenter = new (std::nothrow)
                 CCandidateListUIPresenter(this, CATEGORY_CANDIDATE,
                                           pCompositionProcessorEngine->GetCandidateListIndexRange(), FALSE);
+            allocPresenterElapsedMs = allocPresenterTimer.ElapsedMs();
             if (!_pCandidateListUIPresenter)
             {
                 return E_OUTOFMEMORY;
@@ -498,18 +651,29 @@ HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCont
             ITfRange *pRange = nullptr;
             if (SUCCEEDED(_pComposition->GetRange(&pRange)))
             {
+                PerfTimer startCandidateListTimer;
                 hr = _pCandidateListUIPresenter->_StartCandidateList(
                     _tfClientId, pDocumentMgr, pContext, ec, pRange,
                     pCompositionProcessorEngine->GetCandidateWindowWidth());
+                startCandidateListElapsedMs = startCandidateListTimer.ElapsedMs();
                 pRange->Release();
             }
             pDocumentMgr->Release();
         }
         if (SUCCEEDED(hr))
         {
+            PerfTimer setTextTimer;
             _pCandidateListUIPresenter->_SetText(&candidateList, FALSE);
+            setTextElapsedMs = setTextTimer.ElapsedMs();
         }
     }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCompositionConvert elapsed={:.3f}ms get_candidate_list={:.3f}ms rebuild_presenter={:.3f}ms alloc_presenter={:.3f}ms start_candidate_list={:.3f}ms set_text={:.3f}ms candidate_count={} wildcard={} hr={:#x}",
+                          timer.ElapsedMs(), getCandidateListElapsedMs, rebuildPresenterElapsedMs,
+                          allocPresenterElapsedMs, startCandidateListElapsedMs, setTextElapsedMs, nCount,
+                          isWildcardSearch ? 1 : 0, static_cast<unsigned int>(hr))
+                          .c_str());
 
     return hr;
 }
@@ -650,6 +814,7 @@ Exit:
 HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITfContext *pContext, WCHAR wch)
 {
     HRESULT hr = S_OK;
+    PerfTimer timer;
     //
     // Get punctuation char from composition processor engine
     //
@@ -659,6 +824,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     const WCHAR *punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
     std::wstring punctuationStr(punctuation, wcslen(punctuation));
 
+    double pipeReadElapsedMs = 0;
     if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
     {
         //
@@ -667,7 +833,9 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
         if (Global::CommitWithFirstCandPunc.count(wch) > 0)
         {
             /* 这里我们不需要考虑下标超出范围，因为我们总是可以取到第一个候选词 */
+            PerfTimer pipeReadTimer;
             struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
+            pipeReadElapsedMs = pipeReadTimer.ElapsedMs();
             punctuationStr = std::wstring(receivedData->candidate_string) + punctuationStr;
         }
     }
@@ -677,13 +845,23 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
 
     /* Finalize character */
     _RemoveDummyCompositionForComposing(ec, _pComposition); // Clear dummy original pinyin composition
+    PerfTimer addCharTimer;
     hr = _AddCharAndFinalize(ec, pContext, &punctuationString);
+    double addCharElapsedMs = addCharTimer.ElapsedMs();
     if (FAILED(hr))
     {
         return hr;
     }
 
+    PerfTimer completeTimer;
     _HandleComplete(ec, pContext);
+    double completeElapsedMs = completeTimer.ElapsedMs();
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] _HandleCompositionPunctuation elapsed={:.3f}ms pipe_read={:.3f}ms add_char_finalize={:.3f}ms handle_complete={:.3f}ms hr={:#x}",
+                          timer.ElapsedMs(), pipeReadElapsedMs, addCharElapsedMs, completeElapsedMs,
+                          static_cast<unsigned int>(hr))
+                          .c_str());
 
     return S_OK;
 }
@@ -736,9 +914,14 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
 
     CKeyHandlerEditSession *pEditSession = nullptr;
     HRESULT hr = E_FAIL;
+    PerfTimer requestTimer;
 
     // we'll insert a char ourselves in place of this keystroke
-    pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState);
+    LARGE_INTEGER requestStartQpc;
+    QueryPerformanceCounter(&requestStartQpc);
+    PerfTimer allocTimer;
+    pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState, requestStartQpc);
+    double allocElapsedMs = allocTimer.ElapsedMs();
     if (pEditSession == nullptr)
     {
         goto Exit;
@@ -749,9 +932,24 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
     //
     // Do not specify TF_ES_SYNC so edit session is not invoked on WinWord
     //
-    hr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
+    HRESULT editSessionHr = E_FAIL;
+    PerfTimer requestCallTimer;
+    HRESULT requestHr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE,
+                                                     &editSessionHr);
+    double requestCallElapsedMs = requestCallTimer.ElapsedMs();
+    OutputDebugString(fmt::format(L"[msime-perf] RequestEditSession keycode={} category={} function={} request_hr={:#x} edit_hr={:#x} elapsed={:.3f}ms call_elapsed={:.3f}ms alloc_edit_session={:.3f}ms",
+                                  code, static_cast<int>(keyState.Category), static_cast<int>(keyState.Function),
+                                  static_cast<unsigned int>(requestHr), static_cast<unsigned int>(editSessionHr),
+                                  requestTimer.ElapsedMs(), requestCallElapsedMs, allocElapsedMs)
+                          .c_str());
+    hr = requestHr;
 
+    PerfTimer releaseTimer;
     pEditSession->Release();
+    OutputDebugString(fmt::format(L"[msime-perf] _InvokeKeyHandler release_edit_session elapsed={:.3f}ms total={:.3f}ms keycode={} category={} function={}",
+                                  releaseTimer.ElapsedMs(), requestTimer.ElapsedMs(), code,
+                                  static_cast<int>(keyState.Category), static_cast<int>(keyState.Function))
+                          .c_str());
 
 Exit:
     return hr;

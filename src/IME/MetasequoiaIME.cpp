@@ -16,6 +16,7 @@
 #include "CommonUtils.h"
 #include "Global/FanyDefines.h"
 #include "Utils/FanyUtils.h"
+#include "../Utils/PerfTimer.h"
 
 #ifdef FANY_IPC_DEBUG
 #define FANY_IPC_LOG_RAW(message) OutputDebugString(message)
@@ -119,6 +120,8 @@ CMetasequoiaIME::CMetasequoiaIME()
     _msgWndHandle = nullptr;
     _pIpcThread = nullptr;
     _shouldStopIpcThread = false;
+    _hasPendingServerCandidate = false;
+    _pendingServerCandidateMsgType = Global::DataFromServerMsgType::OutofRange;
 }
 
 //+---------------------------------------------------------------------------
@@ -134,6 +137,7 @@ CMetasequoiaIME::~CMetasequoiaIME()
         delete _pCandidateListUIPresenter;
         _pCandidateListUIPresenter = nullptr;
     }
+    _DrainPendingCandidatePresenterCleanup();
     DllRelease();
 
     /* 处理线程的清理 */
@@ -146,6 +150,94 @@ CMetasequoiaIME::~CMetasequoiaIME()
         delete _pIpcThread;
         _pIpcThread = nullptr;
     }
+}
+
+void CMetasequoiaIME::_QueuePendingCommitCandidate(_In_z_ const WCHAR *pCommitString)
+{
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    _pendingCommitCandidate = pCommitString ? pCommitString : L"";
+}
+
+std::wstring CMetasequoiaIME::_TakePendingCommitCandidate()
+{
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    std::wstring pendingCommitCandidate;
+    pendingCommitCandidate.swap(_pendingCommitCandidate);
+    return pendingCommitCandidate;
+}
+
+void CMetasequoiaIME::_QueuePendingServerCandidate(UINT msgType, _In_z_ const WCHAR *pCandidateString)
+{
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    _hasPendingServerCandidate = true;
+    _pendingServerCandidateMsgType = msgType;
+    _pendingServerCandidateString = pCandidateString ? pCandidateString : L"";
+}
+
+bool CMetasequoiaIME::_TakePendingServerCandidate(_Out_ UINT *pMsgType, _Out_ std::wstring *pCandidateString)
+{
+    if (pMsgType == nullptr || pCandidateString == nullptr)
+    {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    if (!_hasPendingServerCandidate)
+    {
+        return false;
+    }
+
+    *pMsgType = _pendingServerCandidateMsgType;
+    pCandidateString->swap(_pendingServerCandidateString);
+    _hasPendingServerCandidate = false;
+    _pendingServerCandidateMsgType = Global::DataFromServerMsgType::OutofRange;
+    return true;
+}
+
+void CMetasequoiaIME::_ScheduleCandidatePresenterCleanup(_In_ CCandidateListUIPresenter *pPresenter)
+{
+    if (pPresenter == nullptr)
+    {
+        return;
+    }
+
+    pPresenter->_PrepareForAsyncCleanup();
+    _pendingCandidatePresenterCleanup.push_back(pPresenter);
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] async_cleanup schedule presenter pending_count={}",
+                          _pendingCandidatePresenterCleanup.size())
+                          .c_str());
+
+    if (_msgWndHandle)
+    {
+        PostMessage(_msgWndHandle, WM_CleanupCandidatePresenter, 0, 0);
+    }
+}
+
+void CMetasequoiaIME::_DrainPendingCandidatePresenterCleanup()
+{
+    PerfTimer timer;
+    size_t cleanedCount = 0;
+    while (!_pendingCandidatePresenterCleanup.empty())
+    {
+        CCandidateListUIPresenter *pPresenter = _pendingCandidatePresenterCleanup.front();
+        _pendingCandidatePresenterCleanup.pop_front();
+        if (pPresenter)
+        {
+            PerfTimer deleteTimer;
+            delete pPresenter;
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] async_cleanup delete presenter elapsed={:.3f}ms remaining_count={}",
+                                  deleteTimer.ElapsedMs(), _pendingCandidatePresenterCleanup.size())
+                                  .c_str());
+            ++cleanedCount;
+        }
+    }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] async_cleanup drain elapsed={:.3f}ms cleaned_count={}",
+                          timer.ElapsedMs(), cleanedCount)
+                          .c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -471,14 +563,16 @@ STDAPI CMetasequoiaIME::Deactivate()
         delete _pCandidateListUIPresenter;
         _pCandidateListUIPresenter = nullptr;
 
-        if (pContext)
-        {
-            pContext->Release();
-        }
-
         _candidateMode = CANDIDATE_NONE;
         _isCandidateWithWildcard = FALSE;
     }
+
+    if (pContext)
+    {
+        pContext->Release();
+    }
+
+    _DrainPendingCandidatePresenterCleanup();
 
     _UninitFunctionProviderSink();
 
@@ -558,6 +652,10 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
 
             if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::CommitCurCandidate)
             {
+                pIME->_QueuePendingCommitCandidate(buf.data);
+                OutputDebugString(fmt::format(L"[msime-perf] worker CommitCurCandidate payload_len={}",
+                                              wcslen(buf.data))
+                                      .c_str());
                 PostMessage(pIME->_msgWndHandle, WM_CommitCandidate, 0, 0);
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
@@ -705,8 +803,6 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_ConnectNamedpipe: start reconnect-all sequence");
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
-        SendToAuxNamedpipe(L"kill");
-        // 即使是第一次连接，也要等一会儿再试，要给 server 端留时间来处理 kill
         SetTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE, CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS, nullptr);
         break;
     }
@@ -714,12 +810,12 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 #ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: WM_DisconnectNamedpipe.").c_str());
 #endif
-        FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_DisconnectNamedpipe: closing all client pipe handles");
+        FANY_IPC_LOG_RAW(L"[msime]: [ipc] WM_DisconnectNamedpipe: deactivating current pipe client");
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
         g_connectToTsfNamedpipeRetryCount = 0;
-        CloseNamedpipe();
+        SendClientDeactivatedEventToServerViaNamedPipe();
         break;
     }
     case WM_ConnectToTsfNamedpipe: {
@@ -754,6 +850,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
                 FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-all succeeded");
+                SendClientActivatedEventToServerViaNamedPipe();
 #ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Yes Connected to named pipe :)").c_str());
 #endif
@@ -838,6 +935,35 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             }
             pDocMgrFocus->Release();
         }
+        break;
+    }
+    case WM_AsyncFinalizeCandidate: {
+        PerfTimer timer;
+        ITfDocumentMgr *pDocMgrFocus = nullptr;
+        ITfContext *pContext = nullptr;
+
+        if (SUCCEEDED(pIME->_GetThreadMgr()->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
+        {
+            if (SUCCEEDED(pDocMgrFocus->GetTop(&pContext)) && pContext)
+            {
+                _KEYSTROKE_STATE KeystrokeState;
+                KeystrokeState.Category = CATEGORY_CANDIDATE;
+                KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
+                OutputDebugString(fmt::format(
+                                      L"[msime-perf] WM_AsyncFinalizeCandidate begin elapsed=0ms")
+                                      .c_str());
+                pIME->_InvokeKeyHandler(pContext, VK_SPACE, L' ', 0, KeystrokeState);
+                pContext->Release();
+            }
+            pDocMgrFocus->Release();
+        }
+        OutputDebugString(fmt::format(L"[msime-perf] WM_AsyncFinalizeCandidate end elapsed={:.3f}ms",
+                                      timer.ElapsedMs())
+                              .c_str());
+        break;
+    }
+    case WM_CleanupCandidatePresenter: {
+        pIME->_DrainPendingCandidatePresenterCleanup();
         break;
     }
     default:

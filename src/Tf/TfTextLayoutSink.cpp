@@ -3,6 +3,9 @@
 #include "TfTextLayoutSink.h"
 #include "MetasequoiaIME.h"
 #include "GetTextExtentEditSession.h"
+#include <debugapi.h>
+#include <fmt/xchar.h>
+#include "../Utils/PerfTimer.h"
 
 CTfTextLayoutSink::CTfTextLayoutSink(_In_ CMetasequoiaIME *pTextService)
 {
@@ -81,12 +84,20 @@ STDAPI_(ULONG) CTfTextLayoutSink::Release()
 STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode lcode,
                                          _In_ ITfContextView *pContextView)
 {
+    PerfTimer timer;
+    const bool isDocumentContext = (pContext == _pContextDocument);
+
     // we're interested in only document context.
     if (pContext != _pContextDocument)
     {
+        OutputDebugString(fmt::format(
+                              L"[msime-perf] TfLayoutSink::OnLayoutChange elapsed={:.3f}ms lcode={} is_document_context=0",
+                              timer.ElapsedMs(), static_cast<int>(lcode))
+                              .c_str());
         return S_OK;
     }
 
+    double requestEditSessionElapsedMs = 0;
     switch (lcode)
     {
     case TF_LC_CREATE: {
@@ -101,7 +112,9 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
         if (nullptr != (pEditSession))
         {
             HRESULT hr = S_OK;
+            PerfTimer requestTimer;
             pContext->RequestEditSession(_pTextService->_GetClientId(), pEditSession, TF_ES_SYNC | TF_ES_READ, &hr);
+            requestEditSessionElapsedMs = requestTimer.ElapsedMs();
 #ifdef FANY_DEBUG
             // TODO: Log TF_LC_CHANGE is triggered and edit session is started
 #endif
@@ -114,12 +127,18 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
         _LayoutDestroyNotification();
         break;
     }
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::OnLayoutChange elapsed={:.3f}ms lcode={} is_document_context={} request_edit_session={:.3f}ms",
+                          timer.ElapsedMs(), static_cast<int>(lcode), isDocumentContext ? 1 : 0,
+                          requestEditSessionElapsedMs)
+                          .c_str());
     return S_OK;
 }
 
 HRESULT CTfTextLayoutSink::_StartLayout(_In_ ITfContext *pContextDocument, TfEditCookie ec,
                                         _In_ ITfRange *pRangeComposition)
 {
+    PerfTimer timer;
     _pContextDocument = pContextDocument;
     _pContextDocument->AddRef();
 
@@ -127,12 +146,21 @@ HRESULT CTfTextLayoutSink::_StartLayout(_In_ ITfContext *pContextDocument, TfEdi
     _pRangeComposition->AddRef();
 
     _tfEditCookie = ec;
-
-    return _AdviseTextLayoutSink();
+    HRESULT hr = _AdviseTextLayoutSink();
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::_StartLayout elapsed={:.3f}ms advise_result={:#x} cookie={}",
+                          timer.ElapsedMs(), static_cast<unsigned int>(hr), _dwCookieTextLayoutSink)
+                          .c_str());
+    return hr;
 }
 
 VOID CTfTextLayoutSink::_EndLayout()
 {
+    PerfTimer timer;
+    const bool hadRangeComposition = (_pRangeComposition != nullptr);
+    const bool hadContextDocument = (_pContextDocument != nullptr);
+    HRESULT unadviseHr = S_OK;
+
     if (_pRangeComposition)
     {
         _pRangeComposition->Release();
@@ -141,14 +169,21 @@ VOID CTfTextLayoutSink::_EndLayout()
 
     if (_pContextDocument)
     {
-        _UnadviseTextLayoutSink();
+        unadviseHr = _UnadviseTextLayoutSink();
         _pContextDocument->Release();
         _pContextDocument = nullptr;
     }
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::_EndLayout elapsed={:.3f}ms had_range={} had_context={} unadvise_hr={:#x} cookie={}",
+                          timer.ElapsedMs(), hadRangeComposition ? 1 : 0, hadContextDocument ? 1 : 0,
+                          static_cast<unsigned int>(unadviseHr), _dwCookieTextLayoutSink)
+                          .c_str());
 }
 
 HRESULT CTfTextLayoutSink::_AdviseTextLayoutSink()
 {
+    PerfTimer timer;
     HRESULT hr = S_OK;
     ITfSource *pSource = nullptr;
 
@@ -167,11 +202,17 @@ HRESULT CTfTextLayoutSink::_AdviseTextLayoutSink()
 
     pSource->Release();
 
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::_AdviseTextLayoutSink elapsed={:.3f}ms hr={:#x} cookie={}",
+                          timer.ElapsedMs(), static_cast<unsigned int>(hr), _dwCookieTextLayoutSink)
+                          .c_str());
+
     return hr;
 }
 
 HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
 {
+    PerfTimer timer;
     HRESULT hr = S_OK;
     ITfSource *pSource = nullptr;
 
@@ -194,6 +235,12 @@ HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
     }
 
     pSource->Release();
+    _dwCookieTextLayoutSink = TF_INVALID_COOKIE;
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::_UnadviseTextLayoutSink elapsed={:.3f}ms hr={:#x}",
+                          timer.ElapsedMs(), static_cast<unsigned int>(hr))
+                          .c_str());
 
     return hr;
 }
@@ -210,6 +257,7 @@ HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
  */
 HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
 {
+    PerfTimer timer;
     HRESULT hr = S_OK;
     BOOL isClipped = TRUE;
     ITfContextView *pContextView = nullptr;
@@ -217,6 +265,10 @@ HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
     hr = _pContextDocument->GetActiveView(&pContextView);
     if (FAILED(hr))
     {
+        OutputDebugString(fmt::format(
+                              L"[msime-perf] TfLayoutSink::_GetTextExt elapsed={:.3f}ms get_active_view_hr={:#x}",
+                              timer.ElapsedMs(), static_cast<unsigned int>(hr))
+                              .c_str());
         return hr;
     }
 
@@ -234,6 +286,12 @@ HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
 #endif
 
     pContextView->Release();
+
+    OutputDebugString(fmt::format(
+                          L"[msime-perf] TfLayoutSink::_GetTextExt elapsed={:.3f}ms hr={:#x} clipped={} rect=({}, {}, {}, {})",
+                          timer.ElapsedMs(), static_cast<unsigned int>(hr), isClipped ? 1 : 0, lpRect->left,
+                          lpRect->top, lpRect->right, lpRect->bottom)
+                          .c_str());
 
     return S_OK;
 }
