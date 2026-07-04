@@ -24,6 +24,7 @@ const DWORD WM_UpdatePuncMode = WM_USER + 8;
 const DWORD WM_CommitCandidate = WM_USER + 9;
 const DWORD WM_CleanupCandidatePresenter = WM_USER + 10;
 const DWORD WM_AsyncFinalizeCandidate = WM_USER + 11;
+const DWORD WM_AsyncPunctuationCommit = WM_USER + 12;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,
@@ -172,6 +173,8 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     std::wstring _TakePendingCommitCandidate();
     void _QueuePendingServerCandidate(UINT msgType, _In_z_ const WCHAR *pCandidateString);
     bool _TakePendingServerCandidate(_Out_ UINT *pMsgType, _Out_ std::wstring *pCandidateString);
+    void _QueuePendingPunctuationCommitText(_In_z_ const WCHAR *pCommitString);
+    std::wstring _TakePendingPunctuationCommitText();
     void _ScheduleCandidatePresenterCleanup(_In_ CCandidateListUIPresenter *pPresenter);
     void _DrainPendingCandidatePresenterCleanup();
 
@@ -296,6 +299,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     std::atomic<bool> _shouldStopIpcThread;
     std::mutex _pendingCommitCandidateMutex;
     std::wstring _pendingCommitCandidate;
+    std::wstring _pendingPunctuationCommitText;
     bool _hasPendingServerCandidate;
     UINT _pendingServerCandidateMsgType;
     std::wstring _pendingServerCandidateString;

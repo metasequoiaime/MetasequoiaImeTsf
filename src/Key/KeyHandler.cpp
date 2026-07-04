@@ -821,11 +821,20 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
     pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
-    const WCHAR *punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
-    std::wstring punctuationStr(punctuation, wcslen(punctuation));
+    std::wstring pendingPunctuationCommitText = _TakePendingPunctuationCommitText();
+    std::wstring punctuationStr;
+    if (!pendingPunctuationCommitText.empty())
+    {
+        punctuationStr = std::move(pendingPunctuationCommitText);
+    }
+    else
+    {
+        const WCHAR *punctuation = pCompositionProcessorEngine->GetPunctuation(wch);
+        punctuationStr.assign(punctuation, wcslen(punctuation));
+    }
 
     double pipeReadElapsedMs = 0;
-    if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
+    if (pendingPunctuationCommitText.empty() && _candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
     {
         //
         // 请求第一个候选词

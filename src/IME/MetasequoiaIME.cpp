@@ -166,6 +166,20 @@ std::wstring CMetasequoiaIME::_TakePendingCommitCandidate()
     return pendingCommitCandidate;
 }
 
+void CMetasequoiaIME::_QueuePendingPunctuationCommitText(_In_z_ const WCHAR *pCommitString)
+{
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    _pendingPunctuationCommitText = pCommitString ? pCommitString : L"";
+}
+
+std::wstring CMetasequoiaIME::_TakePendingPunctuationCommitText()
+{
+    std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
+    std::wstring pendingPunctuationCommitText;
+    pendingPunctuationCommitText.swap(_pendingPunctuationCommitText);
+    return pendingPunctuationCommitText;
+}
+
 void CMetasequoiaIME::_QueuePendingServerCandidate(UINT msgType, _In_z_ const WCHAR *pCandidateString)
 {
     std::lock_guard<std::mutex> lock(_pendingCommitCandidateMutex);
@@ -958,6 +972,31 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             pDocMgrFocus->Release();
         }
         OutputDebugString(fmt::format(L"[msime-perf] WM_AsyncFinalizeCandidate end elapsed={:.3f}ms",
+                                      timer.ElapsedMs())
+                              .c_str());
+        break;
+    }
+    case WM_AsyncPunctuationCommit: {
+        PerfTimer timer;
+        ITfDocumentMgr *pDocMgrFocus = nullptr;
+        ITfContext *pContext = nullptr;
+
+        if (SUCCEEDED(pIME->_GetThreadMgr()->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
+        {
+            if (SUCCEEDED(pDocMgrFocus->GetTop(&pContext)) && pContext)
+            {
+                _KEYSTROKE_STATE KeystrokeState;
+                KeystrokeState.Category = CATEGORY_COMPOSING;
+                KeystrokeState.Function = FUNCTION_PUNCTUATION;
+                OutputDebugString(fmt::format(
+                                      L"[msime-perf] WM_AsyncPunctuationCommit begin elapsed=0ms")
+                                      .c_str());
+                pIME->_InvokeKeyHandler(pContext, Global::Keycode, Global::wch, 0, KeystrokeState);
+                pContext->Release();
+            }
+            pDocMgrFocus->Release();
+        }
+        OutputDebugString(fmt::format(L"[msime-perf] WM_AsyncPunctuationCommit end elapsed={:.3f}ms",
                                       timer.ElapsedMs())
                               .c_str());
         break;

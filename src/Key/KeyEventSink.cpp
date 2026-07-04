@@ -464,6 +464,43 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
                 return S_OK;
             }
         }
+
+        if (KeystrokeState.Function == FUNCTION_PUNCTUATION && _msgWndHandle)
+        {
+            std::wstring punctuationCommitText;
+            const WCHAR *punctuation = _pCompositionProcessorEngine->GetPunctuation(wch);
+            punctuationCommitText = punctuation ? punctuation : L"";
+
+            double prefetchElapsedMs = 0;
+            if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter &&
+                Global::CommitWithFirstCandPunc.count(wch) > 0)
+            {
+                PerfTimer prefetchTimer;
+                FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
+                prefetchElapsedMs = prefetchTimer.ElapsedMs();
+                punctuationCommitText = std::wstring(receivedData->candidate_string) + punctuationCommitText;
+            }
+
+            _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] prefetch punctuation commit before edit-session elapsed={:.3f}ms len={} keycode={}",
+                                  prefetchElapsedMs, punctuationCommitText.length(), code)
+                                  .c_str());
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] OnKeyDown post async punctuation elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
+                                  onKeyDownTimer.ElapsedMs(), code,
+                                  static_cast<int>(KeystrokeState.Category),
+                                  static_cast<int>(KeystrokeState.Function))
+                                  .c_str());
+            PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, 0, 0);
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={} async_punctuation=1",
+                                  onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
+                                  static_cast<int>(KeystrokeState.Category),
+                                  static_cast<int>(KeystrokeState.Function))
+                                  .c_str());
+            return S_OK;
+        }
     }
 
     if (*pIsEaten)
