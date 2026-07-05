@@ -83,6 +83,19 @@ void LogPeekFailure(const wchar_t *pipeName)
     FANY_IPC_LOGF(L"[msime]: [ipc] PeekNamedPipe failed: pipe={}, gle={}", pipeName, GetLastError());
 }
 
+void LogServerPipeReadFallback(const wchar_t *reason, const wchar_t *fallbackText, double elapsedMs, int timeoutMs,
+                               DWORD gle, DWORD bytesAvailable, int peekFailureCount)
+{
+    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe fallback: reason={}, fallback={}, elapsed_ms={:.3f}, "
+                                  L"timeout_ms={}, gle={}, bytes_available={}, peek_failures={}, client_id={}, "
+                                  L"event_type={}, keycode={}, wch={}, modifiers={}, pinyin_length={}",
+                                  reason, fallbackText, elapsedMs, timeoutMs, gle, bytesAvailable, peekFailureCount,
+                                  GetPipeClientId(), namedpipeData.event_type, namedpipeData.keycode,
+                                  static_cast<unsigned int>(namedpipeData.wch), namedpipeData.modifiers_down,
+                                  namedpipeData.pinyin_length)
+                          .c_str());
+}
+
 void LogAuxMessage(const std::wstring &message)
 {
     FANY_IPC_LOGF(L"[msime]: [ipc] SendToAuxNamedpipe: {}", message);
@@ -667,11 +680,15 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
             namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
+            LogServerPipeReadFallback(L"open_to_tsf_pipe_failed", namedpipeDataFromServer.candidate_string, 0.0,
+                                      timeoutMs, GetLastError(), 0, 0);
             return &namedpipeDataFromServer;
         }
     }
 
     DWORD bytesAvailable = 0;
+    DWORD lastPeekError = ERROR_SUCCESS;
+    int peekFailureCount = 0;
     LARGE_INTEGER frequency = {};
     LARGE_INTEGER startCounter = {};
     LARGE_INTEGER nowCounter = {};
@@ -687,7 +704,13 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
             fmt::format(L"[msime]: current waited: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
                 .c_str());
 #endif
-        if (PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
+        BOOL peekOk = PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr);
+        if (!peekOk)
+        {
+            lastPeekError = GetLastError();
+            peekFailureCount++;
+        }
+        else if (bytesAvailable > 0)
         {
             auto ret = ReadDataFromServerViaNamedPipe();
 #ifdef FANY_DEBUG
@@ -716,6 +739,10 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
     // Pipe timeout error
     wcscpy_s(namedpipeDataFromServer.candidate_string, L"T");
+    const wchar_t *reason = peekFailureCount > 0 ? L"peek_failed_until_timeout" : L"timeout_no_data";
+    LogServerPipeReadFallback(reason, namedpipeDataFromServer.candidate_string,
+                              GetElapsedMilliseconds(startCounter, nowCounter, frequency), timeoutMs, lastPeekError,
+                              bytesAvailable, peekFailureCount);
     return &namedpipeDataFromServer;
 }
 
@@ -735,6 +762,8 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
             namedpipeDataFromServer.msg_type = 0;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
+            LogServerPipeReadFallback(L"read_open_to_tsf_pipe_failed", namedpipeDataFromServer.candidate_string, 0.0,
+                                      0, GetLastError(), 0, 0);
             return &namedpipeDataFromServer;
         }
     }
@@ -764,6 +793,7 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
 
     namedpipeDataFromServer.msg_type = 0;
     wcscpy_s(namedpipeDataFromServer.candidate_string, L"ReadDataError");
+    LogServerPipeReadFallback(L"read_failed", namedpipeDataFromServer.candidate_string, 0.0, 0, GetLastError(), 0, 0);
     return &namedpipeDataFromServer;
 }
 
