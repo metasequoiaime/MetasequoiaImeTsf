@@ -641,7 +641,6 @@ void ClearNamedpipeDataIfExists(bool force)
 
     if (force)
     {
-        OutputDebugString(fmt::format(L"[msime-perf] force-drain to-tsf pipe cleared_count={}", clearedCount).c_str());
     }
 }
 

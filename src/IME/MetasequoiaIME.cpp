@@ -217,10 +217,6 @@ void CMetasequoiaIME::_ScheduleCandidatePresenterCleanup(_In_ CCandidateListUIPr
 
     pPresenter->_PrepareForAsyncCleanup();
     _pendingCandidatePresenterCleanup.push_back(pPresenter);
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] async_cleanup schedule presenter pending_count={}",
-                          _pendingCandidatePresenterCleanup.size())
-                          .c_str());
 
     if (_msgWndHandle)
     {
@@ -240,18 +236,10 @@ void CMetasequoiaIME::_DrainPendingCandidatePresenterCleanup()
         {
             PerfTimer deleteTimer;
             delete pPresenter;
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] async_cleanup delete presenter elapsed={:.3f}ms remaining_count={}",
-                                  deleteTimer.ElapsedMs(), _pendingCandidatePresenterCleanup.size())
-                                  .c_str());
             ++cleanedCount;
         }
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] async_cleanup drain elapsed={:.3f}ms cleaned_count={}",
-                          timer.ElapsedMs(), cleanedCount)
-                          .c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -667,9 +655,6 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
             if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::CommitCurCandidate)
             {
                 pIME->_QueuePendingCommitCandidate(buf.data);
-                OutputDebugString(fmt::format(L"[msime-perf] worker CommitCurCandidate payload_len={}",
-                                              wcslen(buf.data))
-                                      .c_str());
                 PostMessage(pIME->_msgWndHandle, WM_CommitCandidate, 0, 0);
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
@@ -963,17 +948,11 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                 _KEYSTROKE_STATE KeystrokeState;
                 KeystrokeState.Category = CATEGORY_CANDIDATE;
                 KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
-                OutputDebugString(fmt::format(
-                                      L"[msime-perf] WM_AsyncFinalizeCandidate begin elapsed=0ms")
-                                      .c_str());
                 pIME->_InvokeKeyHandler(pContext, VK_SPACE, L' ', 0, KeystrokeState);
                 pContext->Release();
             }
             pDocMgrFocus->Release();
         }
-        OutputDebugString(fmt::format(L"[msime-perf] WM_AsyncFinalizeCandidate end elapsed={:.3f}ms",
-                                      timer.ElapsedMs())
-                              .c_str());
         break;
     }
     case WM_AsyncPunctuationCommit: {
@@ -988,17 +967,11 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                 _KEYSTROKE_STATE KeystrokeState;
                 KeystrokeState.Category = CATEGORY_COMPOSING;
                 KeystrokeState.Function = FUNCTION_PUNCTUATION;
-                OutputDebugString(fmt::format(
-                                      L"[msime-perf] WM_AsyncPunctuationCommit begin elapsed=0ms")
-                                      .c_str());
                 pIME->_InvokeKeyHandler(pContext, Global::Keycode, Global::wch, 0, KeystrokeState);
                 pContext->Release();
             }
             pDocMgrFocus->Release();
         }
-        OutputDebugString(fmt::format(L"[msime-perf] WM_AsyncPunctuationCommit end elapsed={:.3f}ms",
-                                      timer.ElapsedMs())
-                              .c_str());
         break;
     }
     case WM_AsyncNumberCandidateCommit: {
@@ -1013,20 +986,12 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                 _KEYSTROKE_STATE KeystrokeState;
                 KeystrokeState.Category = CATEGORY_CANDIDATE;
                 KeystrokeState.Function = FUNCTION_SELECT_BY_NUMBER;
-                OutputDebugString(fmt::format(
-                                      L"[msime-perf] WM_AsyncNumberCandidateCommit begin elapsed=0ms keycode={}",
-                                      static_cast<UINT>(wParam))
-                                      .c_str());
                 pIME->_InvokeKeyHandler(pContext, static_cast<UINT>(wParam), static_cast<WCHAR>(lParam), 0,
                                         KeystrokeState);
                 pContext->Release();
             }
             pDocMgrFocus->Release();
         }
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] WM_AsyncNumberCandidateCommit end elapsed={:.3f}ms keycode={}",
-                              timer.ElapsedMs(), static_cast<UINT>(wParam))
-                              .c_str());
         break;
     }
     case WM_CleanupCandidatePresenter: {

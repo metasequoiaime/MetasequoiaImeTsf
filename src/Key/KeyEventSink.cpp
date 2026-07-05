@@ -349,11 +349,6 @@ STDAPI CMetasequoiaIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
         _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
     }
 
-    OutputDebugString(fmt::format(L"[msime-perf] OnTestKeyDown end total={:.3f}ms raw_wparam={} eaten={} keycode={} category={} function={}",
-                                  onTestKeyDownTimer.ElapsedMs(), static_cast<UINT>(wParam), *pIsEaten,
-                                  code, static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                          .c_str());
 
     return S_OK;
 }
@@ -369,9 +364,6 @@ STDAPI CMetasequoiaIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
 STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     PerfTimer onKeyDownTimer;
-    OutputDebugString(
-        fmt::format(L"[msime-perf] OnKeyDown begin raw_wparam={} lparam={}", static_cast<UINT>(wParam), lParam)
-            .c_str());
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -387,11 +379,6 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         &wch,                //
         &KeystrokeState      //
     );
-    OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown IsKeyEaten elapsed={:.3f}ms eaten={} keycode={} category={} function={}",
-                                  isKeyEatenTimer.ElapsedMs(), *pIsEaten, code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                          .c_str());
 
     Global::firefox_like_cnt = 0;
 
@@ -406,9 +393,6 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         {
             // 这个键仍然被吃掉（以防止它到达应用程序），
             // 但我们不把它发送到 server 端，也不进一步处理它。
-            OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown skipped server due max length total={:.3f}ms",
-                                          onKeyDownTimer.ElapsedMs())
-                                  .c_str());
             return S_OK;
         }
 
@@ -421,46 +405,22 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
         PerfTimer clearPipeTimer;
         ClearNamedpipeDataIfExists();
-        OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown clear-pipe elapsed={:.3f}ms",
-                                      clearPipeTimer.ElapsedMs())
-                              .c_str());
 
         PerfTimer writeShmTimer;
         WriteDataToSharedMemory(Global::Keycode, wch, Global::ModifiersDown, nullptr, 0, L"", 0b000111);
-        OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown write-shared-memory elapsed={:.3f}ms",
-                                      writeShmTimer.ElapsedMs())
-                              .c_str());
 
         PerfTimer sendKeyEventTimer;
         SendKeyEventToUIProcess();
-        OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown send-key-event elapsed={:.3f}ms",
-                                      sendKeyEventTimer.ElapsedMs())
-                              .c_str());
 
         if (code == VK_SPACE && KeystrokeState.Function == FUNCTION_CONVERT)
         {
             PerfTimer prefetchTimer;
             FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
             _QueuePendingServerCandidate(receivedData->msg_type, receivedData->candidate_string);
-            OutputDebugString(fmt::format(L"[msime-perf] prefetch server candidate before edit-session elapsed={:.3f}ms msg_type={} len={}",
-                                          prefetchTimer.ElapsedMs(), receivedData->msg_type,
-                                          wcslen(receivedData->candidate_string))
-                                  .c_str());
 
             if (_msgWndHandle)
             {
-                OutputDebugString(fmt::format(
-                                      L"[msime-perf] OnKeyDown post async finalize elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
-                                      onKeyDownTimer.ElapsedMs(), code,
-                                      static_cast<int>(KeystrokeState.Category),
-                                      static_cast<int>(KeystrokeState.Function))
-                                      .c_str());
                 PostMessage(_msgWndHandle, WM_AsyncFinalizeCandidate, 0, 0);
-                OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={} async_finalize=1",
-                                              onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
-                                              static_cast<int>(KeystrokeState.Category),
-                                              static_cast<int>(KeystrokeState.Function))
-                                      .c_str());
                 return S_OK;
             }
         }
@@ -482,41 +442,13 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
             }
 
             _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] prefetch punctuation commit before edit-session elapsed={:.3f}ms len={} keycode={}",
-                                  prefetchElapsedMs, punctuationCommitText.length(), code)
-                                  .c_str());
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] OnKeyDown post async punctuation elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
-                                  onKeyDownTimer.ElapsedMs(), code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                                  .c_str());
             PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, 0, 0);
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={} async_punctuation=1",
-                                  onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                                  .c_str());
             return S_OK;
         }
 
         if (KeystrokeState.Function == FUNCTION_SELECT_BY_NUMBER && _msgWndHandle)
         {
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] OnKeyDown post async select-by-number elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
-                                  onKeyDownTimer.ElapsedMs(), code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                                  .c_str());
             PostMessage(_msgWndHandle, WM_AsyncNumberCandidateCommit, code, static_cast<LPARAM>(wch));
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={} async_select_by_number=1",
-                                  onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                                  .c_str());
             return S_OK;
         }
     }
@@ -540,15 +472,7 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         if (needInvokeKeyHandler)
         {
             PerfTimer invokeTimer;
-            OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown before InvokeKeyHandler elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
-                                          onKeyDownTimer.ElapsedMs(), code,
-                                          static_cast<int>(KeystrokeState.Category),
-                                          static_cast<int>(KeystrokeState.Function))
-                                  .c_str());
             _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-            OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown after InvokeKeyHandler invoke_elapsed={:.3f}ms total={:.3f}ms",
-                                          invokeTimer.ElapsedMs(), onKeyDownTimer.ElapsedMs())
-                                  .c_str());
         }
     }
     else if (KeystrokeState.Category == CATEGORY_INVOKE_COMPOSITION_EDIT_SESSION)
@@ -556,22 +480,9 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
         // Invoke key handler edit session
         KeystrokeState.Category = CATEGORY_COMPOSING;
         PerfTimer invokeTimer;
-        OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown before InvokeKeyHandler elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
-                                      onKeyDownTimer.ElapsedMs(), code,
-                                      static_cast<int>(KeystrokeState.Category),
-                                      static_cast<int>(KeystrokeState.Function))
-                              .c_str());
         _InvokeKeyHandler(pContext, code, wch, (DWORD)lParam, KeystrokeState);
-        OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown after InvokeKeyHandler invoke_elapsed={:.3f}ms total={:.3f}ms",
-                                      invokeTimer.ElapsedMs(), onKeyDownTimer.ElapsedMs())
-                              .c_str());
     }
 
-    OutputDebugString(fmt::format(L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={}",
-                                  onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
-                                  static_cast<int>(KeystrokeState.Category),
-                                  static_cast<int>(KeystrokeState.Function))
-                          .c_str());
 
     return S_OK;
 }

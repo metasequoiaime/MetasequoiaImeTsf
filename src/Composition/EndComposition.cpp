@@ -82,11 +82,6 @@ void CMetasequoiaIME::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pC
             releaseContextElapsedMs = releaseContextTimer.ElapsedMs();
         }
 
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] _TerminateComposition elapsed={:.3f}ms clear_display_attr={:.3f}ms end_composition={:.3f}ms release_composition={:.3f}ms release_context={:.3f}ms",
-                              timer.ElapsedMs(), clearDisplayAttrElapsedMs, endCompositionElapsedMs,
-                              releaseCompositionElapsedMs, releaseContextElapsedMs)
-                              .c_str());
     }
 }
 
@@ -108,8 +103,5 @@ void CMetasequoiaIME::_EndComposition(_In_opt_ ITfContext *pContext)
         pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &hr);
         double requestElapsedMs = requestTimer.ElapsedMs();
         pEditSession->Release();
-        OutputDebugString(fmt::format(L"[msime-perf] _EndComposition elapsed={:.3f}ms request_edit_session={:.3f}ms hr={:#x}",
-                                      timer.ElapsedMs(), requestElapsedMs, static_cast<unsigned int>(hr))
-                              .c_str());
     }
 }

@@ -91,11 +91,6 @@ VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pC
         _isCandidateWithWildcard = FALSE;
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _DeleteCandidateList elapsed={:.3f}ms purge_virtual_key={:.3f}ms end_candidate_list={:.3f}ms has_presenter={} force={}",
-                          timer.ElapsedMs(), purgeElapsedMs, endCandidateElapsedMs,
-                          _pCandidateListUIPresenter ? 1 : 0, isForce ? 1 : 0)
-                          .c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -117,9 +112,6 @@ HRESULT CMetasequoiaIME::_HandleComplete(TfEditCookie ec, _In_ ITfContext *pCont
     _TerminateComposition(ec, pContext);
     double terminateElapsedMs = terminateTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(L"[msime-perf] _HandleComplete elapsed={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
-                                  timer.ElapsedMs(), deleteElapsedMs, terminateElapsedMs)
-                          .c_str());
 
     return S_OK;
 }
@@ -137,10 +129,6 @@ HRESULT CMetasequoiaIME::_HandleCompleteCommitFirst(TfEditCookie ec, _In_ ITfCon
     _TerminateComposition(ec, pContext);
     double terminateElapsedMs = terminateTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCompleteCommitFirst elapsed={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
-                          timer.ElapsedMs(), deleteElapsedMs, terminateElapsedMs)
-                          .c_str());
 
     return S_OK;
 }
@@ -168,10 +156,6 @@ HRESULT CMetasequoiaIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContex
     _TerminateComposition(ec, pContext);
     double terminateElapsedMs = terminateTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCancel elapsed={:.3f}ms remove_dummy={:.3f}ms delete_candidate={:.3f}ms terminate_composition={:.3f}ms",
-                          timer.ElapsedMs(), removeDummyElapsedMs, deleteElapsedMs, terminateElapsedMs)
-                          .c_str());
 
     return S_OK;
 }
@@ -353,11 +337,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
 
         if (FAILED(hr))
         {
-            OutputDebugString(fmt::format(
-                                  L"[msime-perf] _HandleCompositionInputWorker failed elapsed={:.3f}ms get_reading={:.3f}ms preedit_pipe={:.3f}ms add_composing={:.3f}ms hr={:#x}",
-                                  timer.ElapsedMs(), readingElapsedMs, preeditPipeElapsedMs,
-                                  addComposingElapsedMs, static_cast<unsigned int>(hr))
-                                  .c_str());
             return hr;
         }
     }
@@ -411,12 +390,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
             clearListElapsedMs = clearListTimer.ElapsedMs();
         }
     }
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCompositionInputWorker elapsed={:.3f}ms get_reading={:.3f}ms preedit_pipe={:.3f}ms add_composing={:.3f}ms get_candidate_list={:.3f}ms create_candidate={:.3f}ms clear_list={:.3f}ms set_text={:.3f}ms candidate_count={} wildcard={} hr={:#x}",
-                          timer.ElapsedMs(), readingElapsedMs, preeditPipeElapsedMs, addComposingElapsedMs,
-                          candidateListElapsedMs, createCandidateElapsedMs, clearListElapsedMs, setTextElapsedMs,
-                          candidateList.Count(), isWildcardIncluded ? 1 : 0, static_cast<unsigned int>(hr))
-                          .c_str());
     return hr;
 }
 //+---------------------------------------------------------------------------
@@ -486,11 +459,6 @@ HRESULT CMetasequoiaIME::_CreateAndStartCandidate(_In_ CCompositionProcessorEngi
         }
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _CreateAndStartCandidate elapsed={:.3f}ms recreate={:.3f}ms alloc_presenter={:.3f}ms get_document_mgr={:.3f}ms get_composition_range={:.3f}ms start_candidate_list={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), recreateElapsedMs, allocElapsedMs, getDocMgrElapsedMs,
-                          getRangeElapsedMs, startCandidateListElapsedMs, static_cast<unsigned int>(hr))
-                          .c_str());
 
     return hr;
 }
@@ -571,12 +539,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionFinalize(TfEditCookie ec, _In_ ITfCon
     _HandleCancel(ec, pContext);
     double cancelElapsedMs = cancelTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCompositionFinalize elapsed={:.3f}ms is_candidate_list={} finalize_candidate={:.3f}ms get_selection={:.3f}ms get_composition_range={:.3f}ms end_composition={:.3f}ms cancel={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), isCandidateList ? 1 : 0, finalizeCandidateElapsedMs,
-                          getSelectionElapsedMs, getRangeElapsedMs, endCompositionElapsedMs, cancelElapsedMs,
-                          static_cast<unsigned int>(hr))
-                          .c_str());
 
     return S_OK;
 }
@@ -668,12 +630,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionConvert(TfEditCookie ec, _In_ ITfCont
         }
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCompositionConvert elapsed={:.3f}ms get_candidate_list={:.3f}ms rebuild_presenter={:.3f}ms alloc_presenter={:.3f}ms start_candidate_list={:.3f}ms set_text={:.3f}ms candidate_count={} wildcard={} hr={:#x}",
-                          timer.ElapsedMs(), getCandidateListElapsedMs, rebuildPresenterElapsedMs,
-                          allocPresenterElapsedMs, startCandidateListElapsedMs, setTextElapsedMs, nCount,
-                          isWildcardSearch ? 1 : 0, static_cast<unsigned int>(hr))
-                          .c_str());
 
     return hr;
 }
@@ -866,11 +822,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     _HandleComplete(ec, pContext);
     double completeElapsedMs = completeTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _HandleCompositionPunctuation elapsed={:.3f}ms pipe_read={:.3f}ms add_char_finalize={:.3f}ms handle_complete={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), pipeReadElapsedMs, addCharElapsedMs, completeElapsedMs,
-                          static_cast<unsigned int>(hr))
-                          .c_str());
 
     return S_OK;
 }
@@ -946,19 +897,10 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
     HRESULT requestHr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE,
                                                      &editSessionHr);
     double requestCallElapsedMs = requestCallTimer.ElapsedMs();
-    OutputDebugString(fmt::format(L"[msime-perf] RequestEditSession keycode={} category={} function={} request_hr={:#x} edit_hr={:#x} elapsed={:.3f}ms call_elapsed={:.3f}ms alloc_edit_session={:.3f}ms",
-                                  code, static_cast<int>(keyState.Category), static_cast<int>(keyState.Function),
-                                  static_cast<unsigned int>(requestHr), static_cast<unsigned int>(editSessionHr),
-                                  requestTimer.ElapsedMs(), requestCallElapsedMs, allocElapsedMs)
-                          .c_str());
     hr = requestHr;
 
     PerfTimer releaseTimer;
     pEditSession->Release();
-    OutputDebugString(fmt::format(L"[msime-perf] _InvokeKeyHandler release_edit_session elapsed={:.3f}ms total={:.3f}ms keycode={} category={} function={}",
-                                  releaseTimer.ElapsedMs(), requestTimer.ElapsedMs(), code,
-                                  static_cast<int>(keyState.Category), static_cast<int>(keyState.Function))
-                          .c_str());
 
 Exit:
     return hr;

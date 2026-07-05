@@ -69,11 +69,6 @@ STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
         }
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] GetTextExtentEditSession::DoEditSession elapsed={:.3f}ms get_text_ext={:.3f}ms layout_change={:.3f}ms hr={:#x} clipped={} rect=({}, {}, {}, {})",
-                          timer.ElapsedMs(), getTextExtElapsedMs, layoutChangeElapsedMs,
-                          static_cast<unsigned int>(hr), isClipped ? 1 : 0, rc.left, rc.top, rc.right, rc.bottom)
-                          .c_str());
 
     return S_OK;
 }

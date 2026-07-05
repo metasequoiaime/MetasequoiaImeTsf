@@ -43,9 +43,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     CStringRange candidateString(keyStrokebuffer);
     std::wstring pendingCommitCandidate = _TakePendingCommitCandidate();
 
-    OutputDebugString(fmt::format(L"[msime-perf] finalize begin keycode={} keystroke_len={} pending_len={}",
-                                  Global::Keycode, keystrokeBufLen, pendingCommitCandidate.length())
-                          .c_str());
 
 #ifdef FANY_DEBUG
     OutputDebugString(fmt::format(L"[msime]: create_word, keystrokeBuffer: {}", keyStrokebuffer.ToWString()).c_str());
@@ -67,14 +64,8 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             hr = _InsertTextToComposition(ec, pContext, &candidateString);
             if (FAILED(hr))
             {
-                OutputDebugString(fmt::format(L"[msime-perf] commit fast-path direct InsertText failed hr={:#x}; fallback",
-                                              static_cast<unsigned int>(hr))
-                                      .c_str());
                 hr = _AddComposingAndChar(ec, pContext, &candidateString);
             }
-            OutputDebugString(fmt::format(L"[msime-perf] commit fast-path InsertText elapsed={:.3f}ms hr={:#x}",
-                                          insertTextTimer.ElapsedMs(), static_cast<unsigned int>(hr))
-                                  .c_str());
             if (FAILED(hr))
             {
                 return hr;
@@ -82,9 +73,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
 
             PerfTimer completeTimer;
             _HandleCompleteCommitFirst(ec, pContext);
-            OutputDebugString(fmt::format(L"[msime-perf] commit fast-path Complete elapsed={:.3f}ms total={:.3f}ms",
-                                          completeTimer.ElapsedMs(), finalizeTimer.ElapsedMs())
-                                  .c_str());
             return hr;
         }
 
@@ -94,9 +82,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             _TakePendingServerCandidate(&serverMsgType, &serverCandidateString);
         if (hasPrefetchedServerCandidate)
         {
-            OutputDebugString(fmt::format(L"[msime-perf] commit uses prefetched server candidate msg_type={} len={}",
-                                          serverMsgType, serverCandidateString.length())
-                                  .c_str());
         }
         else
         {
@@ -104,9 +89,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
             serverMsgType = receivedData->msg_type;
             serverCandidateString = receivedData->candidate_string;
-            OutputDebugString(fmt::format(L"[msime-perf] commit fallback pipe-read elapsed={:.3f}ms msg_type={}",
-                                          pipeReadTimer.ElapsedMs(), serverMsgType)
-                                  .c_str());
         }
 
         if (serverMsgType == Global::DataFromServerMsgType::OutofRange) // Candidate index out of range
@@ -124,14 +106,8 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             hr = _InsertTextToComposition(ec, pContext, &candidateString);
             if (FAILED(hr))
             {
-                OutputDebugString(fmt::format(L"[msime-perf] commit fallback direct InsertText failed hr={:#x}; fallback",
-                                              static_cast<unsigned int>(hr))
-                                      .c_str());
                 hr = _AddComposingAndChar(ec, pContext, &candidateString);
             }
-            OutputDebugString(fmt::format(L"[msime-perf] commit fallback InsertText elapsed={:.3f}ms hr={:#x}",
-                                          insertTextTimer.ElapsedMs(), static_cast<unsigned int>(hr))
-                                  .c_str());
             if (FAILED(hr))
             {
                 return hr;
@@ -191,9 +167,6 @@ NoPresenter:
 
     PerfTimer completeTimer;
     _HandleCompleteCommitFirst(ec, pContext);
-    OutputDebugString(fmt::format(L"[msime-perf] commit Complete elapsed={:.3f}ms total={:.3f}ms",
-                                  completeTimer.ElapsedMs(), finalizeTimer.ElapsedMs())
-                          .c_str());
 
     return hr;
 }
@@ -527,11 +500,6 @@ STDAPI CCandidateListUIPresenter::Show(BOOL showCandidateWindow)
         _UpdateUIElement();
         updateUiElapsedMs = updateUiTimer.ElapsedMs();
     }
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::Show elapsed={:.3f}ms show={} move_window={:.3f}ms update_ui={:.3f}ms visible={}",
-                          timer.ElapsedMs(), showCandidateWindow ? 1 : 0, moveWindowElapsedMs, updateUiElapsedMs,
-                          _candidateWindowVisible ? 1 : 0)
-                          .c_str());
     return S_OK;
 }
 
@@ -795,10 +763,6 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     hr = S_OK;
 
 Exit:
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_StartCandidateList elapsed={:.3f}ms start_layout={:.3f}ms begin_ui={:.3f}ms get_text_ext={:.3f}ms layout_change={:.3f}ms hr={:#x}",
-        timer.ElapsedMs(), startLayoutElapsedMs, beginUiElapsedMs, getTextExtElapsedMs, layoutChangeElapsedMs,
-        static_cast<unsigned int>(hr)).c_str());
     if (FAILED(hr))
     {
         _EndCandidateList();
@@ -834,19 +798,11 @@ void CCandidateListUIPresenter::_EndCandidateList()
     _EndLayout();
     double endLayoutElapsedMs = endLayoutTimer.ElapsedMs();
 
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_EndCandidateList elapsed={:.3f}ms end_ui={:.3f}ms end_ui_session={:.3f}ms clear_state={:.3f}ms end_layout={:.3f}ms had_ui_element={} had_ui_session={}",
-        timer.ElapsedMs(), endUiElapsedMs, endSessionElapsedMs, clearStateElapsedMs, endLayoutElapsedMs,
-        hadUiElement ? 1 : 0, hadUiSession ? 1 : 0).c_str());
 }
 
 void CCandidateListUIPresenter::_PrepareForAsyncCleanup()
 {
     _asyncCleanupPending = TRUE;
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::_PrepareForAsyncCleanup ui_element_id={} ui_session_active={}",
-                          _uiElementId, _candidateUiSessionActive ? 1 : 0)
-                          .c_str());
 }
 
 void CCandidateListUIPresenter::_NotifyUI()
@@ -860,9 +816,6 @@ void CCandidateListUIPresenter::_NotifyUI()
     {
         BeginCandidateUiSession();
     }
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_NotifyUI elapsed={:.3f}ms active_session={}",
-        timer.ElapsedMs(), _candidateUiSessionActive ? 1 : 0).c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -897,10 +850,6 @@ void CCandidateListUIPresenter::_SetText(_In_ CMetasequoiaImeArray<CCandidateLis
         uiRefreshElapsedMs = uiRefreshTimer.ElapsedMs();
     }
 
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_SetText elapsed={:.3f}ms add_candidate={:.3f}ms set_page_index={:.3f}ms ui_refresh={:.3f}ms candidate_count={} show_mode={}",
-        timer.ElapsedMs(), addCandidateElapsedMs, setPageIndexElapsedMs, uiRefreshElapsedMs,
-        pCandidateList->Count(), _isShowMode ? 1 : 0).c_str());
 }
 
 void CCandidateListUIPresenter::AddCandidateToCandidateListUI(     //
@@ -1073,8 +1022,6 @@ VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
     lpRect;
     PerfTimer timer;
     MoveCandidateUiSession();
-    OutputDebugString(fmt::format(L"[msime-perf] CandidateUI::_LayoutChangeNotification elapsed={:.3f}ms",
-                                  timer.ElapsedMs()).c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -1088,16 +1035,9 @@ VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
     PerfTimer timer;
     if (_asyncCleanupPending)
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] CandidateUI::_LayoutDestroyNotification skipped_for_async_cleanup elapsed={:.3f}ms ui_element_id={} ui_session_active={}",
-                              timer.ElapsedMs(), _uiElementId, _candidateUiSessionActive ? 1 : 0)
-                              .c_str());
         return;
     }
 
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_LayoutDestroyNotification begin ui_element_id={} ui_session_active={}",
-        _uiElementId, _candidateUiSessionActive ? 1 : 0).c_str());
 
     EndUIElement();
     EndCandidateUiSession();
@@ -1105,8 +1045,6 @@ VOID CCandidateListUIPresenter::_LayoutDestroyNotification()
     _candidateWindowVisible = FALSE;
     _EndLayout();
 
-    OutputDebugString(fmt::format(
-        L"[msime-perf] CandidateUI::_LayoutDestroyNotification elapsed={:.3f}ms", timer.ElapsedMs()).c_str());
 }
 
 //+---------------------------------------------------------------------------
@@ -1287,10 +1225,6 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
         pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
         double beginUiElapsedMs = beginUiTimer.ElapsedMs();
         pUIElementMgr->Release();
-        OutputDebugString(fmt::format(
-            L"[msime-perf] CandidateUI::BeginUIElement elapsed={:.3f}ms query_ui_mgr={:.3f}ms begin_ui_element={:.3f}ms is_show_mode={} ui_element_id={} hr={:#x}",
-            timer.ElapsedMs(), queryUiMgrElapsedMs, beginUiElapsedMs, _isShowMode ? 1 : 0, _uiElementId,
-            static_cast<unsigned int>(hr)).c_str());
     }
 
 Exit:
@@ -1321,10 +1255,6 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
         double endUiElapsedMs = endUiTimer.ElapsedMs();
         pUIElementMgr->Release();
         _uiElementId = static_cast<DWORD>(-1);
-        OutputDebugString(fmt::format(
-            L"[msime-perf] CandidateUI::EndUIElement elapsed={:.3f}ms query_ui_mgr={:.3f}ms end_ui_element={:.3f}ms ui_element_id={} hr={:#x}",
-            timer.ElapsedMs(), queryUiMgrElapsedMs, endUiElapsedMs, currentUiElementId,
-            static_cast<unsigned int>(hr)).c_str());
     }
 
 Exit:
@@ -1348,11 +1278,6 @@ void CCandidateListUIPresenter::WriteCandidateUiPayload(_In_ UINT writeFlag)
         Global::PinyinString,  //
         writeFlag              //
     );
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::WriteCandidateUiPayload elapsed={:.3f}ms write_shared={:.3f}ms write_flag={:#x} pinyin_len={} point=({}, {})",
-                          timer.ElapsedMs(), writeTimer.ElapsedMs(), writeFlag, Global::PinyinLength,
-                          Global::Point[0], Global::Point[1])
-                          .c_str());
 }
 
 void CCandidateListUIPresenter::BeginCandidateUiSession()
@@ -1365,10 +1290,6 @@ void CCandidateListUIPresenter::BeginCandidateUiSession()
     SendShowCandidateWndEventToUIProcess();
     double sendEventElapsedMs = sendEventTimer.ElapsedMs();
     _candidateUiSessionActive = TRUE;
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::BeginCandidateUiSession elapsed={:.3f}ms write_payload={:.3f}ms send_event={:.3f}ms",
-                          timer.ElapsedMs(), writePayloadElapsedMs, sendEventElapsedMs)
-                          .c_str());
 }
 
 void CCandidateListUIPresenter::UpdateCandidateUiSession()
@@ -1380,10 +1301,6 @@ void CCandidateListUIPresenter::UpdateCandidateUiSession()
     PerfTimer sendEventTimer;
     SendShowCandidateWndEventToUIProcess();
     double sendEventElapsedMs = sendEventTimer.ElapsedMs();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::UpdateCandidateUiSession elapsed={:.3f}ms write_payload={:.3f}ms send_event={:.3f}ms",
-                          timer.ElapsedMs(), writePayloadElapsedMs, sendEventElapsedMs)
-                          .c_str());
 }
 
 void CCandidateListUIPresenter::MoveCandidateUiSession()
@@ -1395,10 +1312,6 @@ void CCandidateListUIPresenter::MoveCandidateUiSession()
     PerfTimer sendEventTimer;
     SendMoveCandidateWndEventToUIProcess();
     double sendEventElapsedMs = sendEventTimer.ElapsedMs();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::MoveCandidateUiSession elapsed={:.3f}ms write_payload={:.3f}ms send_event={:.3f}ms",
-                          timer.ElapsedMs(), writePayloadElapsedMs, sendEventElapsedMs)
-                          .c_str());
 }
 
 void CCandidateListUIPresenter::EndCandidateUiSession()
@@ -1406,10 +1319,6 @@ void CCandidateListUIPresenter::EndCandidateUiSession()
     PerfTimer timer;
     if (!_candidateUiSessionActive)
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] CandidateUI::EndCandidateUiSession elapsed={:.3f}ms active_session=0",
-                              timer.ElapsedMs())
-                              .c_str());
         return;
     }
 
@@ -1417,8 +1326,4 @@ void CCandidateListUIPresenter::EndCandidateUiSession()
     SendHideCandidateWndEventToUIProcess();
     double sendEventElapsedMs = sendEventTimer.ElapsedMs();
     _candidateUiSessionActive = FALSE;
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] CandidateUI::EndCandidateUiSession elapsed={:.3f}ms send_event={:.3f}ms active_session=1",
-                          timer.ElapsedMs(), sendEventElapsedMs)
-                          .c_str());
 }

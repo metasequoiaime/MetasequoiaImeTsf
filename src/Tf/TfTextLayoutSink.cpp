@@ -90,10 +90,6 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
     // we're interested in only document context.
     if (pContext != _pContextDocument)
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] TfLayoutSink::OnLayoutChange elapsed={:.3f}ms lcode={} is_document_context=0",
-                              timer.ElapsedMs(), static_cast<int>(lcode))
-                              .c_str());
         return S_OK;
     }
 
@@ -127,11 +123,6 @@ STDAPI CTfTextLayoutSink::OnLayoutChange(_In_ ITfContext *pContext, TfLayoutCode
         _LayoutDestroyNotification();
         break;
     }
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::OnLayoutChange elapsed={:.3f}ms lcode={} is_document_context={} request_edit_session={:.3f}ms",
-                          timer.ElapsedMs(), static_cast<int>(lcode), isDocumentContext ? 1 : 0,
-                          requestEditSessionElapsedMs)
-                          .c_str());
     return S_OK;
 }
 
@@ -147,10 +138,6 @@ HRESULT CTfTextLayoutSink::_StartLayout(_In_ ITfContext *pContextDocument, TfEdi
 
     _tfEditCookie = ec;
     HRESULT hr = _AdviseTextLayoutSink();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::_StartLayout elapsed={:.3f}ms advise_result={:#x} cookie={}",
-                          timer.ElapsedMs(), static_cast<unsigned int>(hr), _dwCookieTextLayoutSink)
-                          .c_str());
     return hr;
 }
 
@@ -174,11 +161,6 @@ VOID CTfTextLayoutSink::_EndLayout()
         _pContextDocument = nullptr;
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::_EndLayout elapsed={:.3f}ms had_range={} had_context={} unadvise_hr={:#x} cookie={}",
-                          timer.ElapsedMs(), hadRangeComposition ? 1 : 0, hadContextDocument ? 1 : 0,
-                          static_cast<unsigned int>(unadviseHr), _dwCookieTextLayoutSink)
-                          .c_str());
 }
 
 HRESULT CTfTextLayoutSink::_AdviseTextLayoutSink()
@@ -202,10 +184,6 @@ HRESULT CTfTextLayoutSink::_AdviseTextLayoutSink()
 
     pSource->Release();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::_AdviseTextLayoutSink elapsed={:.3f}ms hr={:#x} cookie={}",
-                          timer.ElapsedMs(), static_cast<unsigned int>(hr), _dwCookieTextLayoutSink)
-                          .c_str());
 
     return hr;
 }
@@ -237,10 +215,6 @@ HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
     pSource->Release();
     _dwCookieTextLayoutSink = TF_INVALID_COOKIE;
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::_UnadviseTextLayoutSink elapsed={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), static_cast<unsigned int>(hr))
-                          .c_str());
 
     return hr;
 }
@@ -265,10 +239,6 @@ HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
     hr = _pContextDocument->GetActiveView(&pContextView);
     if (FAILED(hr))
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] TfLayoutSink::_GetTextExt elapsed={:.3f}ms get_active_view_hr={:#x}",
-                              timer.ElapsedMs(), static_cast<unsigned int>(hr))
-                              .c_str());
         return hr;
     }
 
@@ -287,11 +257,6 @@ HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
 
     pContextView->Release();
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] TfLayoutSink::_GetTextExt elapsed={:.3f}ms hr={:#x} clipped={} rect=({}, {}, {}, {})",
-                          timer.ElapsedMs(), static_cast<unsigned int>(hr), isClipped ? 1 : 0, lpRect->left,
-                          lpRect->top, lpRect->right, lpRect->bottom)
-                          .c_str());
 
     return S_OK;
 }

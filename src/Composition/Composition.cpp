@@ -46,11 +46,6 @@ STDAPI CMetasequoiaIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCo
         pContext = nullptr;
     }
 
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] OnCompositionTerminated elapsed={:.3f}ms remove_dummy={:.3f}ms end_composition={:.3f}ms delete_candidate={:.3f}ms had_context={}",
-                          timer.ElapsedMs(), removeDummyElapsedMs, endCompositionElapsedMs, deleteCandidateElapsedMs,
-                          hadContext ? 1 : 0)
-                          .c_str());
 
     return S_OK;
 }
@@ -113,18 +108,11 @@ HRESULT CMetasequoiaIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *
                 pContext->SetSelection(ec, 1, &sel);
                 double selectionElapsedMs = selectionTimer.ElapsedMs();
 
-                OutputDebugString(fmt::format(L"[msime-perf] AddComposing fast-update elapsed={:.3f}ms set_text={:.3f}ms display_attr={:.3f}ms selection={:.3f}ms hr={:#x}",
-                                              fastUpdateTimer.ElapsedMs(), setTextElapsedMs,
-                                              displayAttrElapsedMs, selectionElapsedMs, static_cast<unsigned int>(hr))
-                                      .c_str());
                 pRangeComposition->Release();
                 return hr;
             }
             pRangeComposition->Release();
         }
-        OutputDebugString(fmt::format(L"[msime-perf] AddComposing fast-update failed elapsed={:.3f}ms hr={:#x}; fallback",
-                                      fastUpdateTimer.ElapsedMs(), static_cast<unsigned int>(hr))
-                              .c_str());
     }
 
     ULONG fetched = 0;
@@ -186,10 +174,6 @@ HRESULT CMetasequoiaIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *p
         double directSetElapsedMs = directSetTimer.ElapsedMs();
         if (SUCCEEDED(hr))
         {
-            OutputDebugString(fmt::format(L"[msime-perf] _AddCharAndFinalize elapsed={:.3f}ms direct_set_composition={:.3f}ms fallback=0ms hr={:#x}",
-                                          timer.ElapsedMs(), directSetElapsedMs,
-                                          static_cast<unsigned int>(hr))
-                                  .c_str());
             return hr;
         }
     }
@@ -217,11 +201,6 @@ HRESULT CMetasequoiaIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *p
     }
 
     tfSelection.range->Release();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _AddCharAndFinalize elapsed={:.3f}ms direct_set_composition=failed fallback_set_text={:.3f}ms fallback_set_selection={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), setTextElapsedMs, setSelectionElapsedMs,
-                          static_cast<unsigned int>(hr))
-                          .c_str());
 
     return hr;
 }
@@ -241,10 +220,6 @@ HRESULT CMetasequoiaIME::_InsertTextToComposition(TfEditCookie ec, _In_ ITfConte
     double getRangeElapsedMs = getRangeTimer.ElapsedMs();
     if (FAILED(hr) || pRangeComposition == nullptr)
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] _InsertTextToComposition elapsed={:.3f}ms get_range={:.3f}ms set_text=0ms set_selection=0ms hr={:#x}",
-                              timer.ElapsedMs(), getRangeElapsedMs, static_cast<unsigned int>(hr))
-                              .c_str());
         return FAILED(hr) ? hr : E_FAIL;
     }
 
@@ -265,11 +240,6 @@ HRESULT CMetasequoiaIME::_InsertTextToComposition(TfEditCookie ec, _In_ ITfConte
     }
 
     pRangeComposition->Release();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _InsertTextToComposition elapsed={:.3f}ms get_range={:.3f}ms set_text={:.3f}ms set_selection={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), getRangeElapsedMs, setTextElapsedMs, setSelectionElapsedMs,
-                          static_cast<unsigned int>(hr))
-                          .c_str());
     return hr;
 }
 
@@ -294,10 +264,6 @@ HRESULT CMetasequoiaIME::_SetCompositionTextAndSelection(TfEditCookie ec, _In_ I
     double getRangeElapsedMs = getRangeTimer.ElapsedMs();
     if (FAILED(hr) || pRangeComposition == nullptr)
     {
-        OutputDebugString(fmt::format(
-                              L"[msime-perf] _SetCompositionTextAndSelection elapsed={:.3f}ms get_range={:.3f}ms set_text=0ms set_selection=0ms hr={:#x}",
-                              timer.ElapsedMs(), getRangeElapsedMs, static_cast<unsigned int>(hr))
-                              .c_str());
         return FAILED(hr) ? hr : E_FAIL;
     }
 
@@ -318,11 +284,6 @@ HRESULT CMetasequoiaIME::_SetCompositionTextAndSelection(TfEditCookie ec, _In_ I
     }
 
     pRangeComposition->Release();
-    OutputDebugString(fmt::format(
-                          L"[msime-perf] _SetCompositionTextAndSelection elapsed={:.3f}ms get_range={:.3f}ms set_text={:.3f}ms set_selection={:.3f}ms hr={:#x}",
-                          timer.ElapsedMs(), getRangeElapsedMs, setTextElapsedMs, setSelectionElapsedMs,
-                          static_cast<unsigned int>(hr))
-                          .c_str());
     return hr;
 }
 
