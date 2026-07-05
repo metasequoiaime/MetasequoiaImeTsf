@@ -1001,6 +1001,34 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                               .c_str());
         break;
     }
+    case WM_AsyncNumberCandidateCommit: {
+        PerfTimer timer;
+        ITfDocumentMgr *pDocMgrFocus = nullptr;
+        ITfContext *pContext = nullptr;
+
+        if (SUCCEEDED(pIME->_GetThreadMgr()->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
+        {
+            if (SUCCEEDED(pDocMgrFocus->GetTop(&pContext)) && pContext)
+            {
+                _KEYSTROKE_STATE KeystrokeState;
+                KeystrokeState.Category = CATEGORY_CANDIDATE;
+                KeystrokeState.Function = FUNCTION_SELECT_BY_NUMBER;
+                OutputDebugString(fmt::format(
+                                      L"[msime-perf] WM_AsyncNumberCandidateCommit begin elapsed=0ms keycode={}",
+                                      static_cast<UINT>(wParam))
+                                      .c_str());
+                pIME->_InvokeKeyHandler(pContext, static_cast<UINT>(wParam), static_cast<WCHAR>(lParam), 0,
+                                        KeystrokeState);
+                pContext->Release();
+            }
+            pDocMgrFocus->Release();
+        }
+        OutputDebugString(fmt::format(
+                              L"[msime-perf] WM_AsyncNumberCandidateCommit end elapsed={:.3f}ms keycode={}",
+                              timer.ElapsedMs(), static_cast<UINT>(wParam))
+                              .c_str());
+        break;
+    }
     case WM_CleanupCandidatePresenter: {
         pIME->_DrainPendingCandidatePresenterCleanup();
         break;

@@ -25,6 +25,7 @@ const DWORD WM_CommitCandidate = WM_USER + 9;
 const DWORD WM_CleanupCandidatePresenter = WM_USER + 10;
 const DWORD WM_AsyncFinalizeCandidate = WM_USER + 11;
 const DWORD WM_AsyncPunctuationCommit = WM_USER + 12;
+const DWORD WM_AsyncNumberCandidateCommit = WM_USER + 13;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,

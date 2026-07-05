@@ -501,6 +501,24 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
                                   .c_str());
             return S_OK;
         }
+
+        if (KeystrokeState.Function == FUNCTION_SELECT_BY_NUMBER && _msgWndHandle)
+        {
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] OnKeyDown post async select-by-number elapsed_from_begin={:.3f}ms keycode={} category={} function={}",
+                                  onKeyDownTimer.ElapsedMs(), code,
+                                  static_cast<int>(KeystrokeState.Category),
+                                  static_cast<int>(KeystrokeState.Function))
+                                  .c_str());
+            PostMessage(_msgWndHandle, WM_AsyncNumberCandidateCommit, code, static_cast<LPARAM>(wch));
+            OutputDebugString(fmt::format(
+                                  L"[msime-perf] OnKeyDown end total={:.3f}ms eaten={} keycode={} category={} function={} async_select_by_number=1",
+                                  onKeyDownTimer.ElapsedMs(), *pIsEaten, code,
+                                  static_cast<int>(KeystrokeState.Category),
+                                  static_cast<int>(KeystrokeState.Function))
+                                  .c_str());
+            return S_OK;
+        }
     }
 
     if (*pIsEaten)
