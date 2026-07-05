@@ -127,6 +127,7 @@ int ConnectToAllNamedpipe();
 int ConnectToTsfNamedpipe();
 int CloseIpc();
 int CloseNamedpipe();
+HANDLE GetToTsfWorkerThreadNamedpipe();
 
 //
 // For shared memory
@@ -216,8 +217,6 @@ constexpr UINT SwitchToFullwidth = 4;
 constexpr UINT SwitchToHalfwidth = 5;
 constexpr UINT CommitCurCandidate = 6;
 } // namespace DataToTsfWorkerThreadMsgType
-
-inline HANDLE hToTsfWorkerThreadPipe = nullptr;
 
 inline bool g_connected = false;
 

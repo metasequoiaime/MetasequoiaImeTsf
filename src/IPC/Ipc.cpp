@@ -25,11 +25,12 @@ static void *pBuf;
 static FanyImeSharedMemoryData *sharedData;
 static bool canUseSharedMemory = false;
 
-static HANDLE hPipe = nullptr;
-static HANDLE hFromServerPipe = nullptr;
+static thread_local HANDLE hPipe = nullptr;
+static thread_local HANDLE hFromServerPipe = nullptr;
+static thread_local HANDLE hToTsfWorkerThreadPipe = nullptr;
 
-static FanyImeNamedpipeData namedpipeData = {};
-FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
+static thread_local FanyImeNamedpipeData namedpipeData = {};
+static thread_local FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
 
 /* Data size transfered from Server process */
 static const int ServerDtPipeDataSize = 512;
@@ -50,7 +51,7 @@ double GetElapsedMilliseconds(const LARGE_INTEGER &startCounter, const LARGE_INT
 
 uint64_t GetPipeClientId()
 {
-    static const uint64_t clientId =
+    thread_local const uint64_t clientId =
         (static_cast<uint64_t>(GetCurrentProcessId()) << 32) | static_cast<uint64_t>(GetCurrentThreadId());
     return clientId;
 }
@@ -215,7 +216,7 @@ int ConnectToAllNamedpipe()
     bool mainPipeReady = TryOpenClientPipe(hPipe, FANY_IME_NAMED_PIPE, FanyImePipeRole::Main);
     bool toTsfPipeReady = TryOpenClientPipe(hFromServerPipe, FANY_IME_TO_TSF_NAMED_PIPE, FanyImePipeRole::ToTsf);
     bool toTsfWorkerPipeReady =
-        TryOpenClientPipe(Global::hToTsfWorkerThreadPipe, FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE,
+        TryOpenClientPipe(hToTsfWorkerThreadPipe, FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE,
                           FanyImePipeRole::ToTsfWorkerThread);
 
     return (mainPipeReady && toTsfPipeReady && toTsfWorkerPipeReady) ? 1 : 0;
@@ -276,8 +277,13 @@ int CloseNamedpipe()
 {
     ClosePipeHandleIfValid(hPipe);
     ClosePipeHandleIfValid(hFromServerPipe);
-    ClosePipeHandleIfValid(Global::hToTsfWorkerThreadPipe);
+    ClosePipeHandleIfValid(hToTsfWorkerThreadPipe);
     return 0;
+}
+
+HANDLE GetToTsfWorkerThreadNamedpipe()
+{
+    return hToTsfWorkerThreadPipe;
 }
 
 int WriteDataToSharedMemory(           //

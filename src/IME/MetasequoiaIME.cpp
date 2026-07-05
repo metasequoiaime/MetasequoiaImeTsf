@@ -119,6 +119,7 @@ CMetasequoiaIME::CMetasequoiaIME()
 
     _msgWndHandle = nullptr;
     _pIpcThread = nullptr;
+    _hToTsfWorkerThreadPipe = nullptr;
     _shouldStopIpcThread = false;
     _hasPendingServerCandidate = false;
     _pendingServerCandidateMsgType = Global::DataFromServerMsgType::OutofRange;
@@ -528,12 +529,14 @@ STDAPI CMetasequoiaIME::Deactivate()
 
     /* 清理 IPC 线程 */
     _shouldStopIpcThread = true;
-    // CancelIoEx(Global::hToTsfWorkerThreadPipe, nullptr);
-    // CloseHandle(Global::hToTsfWorkerThreadPipe);
-    // Global::hToTsfWorkerThreadPipe = nullptr;
+    if (_hToTsfWorkerThreadPipe && _hToTsfWorkerThreadPipe != INVALID_HANDLE_VALUE)
+    {
+        CancelIoEx(_hToTsfWorkerThreadPipe, nullptr);
+    }
     // Clean IPC
     /* 必须先 CloseIpc，再 join 线程 */
     CloseIpc();
+    _hToTsfWorkerThreadPipe = nullptr;
     if (_pIpcThread && _pIpcThread->joinable())
     {
         _pIpcThread->join();
@@ -637,10 +640,16 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
         /* 阻塞读 */
         while (!pIME->_shouldStopIpcThread)
         {
+            if (!pIME->_hToTsfWorkerThreadPipe || pIME->_hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+            {
+                Sleep(20);
+                continue;
+            }
+
             DWORD bytesRead = 0;
             FanyImeNamedpipeDataToTsfWorkerThread buf;
             BOOL readResult = ReadFile(         //
-                Global::hToTsfWorkerThreadPipe, //
+                pIME->_hToTsfWorkerThreadPipe,  //
                 &buf,                           //
                 sizeof(buf),                    //
                 &bytesRead,                     //
@@ -846,6 +855,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 #endif
             if (ConnectToAllNamedpipe())
             {
+                pIME->_hToTsfWorkerThreadPipe = GetToTsfWorkerThreadNamedpipe();
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
                 FANY_IPC_LOG_RAW(L"[msime]: [ipc] reconnect-all succeeded");

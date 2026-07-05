@@ -297,6 +297,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
 
     HWND _msgWndHandle;
     std::thread *_pIpcThread;
+    HANDLE _hToTsfWorkerThreadPipe;
     std::atomic<bool> _shouldStopIpcThread;
     std::mutex _pendingCommitCandidateMutex;
     std::wstring _pendingCommitCandidate;
