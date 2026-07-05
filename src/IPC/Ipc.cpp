@@ -652,7 +652,7 @@ void ClearNamedpipeDataIfExists(bool force)
 struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
 {
     std::pair<UINT, std::wstring> ret = {0, L""};
-    int timeoutMs = 10; // Default timeout 10ms
+    int timeoutMs = 50; // Default timeout 50ms
 
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
@@ -706,8 +706,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
             YieldProcessor();
         }
     }
-
-    FANY_IPC_LOGF(L"[msime]: [ipc] TryReadDataFromServerPipeWithTimeout timeout after {} ms", timeoutMs);
 
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
     // Pipe timeout error

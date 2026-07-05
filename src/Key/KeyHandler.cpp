@@ -17,6 +17,12 @@
 namespace
 {
 std::wstring g_toggleImeFallbackBuffer;
+
+bool IsTimeoutSentinelCandidate(UINT msgType, const WCHAR *pCandidateString)
+{
+    return msgType == Global::DataFromServerMsgType::Normal && pCandidateString != nullptr &&
+           wcscmp(pCandidateString, L"T") == 0;
+}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -801,6 +807,10 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
             PerfTimer pipeReadTimer;
             struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
             pipeReadElapsedMs = pipeReadTimer.ElapsedMs();
+            if (IsTimeoutSentinelCandidate(receivedData->msg_type, receivedData->candidate_string))
+            {
+                receivedData = TryReadDataFromServerPipeWithTimeout();
+            }
             punctuationStr = std::wstring(receivedData->candidate_string) + punctuationStr;
         }
     }

@@ -26,6 +26,14 @@ const int MOVEDOWN_ONE = 1;
 const int MOVETO_TOP = 0;
 const int MOVETO_BOTTOM = -1;
 
+namespace
+{
+bool IsTimeoutSentinelCandidate(UINT msgType, const std::wstring &candidateString)
+{
+    return msgType == Global::DataFromServerMsgType::Normal && candidateString == L"T";
+}
+}
+
 //+---------------------------------------------------------------------------
 //
 // _HandleCandidateFinalize
@@ -82,6 +90,12 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             _TakePendingServerCandidate(&serverMsgType, &serverCandidateString);
         if (hasPrefetchedServerCandidate)
         {
+            if (IsTimeoutSentinelCandidate(serverMsgType, serverCandidateString))
+            {
+                struct FanyImeNamedpipeDataToTsf *retryData = TryReadDataFromServerPipeWithTimeout();
+                serverMsgType = retryData->msg_type;
+                serverCandidateString = retryData->candidate_string;
+            }
         }
         else
         {
@@ -89,6 +103,12 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
             serverMsgType = receivedData->msg_type;
             serverCandidateString = receivedData->candidate_string;
+            if (IsTimeoutSentinelCandidate(serverMsgType, serverCandidateString))
+            {
+                struct FanyImeNamedpipeDataToTsf *retryData = TryReadDataFromServerPipeWithTimeout();
+                serverMsgType = retryData->msg_type;
+                serverCandidateString = retryData->candidate_string;
+            }
         }
 
         if (serverMsgType == Global::DataFromServerMsgType::OutofRange) // Candidate index out of range

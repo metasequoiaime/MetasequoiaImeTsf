@@ -414,10 +414,6 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
         if (code == VK_SPACE && KeystrokeState.Function == FUNCTION_CONVERT)
         {
-            PerfTimer prefetchTimer;
-            FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
-            _QueuePendingServerCandidate(receivedData->msg_type, receivedData->candidate_string);
-
             if (_msgWndHandle)
             {
                 PostMessage(_msgWndHandle, WM_AsyncFinalizeCandidate, 0, 0);
@@ -430,18 +426,13 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
             std::wstring punctuationCommitText;
             const WCHAR *punctuation = _pCompositionProcessorEngine->GetPunctuation(wch);
             punctuationCommitText = punctuation ? punctuation : L"";
-
-            double prefetchElapsedMs = 0;
-            if (_candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter &&
-                Global::CommitWithFirstCandPunc.count(wch) > 0)
+            const bool shouldFinalizeFirstCandidateWithPunctuation =
+                _candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter &&
+                Global::CommitWithFirstCandPunc.count(wch) > 0;
+            if (!shouldFinalizeFirstCandidateWithPunctuation)
             {
-                PerfTimer prefetchTimer;
-                FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
-                prefetchElapsedMs = prefetchTimer.ElapsedMs();
-                punctuationCommitText = std::wstring(receivedData->candidate_string) + punctuationCommitText;
+                _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
             }
-
-            _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
             PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, 0, 0);
             return S_OK;
         }
