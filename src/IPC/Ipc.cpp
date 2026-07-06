@@ -25,12 +25,12 @@ static void *pBuf;
 static FanyImeSharedMemoryData *sharedData;
 static bool canUseSharedMemory = false;
 
-static thread_local HANDLE hPipe = nullptr;
-static thread_local HANDLE hFromServerPipe = nullptr;
-static thread_local HANDLE hToTsfWorkerThreadPipe = nullptr;
+static HANDLE hPipe = nullptr;
+static HANDLE hFromServerPipe = nullptr;
+static HANDLE hToTsfWorkerThreadPipe = nullptr;
 
-static thread_local FanyImeNamedpipeData namedpipeData = {};
-static thread_local FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
+static FanyImeNamedpipeData namedpipeData = {};
+static FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
 
 /* Data size transfered from Server process */
 static const int ServerDtPipeDataSize = 512;
@@ -51,7 +51,7 @@ double GetElapsedMilliseconds(const LARGE_INTEGER &startCounter, const LARGE_INT
 
 uint64_t GetPipeClientId()
 {
-    thread_local const uint64_t clientId =
+    static const uint64_t clientId =
         (static_cast<uint64_t>(GetCurrentProcessId()) << 32) | static_cast<uint64_t>(GetCurrentThreadId());
     return clientId;
 }
@@ -93,6 +93,26 @@ void LogServerPipeReadFallback(const wchar_t *reason, const wchar_t *fallbackTex
                                   GetPipeClientId(), namedpipeData.event_type, namedpipeData.keycode,
                                   static_cast<unsigned int>(namedpipeData.wch), namedpipeData.modifiers_down,
                                   namedpipeData.pinyin_length)
+                          .c_str());
+}
+
+void LogServerPipeWaitStart(int timeoutMs)
+{
+    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe wait start: timeout_ms={}, client_id={}, event_type={}, "
+                                  L"keycode={}, wch={}, modifiers={}, pinyin_length={}",
+                                  timeoutMs, GetPipeClientId(), namedpipeData.event_type, namedpipeData.keycode,
+                                  static_cast<unsigned int>(namedpipeData.wch), namedpipeData.modifiers_down,
+                                  namedpipeData.pinyin_length)
+                          .c_str());
+}
+
+void LogServerPipeWaitResult(UINT msgType, const WCHAR *candidateString, double elapsedMs)
+{
+    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe wait result: msg_type={}, candidate={}, elapsed_ms={:.3f}, "
+                                  L"client_id={}, event_type={}, keycode={}, wch={}",
+                                  msgType, candidateString ? candidateString : L"<null>", elapsedMs, GetPipeClientId(),
+                                  namedpipeData.event_type, namedpipeData.keycode,
+                                  static_cast<unsigned int>(namedpipeData.wch))
                           .c_str());
 }
 
@@ -672,6 +692,7 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
 {
     std::pair<UINT, std::wstring> ret = {0, L""};
     int timeoutMs = 50; // Default timeout 50ms
+    LogServerPipeWaitStart(timeoutMs);
 
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
@@ -719,6 +740,8 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
                 fmt::format(L"[msime]: PeekNamedPipe: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
                     .c_str());
 #endif
+            LogServerPipeWaitResult(ret->msg_type, ret->candidate_string,
+                                    GetElapsedMilliseconds(startCounter, nowCounter, frequency));
             return ret;
         }
 
