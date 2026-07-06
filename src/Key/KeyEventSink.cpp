@@ -364,6 +364,7 @@ STDAPI CMetasequoiaIME::OnTestKeyDown(ITfContext *pContext, WPARAM wParam, LPARA
 STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lParam, BOOL *pIsEaten)
 {
     PerfTimer onKeyDownTimer;
+    const bool isPunctuationKey = _pCompositionProcessorEngine && _pCompositionProcessorEngine->IsPunctuation(ConvertVKey((UINT)wParam));
 
     Global::UpdateModifiers(wParam, lParam);
 
@@ -423,6 +424,7 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
         if (KeystrokeState.Function == FUNCTION_PUNCTUATION && _msgWndHandle)
         {
+            PerfTimer asyncPuncTimer;
             std::wstring punctuationCommitText;
             const WCHAR *punctuation = _pCompositionProcessorEngine->GetPunctuation(wch);
             punctuationCommitText = punctuation ? punctuation : L"";
@@ -433,7 +435,14 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
             {
                 _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
             }
-            PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, 0, 0);
+            PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, code, static_cast<LPARAM>(wch));
+            OutputDebugString(
+                fmt::format(
+                    L"[msime-punc] OnKeyDown async-punctuation queue keycode={} wch={} with_candidate={} "
+                    L"elapsed_ms={:.3f}",
+                    code, static_cast<unsigned int>(wch), shouldFinalizeFirstCandidateWithPunctuation ? 1 : 0,
+                    asyncPuncTimer.ElapsedMs())
+                    .c_str());
             return S_OK;
         }
 
@@ -475,6 +484,13 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
     }
 
 
+    if (isPunctuationKey)
+    {
+        OutputDebugString(
+            fmt::format(L"[msime-punc] OnKeyDown end keycode={} eaten={} total_ms={:.3f}", code, *pIsEaten ? 1 : 0,
+                        onKeyDownTimer.ElapsedMs())
+                .c_str());
+    }
     return S_OK;
 }
 

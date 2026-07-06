@@ -38,6 +38,44 @@ constexpr int CONNECT_TO_TSF_NAMEDPIPE_MAX_RETRY = 1;
 int g_connectAllNamedpipeRetryCount = 0;
 int g_connectToTsfNamedpipeRetryCount = 0;
 
+class CPunctuationCommitEditSession : public CEditSessionBase
+{
+  public:
+    CPunctuationCommitEditSession(CMetasequoiaIME *pTextService, ITfContext *pContext, UINT code, WCHAR wch,
+                                  LARGE_INTEGER requestStartQpc)
+        : CEditSessionBase(pTextService, pContext), _code(code), _wch(wch), _requestStartQpc(requestStartQpc)
+    {
+        if (_requestStartQpc.QuadPart == 0)
+        {
+            QueryPerformanceCounter(&_requestStartQpc);
+        }
+    }
+
+    STDMETHODIMP DoEditSession(TfEditCookie ec) override
+    {
+        PerfTimer timer;
+        HRESULT hr = _pTextService->_HandleCompositionPunctuation(ec, _pContext, _wch);
+        LARGE_INTEGER freq = {};
+        LARGE_INTEGER nowQpc = {};
+        QueryPerformanceFrequency(&freq);
+        QueryPerformanceCounter(&nowQpc);
+        const double queueElapsedMs =
+            static_cast<double>(nowQpc.QuadPart - _requestStartQpc.QuadPart) * 1000.0 / static_cast<double>(freq.QuadPart);
+        OutputDebugString(
+            fmt::format(L"[msime-punc] DirectPunctuationEditSession DoEditSession keycode={} wch={} queue_ms={:.3f} "
+                        L"do_ms={:.3f} hr=0x{:08X}",
+                        _code, static_cast<unsigned int>(_wch), queueElapsedMs, timer.ElapsedMs(),
+                        static_cast<unsigned int>(hr))
+                .c_str());
+        return hr;
+    }
+
+  private:
+    UINT _code;
+    WCHAR _wch;
+    LARGE_INTEGER _requestStartQpc;
+};
+
 } // namespace
 
 //+---------------------------------------------------------------------------
@@ -179,6 +217,37 @@ std::wstring CMetasequoiaIME::_TakePendingPunctuationCommitText()
     std::wstring pendingPunctuationCommitText;
     pendingPunctuationCommitText.swap(_pendingPunctuationCommitText);
     return pendingPunctuationCommitText;
+}
+
+HRESULT CMetasequoiaIME::_RequestDirectPunctuationEditSession(_In_ ITfContext *pContext, UINT code, WCHAR wch)
+{
+    if (pContext == nullptr)
+    {
+        return E_INVALIDARG;
+    }
+
+    LARGE_INTEGER requestStartQpc = {};
+    QueryPerformanceCounter(&requestStartQpc);
+
+    CPunctuationCommitEditSession *pEditSession =
+        new (std::nothrow) CPunctuationCommitEditSession(this, pContext, code, wch, requestStartQpc);
+    if (pEditSession == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
+    HRESULT editSessionHr = E_FAIL;
+    PerfTimer requestTimer;
+    HRESULT requestHr =
+        pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE, &editSessionHr);
+    OutputDebugString(
+        fmt::format(L"[msime-punc] DirectPunctuationEditSession RequestEditSession keycode={} wch={} request_ms={:.3f} "
+                    L"request_hr=0x{:08X} session_hr=0x{:08X}",
+                    code, static_cast<unsigned int>(wch), requestTimer.ElapsedMs(), static_cast<unsigned int>(requestHr),
+                    static_cast<unsigned int>(editSessionHr))
+            .c_str());
+    pEditSession->Release();
+    return requestHr;
 }
 
 void CMetasequoiaIME::_QueuePendingServerCandidate(UINT msgType, _In_z_ const WCHAR *pCandidateString)
@@ -969,15 +1038,33 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         PerfTimer timer;
         ITfDocumentMgr *pDocMgrFocus = nullptr;
         ITfContext *pContext = nullptr;
+        const UINT code = static_cast<UINT>(wParam);
+        const WCHAR wch = static_cast<WCHAR>(lParam);
 
         if (SUCCEEDED(pIME->_GetThreadMgr()->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
         {
             if (SUCCEEDED(pDocMgrFocus->GetTop(&pContext)) && pContext)
             {
-                _KEYSTROKE_STATE KeystrokeState;
-                KeystrokeState.Category = CATEGORY_COMPOSING;
-                KeystrokeState.Function = FUNCTION_PUNCTUATION;
-                pIME->_InvokeKeyHandler(pContext, Global::Keycode, Global::wch, 0, KeystrokeState);
+                const bool useDirectPunctuationSession = pIME->_candidateMode == CANDIDATE_NONE && !pIME->_IsComposing();
+                if (useDirectPunctuationSession)
+                {
+                    pIME->_RequestDirectPunctuationEditSession(pContext, code, wch);
+                    OutputDebugString(
+                        fmt::format(L"[msime-punc] WM_AsyncPunctuationCommit direct keycode={} wch={} total_ms={:.3f}",
+                                    code, static_cast<unsigned int>(wch), timer.ElapsedMs())
+                            .c_str());
+                }
+                else
+                {
+                    _KEYSTROKE_STATE KeystrokeState;
+                    KeystrokeState.Category = CATEGORY_COMPOSING;
+                    KeystrokeState.Function = FUNCTION_PUNCTUATION;
+                    pIME->_InvokeKeyHandler(pContext, code, wch, 0, KeystrokeState);
+                    OutputDebugString(
+                        fmt::format(L"[msime-punc] WM_AsyncPunctuationCommit invoke keycode={} wch={} total_ms={:.3f}",
+                                    code, static_cast<unsigned int>(wch), timer.ElapsedMs())
+                            .c_str());
+                }
                 pContext->Release();
             }
             pDocMgrFocus->Release();

@@ -809,7 +809,9 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
             pipeReadElapsedMs = pipeReadTimer.ElapsedMs();
             if (IsTimeoutSentinelCandidate(receivedData->msg_type, receivedData->candidate_string))
             {
+                PerfTimer retryTimer;
                 receivedData = TryReadDataFromServerPipeWithTimeout();
+                pipeReadElapsedMs += retryTimer.ElapsedMs();
             }
             punctuationStr = std::wstring(receivedData->candidate_string) + punctuationStr;
         }
@@ -818,19 +820,56 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     CStringRange punctuationString;
     punctuationString.Set(punctuationStr.c_str(), punctuationStr.length());
 
-    /* Finalize character */
-    _RemoveDummyCompositionForComposing(ec, _pComposition); // Clear dummy original pinyin composition
-    PerfTimer addCharTimer;
-    hr = _AddCharAndFinalize(ec, pContext, &punctuationString);
-    double addCharElapsedMs = addCharTimer.ElapsedMs();
-    if (FAILED(hr))
+    const bool hasActiveComposition = _IsComposing() ? true : false;
+    if (hasActiveComposition)
     {
-        return hr;
-    }
+        double insertElapsedMs = 0;
+        PerfTimer insertTextTimer;
+        hr = _InsertTextToComposition(ec, pContext, &punctuationString);
+        insertElapsedMs = insertTextTimer.ElapsedMs();
+        if (FAILED(hr))
+        {
+            PerfTimer fallbackTimer;
+            hr = _AddComposingAndChar(ec, pContext, &punctuationString);
+            insertElapsedMs += fallbackTimer.ElapsedMs();
+        }
+        if (FAILED(hr))
+        {
+            return hr;
+        }
 
-    PerfTimer completeTimer;
-    _HandleComplete(ec, pContext);
-    double completeElapsedMs = completeTimer.ElapsedMs();
+        PerfTimer completeTimer;
+        _HandleCompleteCommitFirst(ec, pContext);
+        double completeElapsedMs = completeTimer.ElapsedMs();
+        OutputDebugString(
+            fmt::format(
+                L"[msime-punc] HandleCompositionPunctuation composed keycode={} wch={} pipe_ms={:.3f} "
+                L"insert_ms={:.3f} complete_ms={:.3f} total_ms={:.3f}",
+                Global::Keycode, static_cast<unsigned int>(wch), pipeReadElapsedMs, insertElapsedMs,
+                completeElapsedMs, timer.ElapsedMs())
+                .c_str());
+    }
+    else
+    {
+        PerfTimer addCharTimer;
+        hr = _AddCharAndFinalize(ec, pContext, &punctuationString);
+        double addCharElapsedMs = addCharTimer.ElapsedMs();
+        if (FAILED(hr))
+        {
+            return hr;
+        }
+
+        PerfTimer completeTimer;
+        _HandleComplete(ec, pContext);
+        double completeElapsedMs = completeTimer.ElapsedMs();
+        OutputDebugString(
+            fmt::format(
+                L"[msime-punc] HandleCompositionPunctuation plain keycode={} wch={} pipe_ms={:.3f} "
+                L"addchar_ms={:.3f} complete_ms={:.3f} total_ms={:.3f}",
+                Global::Keycode, static_cast<unsigned int>(wch), pipeReadElapsedMs, addCharElapsedMs,
+                completeElapsedMs, timer.ElapsedMs())
+                .c_str());
+    }
 
 
     return S_OK;
