@@ -1041,6 +1041,11 @@ VOID CCandidateListUIPresenter::_LayoutChangeNotification(_In_ RECT *lpRect)
 {
     lpRect;
     PerfTimer timer;
+    if (_asyncCleanupPending || !_candidateUiSessionActive)
+    {
+        // In UWP, layout updates can still arrive after candidate UI teardown; ignore them so the window stays hidden.
+        return;
+    }
     MoveCandidateUiSession();
 }
 
@@ -1326,6 +1331,11 @@ void CCandidateListUIPresenter::UpdateCandidateUiSession()
 void CCandidateListUIPresenter::MoveCandidateUiSession()
 {
     PerfTimer timer;
+    if (_asyncCleanupPending || !_candidateUiSessionActive)
+    {
+        // Once teardown starts, do not send further move events or the candidate window may linger on screen.
+        return;
+    }
     PerfTimer writePayloadTimer;
     WriteCandidateUiPayload(0b001000);
     double writePayloadElapsedMs = writePayloadTimer.ElapsedMs();
