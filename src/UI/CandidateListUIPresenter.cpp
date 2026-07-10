@@ -52,10 +52,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     std::wstring pendingCommitCandidate = _TakePendingCommitCandidate();
 
 
-#ifdef FANY_DEBUG
-    OutputDebugString(fmt::format(L"[msime]: create_word, keystrokeBuffer: {}", keyStrokebuffer.ToWString()).c_str());
-#endif
-
     // _pCandidateListUIPresenter would be null in uwp/metro apps
     if (nullptr == _pCandidateListUIPresenter)
     {
@@ -118,9 +114,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         else if (serverMsgType == Global::DataFromServerMsgType::Normal) // 只有正常情况下才会上屏
         {
             GlobalIme::word_for_creating_word = L"";
-#ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"[msime]: create_word, normal???").c_str());
-#endif
             candidateString.Set(serverCandidateString.c_str(), serverCandidateString.length());
             PerfTimer insertTextTimer;
             hr = _InsertTextToComposition(ec, pContext, &candidateString);
@@ -142,11 +135,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             {
                 std::wstring remainingRawInput = data.substr(0, separator);
                 std::wstring curWord = data.substr(separator + 1);
-#ifdef FANY_DEBUG
-                OutputDebugString(
-                    fmt::format(L"[msime]: create_word, remainingRawInput: {}, curWord: {}", remainingRawInput, curWord)
-                        .c_str());
-#endif
                 GlobalIme::word_for_creating_word = curWord;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
@@ -175,10 +163,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                     _HandleCancel(ec, pContext);
                 }
             }
-#ifdef FANY_DEBUG
-            OutputDebugString(
-                fmt::format(L"[msime]: create_word: current word part {}", GlobalIme::word_for_creating_word).c_str());
-#endif
             return hr;
         }
     }
@@ -210,11 +194,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalizeForVKReturn(TfEditCookie ec, _I
     {
         // goto NoPresenter;
     }
-
-#ifdef FANY_DEBUG
-    std::wstring msg(candidateString.Get(), candidateLen);
-    OutputDebugString(fmt::format(L"[msime]: {}", msg).c_str());
-#endif
 
     if (candidateLen)
     {

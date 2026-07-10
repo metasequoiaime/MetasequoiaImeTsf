@@ -1,4 +1,4 @@
-﻿#include "Private.h"
+#include "Private.h"
 #include "MetasequoiaIME.h"
 #include "CompositionProcessorEngine.h"
 #include "TfInputProcessorProfile.h"
@@ -1734,9 +1734,6 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
     {
         if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_NONE)) // 26 basic English chars
         {
-#ifdef FANY_DEBUG
-            OutputDebugString(L"[msime]: Basic 26 chars key pressed.");
-#endif
             return TRUE;
         }
         else if ((IsWildcard() && IsWildcardChar(*pwch) && !IsDisableWildcardAtFirst()) ||
@@ -1958,9 +1955,6 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
 
             case VK_RETURN:
                 // Do something when user press return key
-#ifdef FANY_DEBUG
-                OutputDebugString(L"[msime]: VK_RETURN pressed.");
-#endif
                 if (pKeyState)
                 {
                     pKeyState->Category = CATEGORY_CANDIDATE;
@@ -2209,9 +2203,6 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         return FALSE;
     }
 
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: Unknown keystroke.");
-#endif
     return FALSE;
 }
 
@@ -2227,11 +2218,6 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyKeystrokeComposition( //
     KEYSTROKE_FUNCTION function                                     //
 )
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: Fany Here: IsVirtualKeyKeystrokeComposition 26.");
-    std::wstring modifiers = fmt::format(L"[msime]: Global Modifiers: {}", Global::ModifiersValue);
-    OutputDebugString(modifiers.c_str());
-#endif
     if (pKeyState == nullptr)
     {
         return FALSE;
@@ -2334,9 +2320,6 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
         }
         else if (GetVirtualKeyLength() > 0)
         {
-#ifdef FANY_DEBUG
-            OutputDebugString(L"[msime]: GetVirtualKeyLength() > 0");
-#endif
             pKeyState->Category = CATEGORY_CANDIDATE;
             pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
             return TRUE;

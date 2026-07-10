@@ -87,10 +87,7 @@ HRESULT CKeyStateCategory::KeyStateHandler(KEYSTROKE_FUNCTION function, KeyHandl
     case FUNCTION_FINALIZE_CANDIDATELIST:
         return HandleKeyFinalizeCandidatelist(dto);
     case FUNCTION_FINALIZE_CANDIDATELISTForVKReturn:
-#ifdef FANY_DEBUG
-        OutputDebugString(L"[msime]: Use VK_RETURN to commit original keystroke string.");
-#endif
-        return HandleKeyFinalizeCandidatelistForVKReturn(dto);
+    return HandleKeyFinalizeCandidatelistForVKReturn(dto);
 
     case FUNCTION_CONVERT: {
         return HandleKeyConvert(dto);
@@ -280,9 +277,6 @@ HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
     if (Global::Keycode == VK_SPACE)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateComposing");
-#endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
     // VK_SPACE
@@ -340,9 +334,6 @@ HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelist(KeyHandlerEditSession
 // _HandleCandidateInput
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelistForVKReturn(KeyHandlerEditSessionDTO dto)
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: Will commit original keystroke string.");
-#endif
     return _pTextService->_HandleCandidateFinalizeForVKReturn(dto.ec, dto.pContext);
 }
 
@@ -358,9 +349,6 @@ HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
     if (Global::Keycode == VK_SPACE)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(L"[msime]: HandleKeyConvert in CKeyStateCandidate");
-#endif
         return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
     }
     // Send candidate string to client when pressing VK_SPACE
@@ -382,9 +370,6 @@ HRESULT CKeyStateCandidate::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 //_HandleCandidateSelectByNumber
 HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: HandleKeySelectByNumber in CKeyStateCandidate");
-#endif
     // return _pTextService->_HandleCandidateSelectByNumber(dto.ec, dto.pContext, dto.code);
     return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
 }

@@ -169,10 +169,6 @@ BOOL CMetasequoiaIME::_IsKeyEaten(        //
         }
     }
 
-#ifdef FANY_DEBUG
-    DebugLog(L"IsPunctuation _candidateMode: {}, isPunctuation: {}", (int)_candidateMode, isPunctuation);
-#endif
-
     //
     // Punctuation
     //
@@ -436,13 +432,6 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
                 _QueuePendingPunctuationCommitText(punctuationCommitText.c_str());
             }
             PostMessage(_msgWndHandle, WM_AsyncPunctuationCommit, code, static_cast<LPARAM>(wch));
-            OutputDebugString(
-                fmt::format(
-                    L"[msime-punc] OnKeyDown async-punctuation queue keycode={} wch={} with_candidate={} "
-                    L"elapsed_ms={:.3f}",
-                    code, static_cast<unsigned int>(wch), shouldFinalizeFirstCandidateWithPunctuation ? 1 : 0,
-                    asyncPuncTimer.ElapsedMs())
-                    .c_str());
             return S_OK;
         }
 
@@ -486,10 +475,6 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
 
     if (isPunctuationKey)
     {
-        OutputDebugString(
-            fmt::format(L"[msime-punc] OnKeyDown end keycode={} eaten={} total_ms={:.3f}", code, *pIsEaten ? 1 : 0,
-                        onKeyDownTimer.ElapsedMs())
-                .c_str());
     }
     return S_OK;
 }
@@ -534,11 +519,6 @@ STDAPI CMetasequoiaIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
     WCHAR wch = '\0';
     UINT code = 0;
     *pIsEaten = _IsKeyEaten(pContext, (UINT)wParam, &code, &wch, &KeystrokeState);
-
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: ITfKeyEventSink::OnKeyUp");
-    OutputDebugString(fmt::format(L"[msime]: Global::PureShiftKeyUp: {}", Global::PureShiftKeyUp).c_str());
-#endif
 
     // if (code == VK_SHIFT)
     // {

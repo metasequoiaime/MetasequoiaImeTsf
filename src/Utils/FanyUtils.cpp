@@ -32,9 +32,6 @@ void SendKeys(std::wstring pinyin)
         UINT sent = SendInput(2, in, sizeof(INPUT));
         if (sent != 2)
         {
-#ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"[msime]: SendKeys failed.").c_str());
-#endif
         }
     }
 }

@@ -10,15 +10,6 @@
 #include "MetasequoiaIME.h"
 #include <fmt/xchar.h>
 
-#ifdef FANY_IPC_DEBUG
-#define FANY_IPC_LOG_RAW(message) OutputDebugString(message)
-#define FANY_IPC_LOGW(message) OutputDebugString((message).c_str())
-#define FANY_IPC_LOGF(...) OutputDebugString(fmt::format(__VA_ARGS__).c_str())
-#else
-#define FANY_IPC_LOG_RAW(message) ((void)0)
-#define FANY_IPC_LOGW(message) ((void)0)
-#define FANY_IPC_LOGF(...) ((void)0)
-#endif
 
 static HANDLE hMapFile = nullptr;
 static void *pBuf;
@@ -56,70 +47,14 @@ uint64_t GetPipeClientId()
     return clientId;
 }
 
-void LogCreateFileFailure(const wchar_t *pipeName)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] CreateFile failed: pipe={}, gle={}", pipeName, GetLastError());
-}
 
-void LogCreateFileSuccess(const wchar_t *pipeName)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] CreateFile connected: pipe={}", pipeName);
-}
 
-void LogWriteFailure(const wchar_t *pipeName, DWORD bytesWritten, DWORD expectedBytes)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] WriteFile failed: pipe={}, gle={}, bytes_written={}, expected_bytes={}", pipeName,
-                  GetLastError(), bytesWritten, expectedBytes);
-}
 
-void LogReadFailure(const wchar_t *pipeName, DWORD bytesRead)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] ReadFile failed or empty: pipe={}, gle={}, bytes_read={}", pipeName,
-                  GetLastError(), bytesRead);
-}
 
-void LogPeekFailure(const wchar_t *pipeName)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] PeekNamedPipe failed: pipe={}, gle={}", pipeName, GetLastError());
-}
 
-void LogServerPipeReadFallback(const wchar_t *reason, const wchar_t *fallbackText, double elapsedMs, int timeoutMs,
-                               DWORD gle, DWORD bytesAvailable, int peekFailureCount)
-{
-    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe fallback: reason={}, fallback={}, elapsed_ms={:.3f}, "
-                                  L"timeout_ms={}, gle={}, bytes_available={}, peek_failures={}, client_id={}, "
-                                  L"event_type={}, keycode={}, wch={}, modifiers={}, pinyin_length={}",
-                                  reason, fallbackText, elapsedMs, timeoutMs, gle, bytesAvailable, peekFailureCount,
-                                  GetPipeClientId(), namedpipeData.event_type, namedpipeData.keycode,
-                                  static_cast<unsigned int>(namedpipeData.wch), namedpipeData.modifiers_down,
-                                  namedpipeData.pinyin_length)
-                          .c_str());
-}
 
-void LogServerPipeWaitStart(int timeoutMs)
-{
-    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe wait start: timeout_ms={}, client_id={}, event_type={}, "
-                                  L"keycode={}, wch={}, modifiers={}, pinyin_length={}",
-                                  timeoutMs, GetPipeClientId(), namedpipeData.event_type, namedpipeData.keycode,
-                                  static_cast<unsigned int>(namedpipeData.wch), namedpipeData.modifiers_down,
-                                  namedpipeData.pinyin_length)
-                          .c_str());
-}
 
-void LogServerPipeWaitResult(UINT msgType, const WCHAR *candidateString, double elapsedMs)
-{
-    OutputDebugString(fmt::format(L"[msime]: [ipc] server-pipe wait result: msg_type={}, candidate={}, elapsed_ms={:.3f}, "
-                                  L"client_id={}, event_type={}, keycode={}, wch={}",
-                                  msgType, candidateString ? candidateString : L"<null>", elapsedMs, GetPipeClientId(),
-                                  namedpipeData.event_type, namedpipeData.keycode,
-                                  static_cast<unsigned int>(namedpipeData.wch))
-                          .c_str());
-}
 
-void LogAuxMessage(const std::wstring &message)
-{
-    FANY_IPC_LOGF(L"[msime]: [ipc] SendToAuxNamedpipe: {}", message);
-}
 
 void ClosePipeHandleIfValid(HANDLE &hPipeHandle)
 {
@@ -168,16 +103,12 @@ bool TryOpenClientPipe(HANDLE &hPipeHandle, const wchar_t *pipeName, UINT pipeRo
 
     if (openedPipe == INVALID_HANDLE_VALUE)
     {
-        LogCreateFileFailure(pipeName);
         return false;
     }
 
     hPipeHandle = openedPipe;
-    LogCreateFileSuccess(pipeName);
     if (!WritePipeHello(hPipeHandle, pipeRole))
     {
-        LogWriteFailure(pipeName, 0, pipeRole == FanyImePipeRole::Main ? sizeof(FanyImeNamedpipeData)
-                                                                       : sizeof(FanyImePipeHello));
         ClosePipeHandleIfValid(hPipeHandle);
         return false;
     }
@@ -566,11 +497,7 @@ void SendToNamedpipe()
     if (!ret || bytesWritten != sizeof(namedpipeData))
     {
         /* Error handling: 必须将 hPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
-        LogWriteFailure(FANY_IME_NAMED_PIPE, bytesWritten, sizeof(namedpipeData));
         ClosePipeHandleIfValid(hPipe);
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually01.").c_str());
-#endif
         for (int i = 0; i < 10; ++i)
         {
             Sleep(10);
@@ -582,15 +509,10 @@ void SendToNamedpipe()
 
         if (hPipe == INVALID_HANDLE_VALUE)
         {
-            LogCreateFileFailure(FANY_IME_NAMED_PIPE);
-#ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually02.").c_str());
-#endif
             return;
         }
         else
         {
-            LogCreateFileSuccess(FANY_IME_NAMED_PIPE);
         }
 
         namedpipeData.client_id = GetPipeClientId();
@@ -605,10 +527,6 @@ void SendToNamedpipe()
 
         if (!ret || bytesWritten != sizeof(namedpipeData))
         {
-            LogWriteFailure(FANY_IME_NAMED_PIPE, bytesWritten, sizeof(namedpipeData));
-#ifdef FANY_DEBUG
-            OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually03.").c_str());
-#endif
         }
 
         return;
@@ -657,7 +575,6 @@ void ClearNamedpipeDataIfExists(bool force)
         {
             if (!peekOk)
             {
-                LogPeekFailure(FANY_IME_TO_TSF_NAMED_PIPE);
             }
             break; // no more data or pipe error
         }
@@ -672,7 +589,6 @@ void ClearNamedpipeDataIfExists(bool force)
 
         if (!readOk || bytesRead == 0)
         {
-            LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
             break;
         }
         clearedCount++;
@@ -692,7 +608,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
 {
     std::pair<UINT, std::wstring> ret = {0, L""};
     int timeoutMs = 50; // Default timeout 50ms
-    LogServerPipeWaitStart(timeoutMs);
 
     if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
     {
@@ -701,8 +616,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
             namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
-            LogServerPipeReadFallback(L"open_to_tsf_pipe_failed", namedpipeDataFromServer.candidate_string, 0.0,
-                                      timeoutMs, GetLastError(), 0, 0);
             return &namedpipeDataFromServer;
         }
     }
@@ -719,12 +632,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     while (true)
     {
 // TODO: Do not log
-#ifdef FANY_DEBUG
-        QueryPerformanceCounter(&nowCounter);
-        OutputDebugString(
-            fmt::format(L"[msime]: current waited: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
-                .c_str());
-#endif
         BOOL peekOk = PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr);
         if (!peekOk)
         {
@@ -734,14 +641,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
         else if (bytesAvailable > 0)
         {
             auto ret = ReadDataFromServerViaNamedPipe();
-#ifdef FANY_DEBUG
-            QueryPerformanceCounter(&nowCounter);
-            OutputDebugString(
-                fmt::format(L"[msime]: PeekNamedPipe: {:.3f}", GetElapsedMilliseconds(startCounter, nowCounter, frequency))
-                    .c_str());
-#endif
-            LogServerPipeWaitResult(ret->msg_type, ret->candidate_string,
-                                    GetElapsedMilliseconds(startCounter, nowCounter, frequency));
             return ret;
         }
 
@@ -763,9 +662,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     // Pipe timeout error
     wcscpy_s(namedpipeDataFromServer.candidate_string, L"T");
     const wchar_t *reason = peekFailureCount > 0 ? L"peek_failed_until_timeout" : L"timeout_no_data";
-    LogServerPipeReadFallback(reason, namedpipeDataFromServer.candidate_string,
-                              GetElapsedMilliseconds(startCounter, nowCounter, frequency), timeoutMs, lastPeekError,
-                              bytesAvailable, peekFailureCount);
     return &namedpipeDataFromServer;
 }
 
@@ -785,8 +681,6 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
             namedpipeDataFromServer.msg_type = 0;
             // wcscpy_s(namedpipeDataFromServer.candidate_string, L"PipeOpenError");
             wcscpy_s(namedpipeDataFromServer.candidate_string, L"X");
-            LogServerPipeReadFallback(L"read_open_to_tsf_pipe_failed", namedpipeDataFromServer.candidate_string, 0.0,
-                                      0, GetLastError(), 0, 0);
             return &namedpipeDataFromServer;
         }
     }
@@ -801,22 +695,15 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     );
     if (!readResult || bytesRead == 0) // Disconnected or error
     {
-        LogReadFailure(FANY_IME_TO_TSF_NAMED_PIPE, bytesRead);
         ClosePipeHandleIfValid(hFromServerPipe);
     }
     else
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: ReadDataFromServerViaNamedPipe: {}", //
-                                      namedpipeDataFromServer.candidate_string)
-                              .c_str());
-#endif
         return &namedpipeDataFromServer;
     }
 
     namedpipeDataFromServer.msg_type = 0;
     wcscpy_s(namedpipeDataFromServer.candidate_string, L"ReadDataError");
-    LogServerPipeReadFallback(L"read_failed", namedpipeDataFromServer.candidate_string, 0.0, 0, GetLastError(), 0, 0);
     return &namedpipeDataFromServer;
 }
 
@@ -852,13 +739,8 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     }
     if (!hAuxPipe || hAuxPipe == INVALID_HANDLE_VALUE)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
-#endif
-        LogCreateFileFailure(FANY_IME_AUX_NAMED_PIPE);
         return;
     }
-    LogAuxMessage(pipeData);
     DWORD bytesWritten = 0;
     BOOL ret = WriteFile(                    //
         hAuxPipe,                            //
@@ -869,7 +751,6 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     );
     if (!ret || bytesWritten != pipeData.length() * sizeof(wchar_t))
     {
-        LogWriteFailure(FANY_IME_AUX_NAMED_PIPE, bytesWritten, pipeData.length() * sizeof(wchar_t));
     }
     CloseHandle(hAuxPipe);
 }

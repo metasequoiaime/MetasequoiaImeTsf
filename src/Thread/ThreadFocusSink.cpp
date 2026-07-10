@@ -13,9 +13,6 @@
 
 STDAPI CMetasequoiaIME::OnSetThreadFocus()
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(fmt::format(L"[msime]: CMetasequoiaIME::OnSetThreadFocus").c_str());
-#endif
     PostMessage(_msgWndHandle, WM_ThreadFocus, 0, 0);
     if (_pCandidateListUIPresenter)
     {
@@ -43,9 +40,6 @@ STDAPI CMetasequoiaIME::OnSetThreadFocus()
 
 STDAPI CMetasequoiaIME::OnKillThreadFocus()
 {
-#ifdef FANY_DEBUG
-    OutputDebugString(fmt::format(L"[msime]: CMetasequoiaIME::OnKillThreadFocus").c_str());
-#endif
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr *pCandidateListDocumentMgr = nullptr;

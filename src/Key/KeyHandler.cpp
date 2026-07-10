@@ -77,9 +77,6 @@ VOID CMetasequoiaIME::_DeleteCandidateList(BOOL isForce, _In_opt_ ITfContext *pC
     double endCandidateElapsedMs = 0;
     if (_pCandidateListUIPresenter)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: create_word: dispose window?").c_str());
-#endif
         PerfTimer endCandidateTimer;
         CCandidateListUIPresenter *pPresenter = _pCandidateListUIPresenter;
         _pCandidateListUIPresenter = nullptr;
@@ -177,10 +174,6 @@ HRESULT CMetasequoiaIME::_HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *
         commitString.assign(keyStrokebuffer.Get(), keyStrokebuffer.GetLength());
         CStringRange commitStringRange;
         commitStringRange.Set(commitString.c_str(), commitString.length());
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: commitString: {}", commitString).c_str());
-#endif
-
         HRESULT hr = _AddCharAndFinalize(ec, pContext, &commitStringRange);
         if (FAILED(hr))
         {
@@ -257,9 +250,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionInput(TfEditCookie ec, _In_ ITfContex
         }
     }
 
-#ifdef FANY_DEBUG
-    OutputDebugString(L"[msime]: AddVirtualKey Here.");
-#endif
     // Add virtual key to composition processor engine
     pCompositionProcessorEngine->AddVirtualKey(wch);
     g_toggleImeFallbackBuffer.push_back(wch);
@@ -296,12 +286,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
 
     if (readingStrings.Count())
     {
-#ifdef FANY_DEBUG
-        // TODO: Log reading strings
-        OutputDebugString(fmt::format(L"[msime]: create_word count: {}", readingStrings.Count()).c_str());
-        std::wstring readingStr = readingStrings.GetAt(0)->ToWString();
-        OutputDebugString(fmt::format(L"[msime]: create_word: {}", readingStr).c_str());
-#endif
     }
 
     /* 一般来说，readingStrings 数组中只有一个元素，这个元素就是当前输入的拼音 */
@@ -309,9 +293,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     double addComposingElapsedMs = 0;
     for (UINT index = 0; index < readingStrings.Count(); index++)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"[msime]: create_word here test!!!").c_str());
-#endif
         CStringRange curReadingStr;
         std::wstring readingStr = readingStrings.GetAt(0)->ToWString();
 
@@ -841,13 +822,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
         PerfTimer completeTimer;
         _HandleCompleteCommitFirst(ec, pContext);
         double completeElapsedMs = completeTimer.ElapsedMs();
-        OutputDebugString(
-            fmt::format(
-                L"[msime-punc] HandleCompositionPunctuation composed keycode={} wch={} pipe_ms={:.3f} "
-                L"insert_ms={:.3f} complete_ms={:.3f} total_ms={:.3f}",
-                Global::Keycode, static_cast<unsigned int>(wch), pipeReadElapsedMs, insertElapsedMs,
-                completeElapsedMs, timer.ElapsedMs())
-                .c_str());
     }
     else
     {
@@ -862,13 +836,6 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
         PerfTimer completeTimer;
         _HandleComplete(ec, pContext);
         double completeElapsedMs = completeTimer.ElapsedMs();
-        OutputDebugString(
-            fmt::format(
-                L"[msime-punc] HandleCompositionPunctuation plain keycode={} wch={} pipe_ms={:.3f} "
-                L"addchar_ms={:.3f} complete_ms={:.3f} total_ms={:.3f}",
-                Global::Keycode, static_cast<unsigned int>(wch), pipeReadElapsedMs, addCharElapsedMs,
-                completeElapsedMs, timer.ElapsedMs())
-                .c_str());
     }
 
 

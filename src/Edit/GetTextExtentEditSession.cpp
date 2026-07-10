@@ -46,9 +46,6 @@ STDAPI CGetTextExtentEditSession::DoEditSession(TfEditCookie ec)
 
     if (SUCCEEDED(hr))
     {
-#ifdef FANY_DEBUG
-        // TODO: Log rc position
-#endif
         Global::Point[0] = rc.left * Global::DpiScale;
         Global::Point[1] = rc.bottom * Global::DpiScale;
         if (Global::current_process_name == Global::ZEN_BROWSER)
