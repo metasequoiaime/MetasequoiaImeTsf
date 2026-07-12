@@ -79,7 +79,7 @@ void CMetasequoiaIME::_SetComposition(_In_ ITfComposition *pComposition)
 //----------------------------------------------------------------------------
 
 HRESULT CMetasequoiaIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *pContext,
-                                              _In_ CStringRange *pstrAddString)
+                                               _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = S_OK;
 
@@ -162,7 +162,7 @@ HRESULT CMetasequoiaIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *
 //----------------------------------------------------------------------------
 
 HRESULT CMetasequoiaIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *pContext,
-                                             _In_ CStringRange *pstrAddString)
+                                              _In_ CStringRange *pstrAddString)
 {
     HRESULT hr = E_FAIL;
     PerfTimer timer;
@@ -206,7 +206,7 @@ HRESULT CMetasequoiaIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *p
 }
 
 HRESULT CMetasequoiaIME::_InsertTextToComposition(TfEditCookie ec, _In_ ITfContext *pContext,
-                                                  _In_ CStringRange *pstrAddString)
+                                                   _In_ CStringRange *pstrAddString)
 {
     PerfTimer timer;
     if (_pComposition == nullptr)
@@ -250,7 +250,7 @@ HRESULT CMetasequoiaIME::_InsertTextToComposition(TfEditCookie ec, _In_ ITfConte
 //----------------------------------------------------------------------------
 
 HRESULT CMetasequoiaIME::_SetCompositionTextAndSelection(TfEditCookie ec, _In_ ITfContext *pContext,
-                                                         _In_ CStringRange *pstrAddString)
+                                                          _In_ CStringRange *pstrAddString)
 {
     PerfTimer timer;
     if (_pComposition == nullptr)

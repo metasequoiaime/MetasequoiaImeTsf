@@ -35,7 +35,15 @@ class CCompositionProcessorEngine
 
     BOOL AddVirtualKey(WCHAR wch);
     void RemoveVirtualKey(DWORD_PTR dwIndex);
+    BOOL RemoveVirtualKeyBeforeCaret();
     void PurgeVirtualKey();
+    BOOL MoveCaret(int offset);
+    DWORD_PTR GetCaretPosition() const
+    {
+        return _caretPosition;
+    }
+    void SetRenderedPreedit(std::wstring preedit, size_t prefixLength);
+    DWORD_PTR GetRenderedCaretPosition() const;
 
     DWORD_PTR GetVirtualKeyLength()
     {
@@ -172,6 +180,9 @@ class CCompositionProcessorEngine
     _KEYSTROKE _keystrokeTable[26];
 
     CStringRange _keystrokeBuffer;
+    DWORD_PTR _caretPosition = 0;
+    std::wstring _renderedPreedit;
+    size_t _renderedPreeditPrefixLength = 0;
 
     BOOL _hasWildcardIncludedInKeystrokeBuffer;
 

@@ -401,13 +401,23 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
             Global::ModifiersDown &= ~0b00000001;
 
         PerfTimer clearPipeTimer;
-        ClearNamedpipeDataIfExists();
+        // Candidate-navigation responses share the main Server->TSF pipe with
+        // candidate commits. Drain any unconsumed response from an earlier key
+        // before issuing a new request so it cannot be mistaken for this key's
+        // acknowledgement.
+        ClearNamedpipeDataIfExists(KeystrokeState.Function == FUNCTION_SERVER_CANDIDATE_KEY);
 
         PerfTimer writeShmTimer;
         WriteDataToSharedMemory(Global::Keycode, wch, Global::ModifiersDown, nullptr, 0, L"", 0b000111);
 
         PerfTimer sendKeyEventTimer;
         SendKeyEventToUIProcess();
+
+        if (KeystrokeState.Function == FUNCTION_SERVER_CANDIDATE_KEY && _msgWndHandle)
+        {
+            PostMessage(_msgWndHandle, WM_AsyncServerCandidateKey, code, static_cast<LPARAM>(wch));
+            return S_OK;
+        }
 
         if (code == VK_SPACE && KeystrokeState.Function == FUNCTION_CONVERT)
         {

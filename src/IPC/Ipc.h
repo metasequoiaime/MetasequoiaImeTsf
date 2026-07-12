@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <atomic>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -205,6 +206,11 @@ constexpr UINT Normal = 0;
 constexpr UINT OutofRange = 1;
 constexpr UINT NeedToCreateWord = 2;
 constexpr UINT Preedit = 3;
+constexpr UINT NavigationIgnored = 4;
+constexpr UINT MoveSelectionPrevious = 5;
+constexpr UINT MoveSelectionNext = 6;
+constexpr UINT MovePagePrevious = 7;
+constexpr UINT MovePageNext = 8;
 } // namespace DataFromServerMsgType
 
 namespace DataToTsfWorkerThreadMsgType
@@ -216,8 +222,10 @@ constexpr UINT SwitchToPuncCn = 3;
 constexpr UINT SwitchToFullwidth = 4;
 constexpr UINT SwitchToHalfwidth = 5;
 constexpr UINT CommitCurCandidate = 6;
+constexpr UINT PagingCommaPeriodChanged = 7;
 } // namespace DataToTsfWorkerThreadMsgType
 
+inline std::atomic_bool PagingCommaPeriodEnabled{false};
 inline bool g_connected = false;
 
 } // namespace Global

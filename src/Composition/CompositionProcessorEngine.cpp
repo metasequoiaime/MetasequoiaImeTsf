@@ -251,7 +251,7 @@ BOOL CCompositionProcessorEngine::AddVirtualKey(WCHAR wch)
     }
 
     //
-    // append one keystroke in buffer.
+    // Insert at the logical composition caret.
     //
     DWORD_PTR srgKeystrokeBufLen = _keystrokeBuffer.GetLength();
     PWCHAR pwch = new (std::nothrow) WCHAR[srgKeystrokeBufLen + 1];
@@ -260,8 +260,12 @@ BOOL CCompositionProcessorEngine::AddVirtualKey(WCHAR wch)
         return FALSE;
     }
 
-    memcpy(pwch, _keystrokeBuffer.Get(), srgKeystrokeBufLen * sizeof(WCHAR));
-    pwch[srgKeystrokeBufLen] = wch;
+    _caretPosition = min(_caretPosition, srgKeystrokeBufLen);
+    memcpy(pwch, _keystrokeBuffer.Get(), _caretPosition * sizeof(WCHAR));
+    pwch[_caretPosition] = wch;
+    memcpy(pwch + _caretPosition + 1, _keystrokeBuffer.Get() + _caretPosition,
+           (srgKeystrokeBufLen - _caretPosition) * sizeof(WCHAR));
+    ++_caretPosition;
 
     if (_keystrokeBuffer.Get())
     {
@@ -299,6 +303,68 @@ void CCompositionProcessorEngine::RemoveVirtualKey(DWORD_PTR dwIndex)
     }
 
     _keystrokeBuffer.Set(_keystrokeBuffer.Get(), srgKeystrokeBufLen - 1);
+    if (_caretPosition > dwIndex)
+    {
+        --_caretPosition;
+    }
+    _caretPosition = min(_caretPosition, _keystrokeBuffer.GetLength());
+}
+
+BOOL CCompositionProcessorEngine::RemoveVirtualKeyBeforeCaret()
+{
+    if (_caretPosition == 0 || _keystrokeBuffer.GetLength() == 0)
+    {
+        return FALSE;
+    }
+    RemoveVirtualKey(_caretPosition - 1);
+    return TRUE;
+}
+
+BOOL CCompositionProcessorEngine::MoveCaret(int offset)
+{
+    const LONGLONG next = static_cast<LONGLONG>(_caretPosition) + offset;
+    if (next < 0 || next > static_cast<LONGLONG>(_keystrokeBuffer.GetLength()))
+    {
+        return FALSE;
+    }
+    _caretPosition = static_cast<DWORD_PTR>(next);
+    return TRUE;
+}
+
+void CCompositionProcessorEngine::SetRenderedPreedit(std::wstring preedit, size_t prefixLength)
+{
+    _renderedPreedit = std::move(preedit);
+    _renderedPreeditPrefixLength = min(prefixLength, _renderedPreedit.size());
+}
+
+DWORD_PTR CCompositionProcessorEngine::GetRenderedCaretPosition() const
+{
+    size_t lettersBeforeCaret = 0;
+    for (DWORD_PTR i = 0; i < min(_caretPosition, _keystrokeBuffer.GetLength()); ++i)
+    {
+        if (_keystrokeBuffer.Get()[i] != L'\'')
+        {
+            ++lettersBeforeCaret;
+        }
+    }
+    size_t displayPosition = _renderedPreeditPrefixLength;
+    size_t seenLetters = 0;
+    while (displayPosition < _renderedPreedit.size() && seenLetters < lettersBeforeCaret)
+    {
+        if (_renderedPreedit[displayPosition] != L'\'')
+        {
+            ++seenLetters;
+        }
+        ++displayPosition;
+    }
+    if (_caretPosition > 0 && _keystrokeBuffer.Get()[_caretPosition - 1] == L'\'')
+    {
+        while (displayPosition < _renderedPreedit.size() && _renderedPreedit[displayPosition] == L'\'')
+        {
+            ++displayPosition;
+        }
+    }
+    return displayPosition;
 }
 
 //+---------------------------------------------------------------------------
@@ -318,6 +384,9 @@ void CCompositionProcessorEngine::PurgeVirtualKey()
         delete[] _keystrokeBuffer.Get();
         _keystrokeBuffer.Set(NULL, 0);
     }
+    _caretPosition = 0;
+    _renderedPreedit.clear();
+    _renderedPreeditPrefixLength = 0;
 }
 
 WCHAR CCompositionProcessorEngine::GetVirtualKey(DWORD_PTR dwIndex)
@@ -1716,6 +1785,32 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         {
             pKeyState->Category = CATEGORY_COMPOSING;
             pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
+    }
+
+    // The Server owns the configurable comma/period behavior. Always route
+    // these keys through it while candidates are active; its response decides
+    // whether the key navigates or commits the first candidate with punctuation.
+    const bool isCommaPeriodPagingKey = uCode == VK_OEM_COMMA || uCode == VK_OEM_PERIOD;
+    if (candidateMode != CANDIDATE_NONE &&
+        (uCode == VK_OEM_MINUS || uCode == VK_OEM_PLUS || isCommaPeriodPagingKey || uCode == VK_TAB ||
+         uCode == VK_PRIOR || uCode == VK_NEXT || uCode == VK_UP || uCode == VK_DOWN))
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_CANDIDATE;
+            pKeyState->Function = FUNCTION_SERVER_CANDIDATE_KEY;
+        }
+        return TRUE;
+    }
+
+    if (candidateMode != CANDIDATE_NONE && (uCode == VK_LEFT || uCode == VK_RIGHT))
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = uCode == VK_LEFT ? FUNCTION_MOVE_LEFT : FUNCTION_MOVE_RIGHT;
         }
         return TRUE;
     }

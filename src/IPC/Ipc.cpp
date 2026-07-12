@@ -661,7 +661,6 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
     // Pipe timeout error
     wcscpy_s(namedpipeDataFromServer.candidate_string, L"T");
-    const wchar_t *reason = peekFailureCount > 0 ? L"peek_failed_until_timeout" : L"timeout_no_data";
     return &namedpipeDataFromServer;
 }
 

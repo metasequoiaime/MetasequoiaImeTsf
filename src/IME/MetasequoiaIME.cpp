@@ -744,6 +744,11 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth, //
                     0);
             }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PagingCommaPeriodChanged)
+            {
+                const bool enabled = buf.data[0] == L'1';
+                Global::PagingCommaPeriodEnabled.store(enabled, std::memory_order_relaxed);
+            }
         }
         Sleep(100);
     }
@@ -954,6 +959,36 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             }
             pDocMgrFocus->Release();
         }
+        break;
+    }
+    case WM_AsyncServerCandidateKey: {
+        const UINT code = static_cast<UINT>(wParam);
+        const WCHAR wch = static_cast<WCHAR>(lParam);
+        FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
+        if (receivedData->msg_type == Global::DataFromServerMsgType::Normal &&
+            std::wstring(receivedData->candidate_string) == L"T")
+        {
+            receivedData = TryReadDataFromServerPipeWithTimeout();
+        }
+
+        if (receivedData->msg_type == Global::DataFromServerMsgType::Normal)
+        {
+            if (wch == 0)
+            {
+                break;
+            }
+            const WCHAR *punctuation = pIME->_pCompositionProcessorEngine->GetPunctuation(wch);
+            std::wstring commitText = receivedData->candidate_string;
+            if (punctuation)
+            {
+                commitText.append(punctuation);
+            }
+            pIME->_QueuePendingPunctuationCommitText(commitText.c_str());
+            PostMessage(hWnd, WM_AsyncPunctuationCommit, code, static_cast<LPARAM>(wch));
+        }
+        // Navigation responses are acknowledgements only. The Server owns and
+        // refreshes candidate paging/selection state, so TSF must not apply the
+        // same movement to its presenter a second time.
         break;
     }
     case WM_AsyncNumberCandidateCommit: {

@@ -56,7 +56,10 @@ enum KEYSTROKE_FUNCTION
     FUNCTION_DOUBLE_SINGLE_BYTE,
 
     // Function Punctuation
-    FUNCTION_PUNCTUATION
+    FUNCTION_PUNCTUATION,
+
+    // Raw candidate navigation key; Server decides its configured behavior.
+    FUNCTION_SERVER_CANDIDATE_KEY
 };
 
 //---------------------------------------------------------------------

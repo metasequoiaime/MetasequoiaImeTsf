@@ -23,6 +23,38 @@ bool IsTimeoutSentinelCandidate(UINT msgType, const WCHAR *pCandidateString)
     return msgType == Global::DataFromServerMsgType::Normal && pCandidateString != nullptr &&
            wcscmp(pCandidateString, L"T") == 0;
 }
+
+DWORD_PTR MapRawCaretToPreedit(const CStringRange &raw, DWORD_PTR rawCaret, const std::wstring &preedit,
+                               size_t prefixLength)
+{
+    rawCaret = min(rawCaret, raw.GetLength());
+    size_t lettersBeforeCaret = 0;
+    for (DWORD_PTR i = 0; i < rawCaret; ++i)
+    {
+        if (raw.Get()[i] != L'\'')
+        {
+            ++lettersBeforeCaret;
+        }
+    }
+    size_t displayPosition = min(prefixLength, preedit.size());
+    size_t seenLetters = 0;
+    while (displayPosition < preedit.size() && seenLetters < lettersBeforeCaret)
+    {
+        if (preedit[displayPosition] != L'\'')
+        {
+            ++seenLetters;
+        }
+        ++displayPosition;
+    }
+    if (rawCaret > 0 && raw.Get()[rawCaret - 1] == L'\'')
+    {
+        while (displayPosition < preedit.size() && preedit[displayPosition] == L'\'')
+        {
+            ++displayPosition;
+        }
+    }
+    return displayPosition;
+}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -318,6 +350,11 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
             }
         }
 
+        const DWORD_PTR displayCaret = MapRawCaretToPreedit(
+            pCompositionProcessorEngine->GetKeystrokeBuffer(), pCompositionProcessorEngine->GetCaretPosition(),
+            curReadingStr.ToWString(), GlobalIme::word_for_creating_word.size());
+        pCompositionProcessorEngine->SetRenderedPreedit(curReadingStr.ToWString(), GlobalIme::word_for_creating_word.size());
+
         PerfTimer addComposingTimer;
         hr = _AddComposingAndChar(ec, pContext, &curReadingStr);
         addComposingElapsedMs += addComposingTimer.ElapsedMs();
@@ -325,6 +362,24 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
         if (FAILED(hr))
         {
             return hr;
+        }
+
+        if (_pComposition)
+        {
+            ITfRange *caretRange = nullptr;
+            if (SUCCEEDED(_pComposition->GetRange(&caretRange)) && caretRange)
+            {
+                caretRange->Collapse(ec, TF_ANCHOR_START);
+                LONG shifted = 0;
+                caretRange->ShiftEnd(ec, static_cast<LONG>(displayCaret), &shifted, nullptr);
+                caretRange->Collapse(ec, TF_ANCHOR_END);
+                TF_SELECTION caretSelection = {};
+                caretSelection.range = caretRange;
+                caretSelection.style.ase = TF_AE_NONE;
+                caretSelection.style.fInterimChar = FALSE;
+                pContext->SetSelection(ec, 1, &caretSelection);
+                caretRange->Release();
+            }
         }
     }
 
@@ -674,7 +729,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionBackspace(TfEditCookie ec, _In_ ITfCo
 
     if (vKeyLen)
     {
-        pCompositionProcessorEngine->RemoveVirtualKey(vKeyLen - 1);
+        pCompositionProcessorEngine->RemoveVirtualKeyBeforeCaret();
 
         if (pCompositionProcessorEngine->GetVirtualKeyLength())
         {
@@ -702,6 +757,33 @@ Exit:
 HRESULT CMetasequoiaIME::_HandleCompositionArrowKey(TfEditCookie ec, _In_ ITfContext *pContext,
                                                     KEYSTROKE_FUNCTION keyFunction)
 {
+    if (keyFunction == FUNCTION_MOVE_LEFT || keyFunction == FUNCTION_MOVE_RIGHT)
+    {
+        _pCompositionProcessorEngine->MoveCaret(keyFunction == FUNCTION_MOVE_LEFT ? -1 : 1);
+        if (_pComposition == nullptr)
+        {
+            return S_OK;
+        }
+
+        ITfRange *caretRange = nullptr;
+        if (FAILED(_pComposition->GetRange(&caretRange)) || caretRange == nullptr)
+        {
+            return S_OK;
+        }
+        caretRange->Collapse(ec, TF_ANCHOR_START);
+        LONG shifted = 0;
+        caretRange->ShiftEnd(ec, static_cast<LONG>(_pCompositionProcessorEngine->GetRenderedCaretPosition()), &shifted,
+                             nullptr);
+        caretRange->Collapse(ec, TF_ANCHOR_END);
+        TF_SELECTION caretSelection = {};
+        caretSelection.range = caretRange;
+        caretSelection.style.ase = TF_AE_NONE;
+        caretSelection.style.fInterimChar = FALSE;
+        pContext->SetSelection(ec, 1, &caretSelection);
+        caretRange->Release();
+        return S_OK;
+    }
+
     if ((keyFunction == FUNCTION_MOVE_PAGE_UP) || (keyFunction == FUNCTION_MOVE_PAGE_DOWN) ||
         (keyFunction == FUNCTION_MOVE_PAGE_TOP) || (keyFunction == FUNCTION_MOVE_PAGE_BOTTOM))
     {
@@ -765,8 +847,9 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
     std::wstring pendingPunctuationCommitText = _TakePendingPunctuationCommitText();
+    const bool hasPendingPunctuationCommitText = !pendingPunctuationCommitText.empty();
     std::wstring punctuationStr;
-    if (!pendingPunctuationCommitText.empty())
+    if (hasPendingPunctuationCommitText)
     {
         punctuationStr = std::move(pendingPunctuationCommitText);
     }
@@ -777,7 +860,7 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
     }
 
     double pipeReadElapsedMs = 0;
-    if (pendingPunctuationCommitText.empty() && _candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
+    if (!hasPendingPunctuationCommitText && _candidateMode != CANDIDATE_NONE && _pCandidateListUIPresenter)
     {
         //
         // 请求第一个候选词
@@ -793,6 +876,19 @@ HRESULT CMetasequoiaIME::_HandleCompositionPunctuation(TfEditCookie ec, _In_ ITf
                 PerfTimer retryTimer;
                 receivedData = TryReadDataFromServerPipeWithTimeout();
                 pipeReadElapsedMs += retryTimer.ElapsedMs();
+            }
+
+            // The Server is authoritative for configurable candidate-navigation
+            // keys. The local paging snapshot can briefly lag behind while a TSF
+            // client connects or a setting changes, so a comma/period may have
+            // entered this punctuation path while the Server already treated it
+            // as navigation. Never turn such a response into committed text.
+            if (receivedData->msg_type != Global::DataFromServerMsgType::Normal)
+            {
+                // The Server already updated the authoritative candidate state.
+                // Consuming the response is sufficient; advancing the TSF-side
+                // presenter here would apply the same navigation a second time.
+                return S_OK;
             }
             punctuationStr = std::wstring(receivedData->candidate_string) + punctuationStr;
         }
