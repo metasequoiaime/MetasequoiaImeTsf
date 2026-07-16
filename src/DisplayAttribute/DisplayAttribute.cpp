@@ -8,13 +8,21 @@
 //
 //----------------------------------------------------------------------------
 
-void CMetasequoiaIME::_ClearCompositionDisplayAttributes(TfEditCookie ec, _In_ ITfContext *pContext)
+void CMetasequoiaIME::_ClearCompositionDisplayAttributes(
+    TfEditCookie ec, _In_ ITfContext *pContext,
+    _In_opt_ ITfComposition *expectedComposition)
 {
     ITfRange *pRangeComposition = nullptr;
     ITfProperty *pDisplayAttributeProperty = nullptr;
+    ITfComposition *composition =
+        expectedComposition ? expectedComposition : _pComposition;
+    if (composition == nullptr)
+    {
+        return;
+    }
 
     // get the compositon range.
-    if (FAILED(_pComposition->GetRange(&pRangeComposition)))
+    if (FAILED(composition->GetRange(&pRangeComposition)))
     {
         return;
     }

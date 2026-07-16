@@ -2,6 +2,8 @@
 #include "Globals.h"
 #include "Private.h"
 #include "MetasequoiaIME.h"
+#include <cstdint>
+#include <string>
 
 class CKeyStateCategory;
 
@@ -16,19 +18,23 @@ class CKeyStateCategoryFactory
     CKeyStateCategoryFactory();
 
   private:
-    static CKeyStateCategoryFactory *_instance;
+    static thread_local CKeyStateCategoryFactory *_instance;
 };
 
 typedef struct KeyHandlerEditSessionDTO
 {
     KeyHandlerEditSessionDTO::KeyHandlerEditSessionDTO(TfEditCookie tFEC, _In_ ITfContext *pTfContext, UINT virualCode,
-                                                       WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction)
+                                                       WCHAR inputChar, KEYSTROKE_FUNCTION arrowKeyFunction,
+                                                       uint64_t pipeRequestId,
+                                                       const std::wstring &sessionPrefetchedText)
     {
         ec = tFEC;
         pContext = pTfContext;
         code = virualCode;
         wch = inputChar;
         arrowKey = arrowKeyFunction;
+        requestId = pipeRequestId;
+        prefetchedText = sessionPrefetchedText;
     }
 
     TfEditCookie ec;
@@ -36,6 +42,8 @@ typedef struct KeyHandlerEditSessionDTO
     UINT code;
     WCHAR wch;
     KEYSTROKE_FUNCTION arrowKey;
+    uint64_t requestId;
+    std::wstring prefetchedText;
 } KeyHandlerEditSessionDTO;
 
 class CKeyStateCategory

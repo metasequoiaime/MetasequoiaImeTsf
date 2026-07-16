@@ -112,6 +112,8 @@ CCompositionProcessorEngine::CCompositionProcessorEngine()
     _pCompartmentConversionEventSink = nullptr;
     _pCompartmentDoubleSingleByteEventSink = nullptr;
     _pCompartmentPunctuationEventSink = nullptr;
+    _pOwnerThreadMgr = nullptr;
+    _ownerMsgWndHandle = nullptr;
 
     _hasWildcardIncludedInKeystrokeBuffer = FALSE;
 
@@ -182,6 +184,12 @@ CCompositionProcessorEngine::~CCompositionProcessorEngine()
         delete _pCompartmentPunctuationEventSink;
         _pCompartmentPunctuationEventSink = nullptr;
     }
+    if (_pOwnerThreadMgr)
+    {
+        _pOwnerThreadMgr->Release();
+        _pOwnerThreadMgr = nullptr;
+    }
+    _ownerMsgWndHandle = nullptr;
 
 }
 
@@ -215,6 +223,16 @@ BOOL CCompositionProcessorEngine::SetupLanguageProfile(LANGID langid, REFGUID gu
     _langid = langid;
     _guidProfile = guidLanguageProfile;
     _tfClientId = tfClientId;
+    if (_pOwnerThreadMgr != pThreadMgr)
+    {
+        if (_pOwnerThreadMgr)
+        {
+            _pOwnerThreadMgr->Release();
+        }
+        _pOwnerThreadMgr = pThreadMgr;
+        _pOwnerThreadMgr->AddRef();
+    }
+    _ownerMsgWndHandle = Global::msgWndHandle;
 
     SetupPreserved(pThreadMgr, tfClientId);
     InitializeMetasequoiaIMECompartment(pThreadMgr, tfClientId);
@@ -840,18 +858,60 @@ BOOL CCompositionProcessorEngine::CheckShiftKeyOnly(_In_ CMetasequoiaImeArray<TF
 //
 //----------------------------------------------------------------------------
 
+BOOL CCompositionProcessorEngine::IsPreservedKeyEligible(REFGUID rguid)
+{
+    if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
+    {
+        return CheckShiftKeyOnly(&_PreservedKey_IMEMode.TSFPreservedKeyTable);
+    }
+    if (IsEqualGUID(rguid, _PreservedKey_IMEMode02.Guid))
+    {
+        return CheckShiftKeyOnly(&_PreservedKey_IMEMode02.TSFPreservedKeyTable);
+    }
+    if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
+    {
+        return CheckShiftKeyOnly(&_PreservedKey_DoubleSingleByte.TSFPreservedKeyTable);
+    }
+    if (IsEqualGUID(rguid, _PreservedKey_Punctuation.Guid))
+    {
+        return CheckShiftKeyOnly(&_PreservedKey_Punctuation.TSFPreservedKeyTable);
+    }
+    return FALSE;
+}
+
+CCompositionProcessorEngine::PreservedKeyAction
+CCompositionProcessorEngine::GetPreservedKeyAction(REFGUID rguid) const
+{
+    if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid) ||
+        IsEqualGUID(rguid, _PreservedKey_IMEMode02.Guid))
+    {
+        return PreservedKeyAction::ToggleImeMode;
+    }
+    if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
+    {
+        return PreservedKeyAction::ToggleDoubleSingleByteMode;
+    }
+    if (IsEqualGUID(rguid, _PreservedKey_Punctuation.Guid))
+    {
+        return PreservedKeyAction::TogglePunctuationMode;
+    }
+    return PreservedKeyAction::None;
+}
+
 void CCompositionProcessorEngine::OnPreservedKey( //
     ITfContext *pContext,                         //
     REFGUID rguid,                                //
     _Out_ BOOL *pIsEaten,                         //
     _In_ ITfThreadMgr *pThreadMgr,                //
     TfClientId tfClientId,                        //
-    BOOL *pNeedToggleIMEMode                      //
+    BOOL *pNeedToggleIMEMode,                     //
+    BOOL isPrevalidated                           //
 )
 {
     if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
     {
-        if (!CheckShiftKeyOnly(&_PreservedKey_IMEMode.TSFPreservedKeyTable))
+        if (!isPrevalidated &&
+            !CheckShiftKeyOnly(&_PreservedKey_IMEMode.TSFPreservedKeyTable))
         {
             *pIsEaten = FALSE;
             return;
@@ -889,7 +949,8 @@ void CCompositionProcessorEngine::OnPreservedKey( //
     }
     else if (IsEqualGUID(rguid, _PreservedKey_IMEMode02.Guid))
     {
-        if (!CheckShiftKeyOnly(&_PreservedKey_IMEMode02.TSFPreservedKeyTable))
+        if (!isPrevalidated &&
+            !CheckShiftKeyOnly(&_PreservedKey_IMEMode02.TSFPreservedKeyTable))
         {
             *pIsEaten = FALSE;
             return;
@@ -928,7 +989,8 @@ void CCompositionProcessorEngine::OnPreservedKey( //
     }
     else if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
     {
-        if (!CheckShiftKeyOnly(&_PreservedKey_DoubleSingleByte.TSFPreservedKeyTable))
+        if (!isPrevalidated &&
+            !CheckShiftKeyOnly(&_PreservedKey_DoubleSingleByte.TSFPreservedKeyTable))
         {
             *pIsEaten = FALSE;
             return;
@@ -942,7 +1004,8 @@ void CCompositionProcessorEngine::OnPreservedKey( //
     }
     else if (IsEqualGUID(rguid, _PreservedKey_Punctuation.Guid))
     {
-        if (!CheckShiftKeyOnly(&_PreservedKey_Punctuation.TSFPreservedKeyTable))
+        if (!isPrevalidated &&
+            !CheckShiftKeyOnly(&_PreservedKey_Punctuation.TSFPreservedKeyTable))
         {
             *pIsEaten = FALSE;
             return;
@@ -1264,13 +1327,13 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         return E_INVALIDARG;
     }
 
-    ITfThreadMgr *pThreadMgr = nullptr;
-    HRESULT hr =
-        CoCreateInstance(CLSID_TF_ThreadMgr, nullptr, CLSCTX_INPROC_SERVER, IID_ITfThreadMgr, (void **)&pThreadMgr);
-    if (FAILED(hr))
+    ITfThreadMgr *pThreadMgr = fakeThis->_pOwnerThreadMgr;
+    if (!pThreadMgr)
     {
-        return E_FAIL;
+        return E_UNEXPECTED;
     }
+    pThreadMgr->AddRef();
+    const HWND ownerWindow = fakeThis->_ownerMsgWndHandle;
 
     if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte))
     {
@@ -1280,7 +1343,10 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
         // 0: halfwidth, 1: fullwidth
         // SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(isDoubleSingleByte ? 1 : 0);
-        PostMessage(Global::msgWndHandle, WM_UpdateDoubleSingleByte, (WPARAM)(isDoubleSingleByte ? 1 : 0), 0);
+        if (ownerWindow && IsWindow(ownerWindow))
+        {
+            PostMessage(ownerWindow, WM_UpdateDoubleSingleByte, (WPARAM)(isDoubleSingleByte ? 1 : 0), 0);
+        }
         fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
     }
     else if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentPunctuation))
@@ -1290,7 +1356,10 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
                                             Global::MetasequoiaIMEGuidCompartmentPunctuation);
         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
         // SendPuncSwitchEventToUIProcessViaNamedPipe(isPunctuation ? 1 : 0);
-        PostMessage(Global::msgWndHandle, WM_UpdatePuncMode, (WPARAM)(isPunctuation ? 1 : 0), 0);
+        if (ownerWindow && IsWindow(ownerWindow))
+        {
+            PostMessage(ownerWindow, WM_UpdatePuncMode, (WPARAM)(isPunctuation ? 1 : 0), 0);
+        }
         fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
     }
     else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) ||
@@ -1319,7 +1388,10 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         }
 
         // SendIMESwitchEventToUIProcessViaNamedPipe(isOpen ? 1 : 0);
-        PostMessage(Global::msgWndHandle, WM_UpdateIMEStatus, (WPARAM)(isOpen ? 1 : 0), 0);
+        if (ownerWindow && IsWindow(ownerWindow))
+        {
+            PostMessage(ownerWindow, WM_UpdateIMEStatus, (WPARAM)(isOpen ? 1 : 0), 0);
+        }
 
         fakeThis->KeyboardOpenCompartmentUpdated(pThreadMgr);
     }
@@ -1743,6 +1815,47 @@ void CCompositionProcessorEngine::SetDefaultCandidateTextFont()
 //    CCompositionProcessorEngine
 //
 //////////////////////////////////////////////////////////////////////
+
+BOOL CCompositionProcessorEngine::IsVirtualKeyNeedForFreshComposition(
+    UINT uCode, _In_reads_(1) WCHAR *pwch,
+    _Out_opt_ _KEYSTROKE_STATE *pKeyState)
+{
+    if (pKeyState)
+    {
+        pKeyState->Category = CATEGORY_NONE;
+        pKeyState->Function = FUNCTION_NONE;
+    }
+
+    // Classify against an actually empty composition. This path is used while
+    // the old focus session is still being cancelled, so none of its candidate
+    // mode, wildcard flags, or virtual-key buffer may affect the first key in
+    // the replacement session.
+    if (IsManualPinyinSeparatorInComposition(pwch ? *pwch : 0, FALSE,
+                                             CANDIDATE_NONE, 0))
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
+    }
+    if (IsVirtualKeyKeystrokeComposition(uCode, pKeyState, FUNCTION_INPUT))
+    {
+        return TRUE;
+    }
+    if (pwch && IsWildcard() && IsWildcardChar(*pwch) &&
+        !IsDisableWildcardAtFirst())
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
 
 //+---------------------------------------------------------------------------
 //

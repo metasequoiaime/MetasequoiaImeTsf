@@ -26,21 +26,15 @@ const int MOVEDOWN_ONE = 1;
 const int MOVETO_TOP = 0;
 const int MOVETO_BOTTOM = -1;
 
-namespace
-{
-bool IsTimeoutSentinelCandidate(UINT msgType, const std::wstring &candidateString)
-{
-    return msgType == Global::DataFromServerMsgType::Normal && candidateString == L"T";
-}
-}
-
 //+---------------------------------------------------------------------------
 //
 // _HandleCandidateFinalize
 //
 //----------------------------------------------------------------------------
 
-HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfContext *pContext,
+                                                  uint64_t requestId,
+                                                  const std::wstring &prefetchedText)
 {
     HRESULT hr = S_OK;
     PerfTimer finalizeTimer;
@@ -49,7 +43,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     DWORD_PTR keystrokeBufLen = keyStrokebuffer.GetLength();
     DWORD_PTR candidateLen = keystrokeBufLen;
     CStringRange candidateString(keyStrokebuffer);
-    std::wstring pendingCommitCandidate = _TakePendingCommitCandidate();
+    const std::wstring &pendingCommitCandidate = prefetchedText;
 
 
     // _pCandidateListUIPresenter would be null in uwp/metro apps
@@ -62,7 +56,6 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     {
         if (!pendingCommitCandidate.empty())
         {
-            ClearNamedpipeDataIfExists(true);
             candidateString.Set(pendingCommitCandidate.c_str(), pendingCommitCandidate.length());
             PerfTimer insertTextTimer;
             hr = _InsertTextToComposition(ec, pContext, &candidateString);
@@ -84,29 +77,21 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         std::wstring serverCandidateString;
         const bool hasPrefetchedServerCandidate =
             _TakePendingServerCandidate(&serverMsgType, &serverCandidateString);
-        if (hasPrefetchedServerCandidate)
-        {
-            if (IsTimeoutSentinelCandidate(serverMsgType, serverCandidateString))
-            {
-                struct FanyImeNamedpipeDataToTsf *retryData = TryReadDataFromServerPipeWithTimeout();
-                serverMsgType = retryData->msg_type;
-                serverCandidateString = retryData->candidate_string;
-            }
-        }
-        else
+        if (!hasPrefetchedServerCandidate)
         {
             PerfTimer pipeReadTimer;
-            struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout();
+            struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout(requestId);
             serverMsgType = receivedData->msg_type;
             serverCandidateString = receivedData->candidate_string;
-            if (IsTimeoutSentinelCandidate(serverMsgType, serverCandidateString))
-            {
-                struct FanyImeNamedpipeDataToTsf *retryData = TryReadDataFromServerPipeWithTimeout();
-                serverMsgType = retryData->msg_type;
-                serverCandidateString = retryData->candidate_string;
-            }
         }
 
+        if (serverMsgType == Global::DataFromServerMsgType::TransportUnavailable)
+        {
+            // Transport state is never candidate text.  Propagate failure so
+            // the exact deferred key remains owned and is replayed only after
+            // the replacement focus/session fence is ready.
+            return HRESULT_FROM_WIN32(ERROR_BROKEN_PIPE);
+        }
         if (serverMsgType == Global::DataFromServerMsgType::OutofRange) // Candidate index out of range
         {
             return hr;
@@ -156,7 +141,8 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
 
                 if (pCompositionProcessorEngine->GetVirtualKeyLength())
                 {
-                    _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext);
+                    _HandleCompositionInputWorker(pCompositionProcessorEngine, ec, pContext,
+                                                  FANY_IME_NO_REQUEST_ID);
                 }
                 else
                 {
@@ -218,9 +204,11 @@ NoPresenter:
 //
 //----------------------------------------------------------------------------
 
-HRESULT CMetasequoiaIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CMetasequoiaIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContext *pContext,
+                                                 uint64_t requestId,
+                                                 const std::wstring &prefetchedText)
 {
-    return _HandleCandidateWorker(ec, pContext);
+    return _HandleCandidateWorker(ec, pContext, requestId, prefetchedText);
 }
 
 //+---------------------------------------------------------------------------
@@ -229,7 +217,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateConvert(TfEditCookie ec, _In_ ITfContex
 //
 //----------------------------------------------------------------------------
 
-HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext)
+HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext *pContext,
+                                                uint64_t requestId,
+                                                const std::wstring &prefetchedText)
 {
     HRESULT hrReturn = E_FAIL;
     DWORD_PTR candidateLen = 0;
@@ -250,7 +240,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext
     }
 
     candidateString.Set(pCandidateString, candidateLen);
-    hrReturn = _HandleCandidateFinalize(ec, pContext);
+    hrReturn = _HandleCandidateFinalize(ec, pContext, requestId, prefetchedText);
 
 Exit:
     return hrReturn;
@@ -296,7 +286,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateArrowKey( //
 //
 //----------------------------------------------------------------------------
 
-HRESULT CMetasequoiaIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode)
+HRESULT CMetasequoiaIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ ITfContext *pContext, _In_ UINT uCode,
+                                                        uint64_t requestId,
+                                                        const std::wstring &prefetchedText)
 {
     int iSelectAsNumber = _pCompositionProcessorEngine->GetCandidateListIndexRange()->GetIndex(uCode);
     if (iSelectAsNumber == -1)
@@ -308,7 +300,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateSelectByNumber(TfEditCookie ec, _In_ IT
     {
         if (_pCandidateListUIPresenter->_SetSelectionInPage(iSelectAsNumber))
         {
-            return _HandleCandidateConvert(ec, pContext);
+            return _HandleCandidateConvert(ec, pContext, requestId, prefetchedText);
         }
     }
 
@@ -802,6 +794,10 @@ void CCandidateListUIPresenter::_EndCandidateList()
 void CCandidateListUIPresenter::_PrepareForAsyncCleanup()
 {
     _asyncCleanupPending = TRUE;
+    // Hide and clear the exact Server-side candidate session now. Deferring
+    // this until the presenter destructor lets an old cleanup message race a
+    // newly started composition and clear its candidates.
+    EndCandidateUiSession();
 }
 
 void CCandidateListUIPresenter::_NotifyUI()
@@ -1095,7 +1091,10 @@ HRESULT CCandidateListUIPresenter::_CandidateChangeNotification(_In_ enum CANDWN
     }
 
     CKeyHandlerEditSession *pEditSession =
-        new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState);
+        new (std::nothrow) CKeyHandlerEditSession(_pTextService, pContext, 0, 0, KeyState,
+                                                  FANY_IME_NO_REQUEST_ID, {}, {},
+                                                  _pTextService->_CaptureFocusSessionToken(), 0,
+                                                  _pTextService->_CaptureCompositionEpoch());
     if (nullptr != pEditSession)
     {
         HRESULT hrSession = S_OK;
@@ -1279,7 +1278,7 @@ void CCandidateListUIPresenter::WriteCandidateUiPayload(_In_ UINT writeFlag)
         Global::ModifiersDown, //
         Global::Point,         //
         Global::PinyinLength,  //
-        Global::PinyinString,  //
+        pinyinString,          //
         writeFlag              //
     );
 }

@@ -44,15 +44,32 @@ STDAPI CMetasequoiaIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 
 STDAPI CMetasequoiaIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus)
 {
+    if (!IsNamedpipeFocusStateOwner(this))
+    {
+        return S_OK;
+    }
     pDocMgrPrevFocus;
 
-    if (pDocMgrFocus && !Global::g_connected)
+    const bool windowsTextInputHostTransition =
+        _focusLostToWindowsTextInputHost ||
+        _CaptureWindowsTextInputHostFocusLoss();
+
+    // bcaf34e used document focus as the authoritative reconnect boundary.
+    // The modern protocol preserves that behavior with a new activation epoch
+    // on the existing healthy transport; EnsureNamedpipeFocusSessionActivated
+    // physically reopens a channel as well when its health check fails.
+    if (pDocMgrFocus &&
+        (!Global::g_connected || windowsTextInputHostTransition))
     {
         Global::g_connected = true;
+        _workerCommitReady.store(false, std::memory_order_release);
+        RequireNamedpipeFocusActivation();
         PostMessage(_msgWndHandle, WM_ConnectNamedpipe, 0, 0);
+        _focusLostToWindowsTextInputHost = false;
     }
     else if (!pDocMgrFocus && Global::g_connected)
     {
+        MarkNamedpipeFocusLost();
         Global::g_connected = false;
         PostMessage(_msgWndHandle, WM_DisconnectNamedpipe, 0, 0);
     }
@@ -109,9 +126,8 @@ STDAPI CMetasequoiaIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDo
 
 STDAPI CMetasequoiaIME::OnPushContext(_In_ ITfContext *pContext)
 {
-    pContext;
-
-    return E_NOTIMPL;
+    _HandleFocusedContextStackChange(pContext);
+    return S_OK;
 }
 
 //+---------------------------------------------------------------------------
@@ -123,9 +139,75 @@ STDAPI CMetasequoiaIME::OnPushContext(_In_ ITfContext *pContext)
 
 STDAPI CMetasequoiaIME::OnPopContext(_In_ ITfContext *pContext)
 {
-    pContext;
+    _HandleFocusedContextStackChange(pContext);
+    return S_OK;
+}
 
-    return E_NOTIMPL;
+void CMetasequoiaIME::_HandleFocusedContextStackChange(_In_opt_ ITfContext *changedContext)
+{
+    if (!IsNamedpipeFocusStateOwner(this) || changedContext == nullptr ||
+        _pThreadMgr == nullptr)
+    {
+        return;
+    }
+
+    ITfDocumentMgr *changedDocument = nullptr;
+    ITfDocumentMgr *focusedDocument = nullptr;
+    if (FAILED(changedContext->GetDocumentMgr(&changedDocument)) ||
+        changedDocument == nullptr ||
+        FAILED(_pThreadMgr->GetFocus(&focusedDocument)) ||
+        focusedDocument == nullptr || changedDocument != focusedDocument)
+    {
+        if (changedDocument)
+        {
+            changedDocument->Release();
+        }
+        if (focusedDocument)
+        {
+            focusedDocument->Release();
+        }
+        return;
+    }
+
+    ITfContext *newTopContext = nullptr;
+    if (FAILED(focusedDocument->GetTop(&newTopContext)) || newTopContext == nullptr)
+    {
+        focusedDocument->Release();
+        changedDocument->Release();
+        return;
+    }
+    const bool topContextChanged = newTopContext != _pTextEditSinkContext;
+    newTopContext->Release();
+    if (!topContextChanged)
+    {
+        focusedDocument->Release();
+        changedDocument->Release();
+        return;
+    }
+
+    // Capture the old composition owner before rebinding the text-edit sink.
+    // A pushed modal/context (or a popped editor context) must never inherit
+    // replies or queued edit sessions that belonged to the previous top.
+    ITfContext *resetContext = _pContext ? _pContext : _pTextEditSinkContext;
+    if (resetContext)
+    {
+        resetContext->AddRef();
+    }
+    else
+    {
+        resetContext = changedContext;
+        resetContext->AddRef();
+    }
+
+    _ClearDeferredKeyDowns();
+    MarkNamedpipeSessionDirtyForOwner(this);
+    const UINT resetToken = _localSessionResetToken.load(std::memory_order_acquire);
+    _RequestLocalSessionReset(resetContext, resetToken);
+    _InitTextEditSink(focusedDocument);
+
+    resetContext->Release();
+    focusedDocument->Release();
+    changedDocument->Release();
 }
 
 //+---------------------------------------------------------------------------

@@ -192,6 +192,8 @@ HRESULT CCompartment::_ClearCompartment()
 
 CCompartmentEventSink::CCompartmentEventSink(_In_ CESCALLBACK pfnCallback, _In_ void *pv)
 {
+    _pCompartment = nullptr;
+    _dwCookie = TF_INVALID_COOKIE;
     _pfnCallback = pfnCallback;
     _pv = pv;
     _refCount = 1;
@@ -282,6 +284,15 @@ STDAPI CCompartmentEventSink::OnChange(_In_ REFGUID guidCompartment)
 
 HRESULT CCompartmentEventSink::_Advise(_In_ IUnknown *punk, _In_ REFGUID guidCompartment)
 {
+    if (!punk)
+    {
+        return E_INVALIDARG;
+    }
+    if (_pCompartment)
+    {
+        _Unadvise();
+    }
+
     HRESULT hr = S_OK;
     ITfCompartmentMgr *pCompartmentMgr = nullptr;
     ITfSource *pSource = nullptr;
@@ -305,6 +316,15 @@ HRESULT CCompartmentEventSink::_Advise(_In_ IUnknown *punk, _In_ REFGUID guidCom
 
     pCompartmentMgr->Release();
 
+    if (FAILED(hr))
+    {
+        if (_pCompartment)
+        {
+            _pCompartment->Release();
+            _pCompartment = nullptr;
+        }
+        _dwCookie = TF_INVALID_COOKIE;
+    }
     return hr;
 }
 
@@ -316,19 +336,28 @@ HRESULT CCompartmentEventSink::_Advise(_In_ IUnknown *punk, _In_ REFGUID guidCom
 
 HRESULT CCompartmentEventSink::_Unadvise()
 {
+    if (!_pCompartment)
+    {
+        _dwCookie = TF_INVALID_COOKIE;
+        return S_OK;
+    }
+
     HRESULT hr = S_OK;
     ITfSource *pSource = nullptr;
 
-    hr = _pCompartment->QueryInterface(IID_ITfSource, (void **)&pSource);
-    if (SUCCEEDED(hr))
+    if (_dwCookie != TF_INVALID_COOKIE)
     {
-        hr = pSource->UnadviseSink(_dwCookie);
-        pSource->Release();
+        hr = _pCompartment->QueryInterface(IID_ITfSource, (void **)&pSource);
+        if (SUCCEEDED(hr))
+        {
+            hr = pSource->UnadviseSink(_dwCookie);
+            pSource->Release();
+        }
     }
 
     _pCompartment->Release();
     _pCompartment = nullptr;
-    _dwCookie = 0;
+    _dwCookie = TF_INVALID_COOKIE;
 
     return hr;
 }

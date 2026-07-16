@@ -9,7 +9,7 @@ inline std::wstring ZEN_BROWSER = L"zen.exe";
 // inline std::unordered_set<std::wstring> VSCodeSeries = {L"Code.exe", L"Code - Insiders.exe", L"VSCodium.exe"};
 // inline bool IsVSCodeLike = false;
 inline LONG INVALID_Y = -100000;
-inline float DpiScale = 1.0f;
+inline thread_local float DpiScale = 1.0f;
 } // namespace Global
 
 namespace GlobalSettings
@@ -27,25 +27,29 @@ constexpr std::string_view Pinyin = "pinyin";
 constexpr std::string_view Cand = "cand";
 } // namespace TsfPreeditStyle
 
+inline std::string &tsfPreeditStyleStorage()
+{
+    static std::string style = std::string(TsfPreeditStyle::Raw); // 默认的原始按键序列
+    return style;
+}
+
 inline const std::string &getTsfPreeditStyle()
 {
-    static const std::string style = std::string(TsfPreeditStyle::Raw); // 默认的原始按键序列
-    return style;
+    return tsfPreeditStyleStorage();
 }
 
 inline void setTsfPreeditStyle(std::string_view newStyle)
 {
-    static std::string currentStyle = std::string(TsfPreeditStyle::Raw);
-    currentStyle = std::string(newStyle);
+    tsfPreeditStyleStorage() = std::string(newStyle);
 }
 } // namespace GlobalSettings
 
 namespace GlobalIme
 {
-inline std::wstring word_for_creating_word = L"";
+inline thread_local std::wstring word_for_creating_word = L"";
 }
 
 namespace Global
 {
-inline HWND msgWndHandle = nullptr;
+inline thread_local HWND msgWndHandle = nullptr;
 }

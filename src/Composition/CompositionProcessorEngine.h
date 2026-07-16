@@ -12,6 +12,14 @@ class CCompositionProcessorEngine
     friend class CMetasequoiaIME;
 
   public:
+    enum class PreservedKeyAction
+    {
+        None,
+        ToggleImeMode,
+        ToggleDoubleSingleByteMode,
+        TogglePunctuationMode
+    };
+
     CCompositionProcessorEngine(void);
     ~CCompositionProcessorEngine(void);
 
@@ -32,6 +40,8 @@ class CCompositionProcessorEngine
 
     BOOL IsVirtualKeyNeed(UINT uCode, _In_reads_(1) WCHAR *pwch, BOOL fComposing, CANDIDATE_MODE candidateMode,
                           BOOL hasCandidateWithWildcard, _Out_opt_ _KEYSTROKE_STATE *pKeyState);
+    BOOL IsVirtualKeyNeedForFreshComposition(UINT uCode, _In_reads_(1) WCHAR *pwch,
+                                              _Out_opt_ _KEYSTROKE_STATE *pKeyState);
 
     BOOL AddVirtualKey(WCHAR wch);
     void RemoveVirtualKey(DWORD_PTR dwIndex);
@@ -65,8 +75,11 @@ class CCompositionProcessorEngine
     );
 
     // Preserved key handler
+    BOOL IsPreservedKeyEligible(REFGUID rguid);
+    PreservedKeyAction GetPreservedKeyAction(REFGUID rguid) const;
     void OnPreservedKey(ITfContext *pContext, REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr,
-                        TfClientId tfClientId, BOOL *pNeedToggleIMEMode);
+                        TfClientId tfClientId, BOOL *pNeedToggleIMEMode,
+                        BOOL isPrevalidated = FALSE);
 
     // Toggle IME Mode
     void ToggleIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
@@ -230,6 +243,8 @@ class CCompositionProcessorEngine
     CCompartmentEventSink *_pCompartmentKeyboardOpenEventSink;
     CCompartmentEventSink *_pCompartmentDoubleSingleByteEventSink;
     CCompartmentEventSink *_pCompartmentPunctuationEventSink;
+    ITfThreadMgr *_pOwnerThreadMgr;
+    HWND _ownerMsgWndHandle;
 
     // Configuration data
     BOOL _isWildcard : 1;

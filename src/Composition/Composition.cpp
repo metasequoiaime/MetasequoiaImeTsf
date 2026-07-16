@@ -6,6 +6,7 @@
 #include <fmt/xchar.h>
 #include <string>
 #include "FanyDefines.h"
+#include "Ipc.h"
 #include "../Utils/PerfTimer.h"
 
 //+---------------------------------------------------------------------------
@@ -19,33 +20,60 @@
 STDAPI CMetasequoiaIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfComposition *pComposition)
 {
     PerfTimer timer;
-    // Clear dummy composition
-    PerfTimer removeDummyTimer;
-    _RemoveDummyCompositionForComposing(ecWrite, pComposition);
-    double removeDummyElapsedMs = removeDummyTimer.ElapsedMs();
-
-    // Clear display attribute and end composition, _EndComposition will release composition for us
-    ITfContext *pContext = _pContext;
-    const bool hadContext = (pContext != nullptr);
-    if (pContext)
+    if (pComposition == nullptr || !_IsCompositionCurrent(pComposition))
     {
-        pContext->AddRef();
+        // A delayed termination callback for an older composition must never
+        // delete the current candidate presenter or release newer ownership.
+        return S_OK;
     }
 
-    PerfTimer endCompositionTimer;
-    _EndComposition(_pContext);
-    double endCompositionElapsedMs = endCompositionTimer.ElapsedMs();
+    // The callback already carries a write cookie and the host has already
+    // ended this exact composition. Detach ownership before making COM calls,
+    // so a re-entrant/stale callback cannot observe it as current or tear down
+    // a composition created later.
+    ITfComposition *terminatedComposition = pComposition;
+    terminatedComposition->AddRef();
+    _pComposition->Release();
+    _pComposition = nullptr;
 
-    PerfTimer deleteCandidateTimer;
-    _DeleteCandidateList(FALSE, pContext);
-    double deleteCandidateElapsedMs = deleteCandidateTimer.ElapsedMs();
-
-    if (pContext)
+    ITfContext *ownerContext = _pContext;
+    if (ownerContext)
     {
-        pContext->Release();
-        pContext = nullptr;
+        ownerContext->AddRef();
+        _pContext->Release();
+        _pContext = nullptr;
     }
 
+    uint64_t nextEpoch =
+        _compositionEpoch.fetch_add(1, std::memory_order_acq_rel) + 1;
+    if (nextEpoch == 0)
+    {
+        _compositionEpoch.fetch_add(1, std::memory_order_acq_rel);
+    }
+
+    // Detach and end the old candidate/session before the COM cleanup calls
+    // below can re-enter and create a presenter for a newer composition.
+    _DeleteCandidateList(FALSE, ownerContext);
+    if (Global::g_connected)
+    {
+        // EndCandidateUiSession is intentionally idempotent, but a presenter
+        // can exist before its UI session becomes active. Always send one
+        // exact routed clear so the Server cannot retain that composition.
+        SendHideCandidateWndEventToUIProcess();
+    }
+
+    _RemoveDummyCompositionForComposing(ecWrite, terminatedComposition);
+    if (ownerContext)
+    {
+        _ClearCompositionDisplayAttributes(ecWrite, ownerContext,
+                                           terminatedComposition);
+    }
+    terminatedComposition->Release();
+
+    if (ownerContext)
+    {
+        ownerContext->Release();
+    }
 
     return S_OK;
 }
@@ -70,6 +98,11 @@ BOOL CMetasequoiaIME::_IsComposing()
 void CMetasequoiaIME::_SetComposition(_In_ ITfComposition *pComposition)
 {
     _pComposition = pComposition;
+    uint64_t nextEpoch = _compositionEpoch.fetch_add(1, std::memory_order_acq_rel) + 1;
+    if (nextEpoch == 0)
+    {
+        _compositionEpoch.fetch_add(1, std::memory_order_acq_rel);
+    }
 }
 
 //+---------------------------------------------------------------------------

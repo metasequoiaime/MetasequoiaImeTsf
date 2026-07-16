@@ -1,6 +1,7 @@
 #include "Private.h"
 #include "Globals.h"
 #include "MetasequoiaIME.h"
+#include "Ipc.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -12,6 +13,10 @@
 STDAPI CMetasequoiaIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCookie ecReadOnly,
                              __RPC__in_opt ITfEditRecord *pEditRecord)
 {
+    if (!IsNamedpipeFocusStateOwner(this) || !Global::g_connected)
+    {
+        return S_OK;
+    }
     BOOL isSelectionChanged;
 
     //
@@ -49,7 +54,10 @@ STDAPI CMetasequoiaIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCook
             {
                 if (!_IsRangeCovered(ecReadOnly, tfSelection.range, pRangeComposition))
                 {
-                    _EndComposition(pContext);
+                    if (FAILED(_EndComposition(pContext)))
+                    {
+                        MarkNamedpipeSessionDirtyForOwner(this);
+                    }
                 }
 
                 pRangeComposition->Release();
@@ -70,7 +78,7 @@ STDAPI CMetasequoiaIME::OnEndEdit(__RPC__in_opt ITfContext *pContext, TfEditCook
 // Always release any previous sink.
 //----------------------------------------------------------------------------
 
-BOOL CMetasequoiaIME::_InitTextEditSink(_In_ ITfDocumentMgr *pDocMgr)
+BOOL CMetasequoiaIME::_InitTextEditSink(_In_opt_ ITfDocumentMgr *pDocMgr)
 {
     ITfSource *pSource = nullptr;
     BOOL ret = TRUE;

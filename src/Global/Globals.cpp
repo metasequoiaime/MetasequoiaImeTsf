@@ -364,12 +364,12 @@ BOOL CheckModifiers(UINT modCurrent, UINT mod)
 //  [31]    Transition state
 //----------------------------------------------------------------------------
 
-USHORT ModifiersValue = 0;
-BOOL IsShiftKeyDownOnly = FALSE;
-BOOL IsControlKeyDownOnly = FALSE;
-BOOL IsAltKeyDownOnly = FALSE;
-BOOL PureShiftKeyDown = FALSE;
-BOOL PureShiftKeyUp = FALSE;
+thread_local USHORT ModifiersValue = 0;
+thread_local BOOL IsShiftKeyDownOnly = FALSE;
+thread_local BOOL IsControlKeyDownOnly = FALSE;
+thread_local BOOL IsAltKeyDownOnly = FALSE;
+thread_local BOOL PureShiftKeyDown = FALSE;
+thread_local BOOL PureShiftKeyUp = FALSE;
 
 BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam)
 {

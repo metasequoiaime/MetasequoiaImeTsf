@@ -4,7 +4,7 @@
 #include "MetasequoiaIMEBaseStructure.h"
 #include <debugapi.h>
 
-CKeyStateCategoryFactory *CKeyStateCategoryFactory::_instance;
+thread_local CKeyStateCategoryFactory *CKeyStateCategoryFactory::_instance = nullptr;
 
 CKeyStateCategoryFactory::CKeyStateCategoryFactory()
 {
@@ -248,13 +248,13 @@ CKeyStateComposing::CKeyStateComposing(_In_ CMetasequoiaIME *pTextService) : CKe
 
 HRESULT CKeyStateComposing::HandleKeyInput(KeyHandlerEditSessionDTO dto)
 {
-    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch);
+    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch, dto.requestId);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeTextStoreAndInput(KeyHandlerEditSessionDTO dto)
 {
     _pTextService->_HandleCompositionFinalize(dto.ec, dto.pContext, FALSE);
-    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch);
+    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch, dto.requestId);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO dto)
@@ -265,7 +265,7 @@ HRESULT CKeyStateComposing::HandleKeyFinalizeTextStore(KeyHandlerEditSessionDTO 
 HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto)
 {
     _pTextService->_HandleCompositionFinalize(dto.ec, dto.pContext, TRUE);
-    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch);
+    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch, dto.requestId);
 }
 
 HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
@@ -275,9 +275,10 @@ HRESULT CKeyStateComposing::HandleKeyFinalizeCandidatelist(KeyHandlerEditSession
 
 HRESULT CKeyStateComposing::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
-    if (Global::Keycode == VK_SPACE)
+    if (dto.code == VK_SPACE)
     {
-        return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
+        return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext, dto.requestId,
+                                                        dto.prefetchedText);
     }
     // VK_SPACE
     return _pTextService->_HandleCompositionConvert(dto.ec, dto.pContext, FALSE);
@@ -300,7 +301,7 @@ HRESULT CKeyStateComposing::HandleKeyToogleIMEMode(KeyHandlerEditSessionDTO dto)
 
 HRESULT CKeyStateComposing::HandleKeyBackspace(KeyHandlerEditSessionDTO dto)
 {
-    return _pTextService->_HandleCompositionBackspace(dto.ec, dto.pContext);
+    return _pTextService->_HandleCompositionBackspace(dto.ec, dto.pContext, dto.requestId);
 }
 
 HRESULT CKeyStateComposing::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
@@ -315,7 +316,8 @@ HRESULT CKeyStateComposing::HandleKeyDoubleSingleByte(KeyHandlerEditSessionDTO d
 
 HRESULT CKeyStateComposing::HandleKeyPunctuation(KeyHandlerEditSessionDTO dto)
 {
-    return _pTextService->_HandleCompositionPunctuation(dto.ec, dto.pContext, dto.wch);
+    return _pTextService->_HandleCompositionPunctuation(dto.ec, dto.pContext, dto.wch, dto.requestId,
+                                                        dto.prefetchedText);
 }
 
 /*
@@ -328,7 +330,8 @@ CKeyStateCandidate::CKeyStateCandidate(_In_ CMetasequoiaIME *pTextService) : CKe
 // _HandleCandidateInput
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelist(KeyHandlerEditSessionDTO dto)
 {
-    return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
+    return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext, dto.requestId,
+                                                    dto.prefetchedText);
 }
 
 // _HandleCandidateInput
@@ -340,19 +343,21 @@ HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelistForVKReturn(KeyHandler
 // HandleKeyFinalizeCandidatelistAndInput
 HRESULT CKeyStateCandidate::HandleKeyFinalizeCandidatelistAndInput(KeyHandlerEditSessionDTO dto)
 {
-    _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
-    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch);
+    _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext, dto.requestId, dto.prefetchedText);
+    return _pTextService->_HandleCompositionInput(dto.ec, dto.pContext, dto.wch, dto.requestId);
 }
 
 //_HandleCandidateConvert
 HRESULT CKeyStateCandidate::HandleKeyConvert(KeyHandlerEditSessionDTO dto)
 {
-    if (Global::Keycode == VK_SPACE)
+    if (dto.code == VK_SPACE)
     {
-        return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
+        return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext, dto.requestId,
+                                                        dto.prefetchedText);
     }
     // Send candidate string to client when pressing VK_SPACE
-    return _pTextService->_HandleCandidateConvert(dto.ec, dto.pContext);
+    return _pTextService->_HandleCandidateConvert(dto.ec, dto.pContext, dto.requestId,
+                                                  dto.prefetchedText);
 }
 
 //_HandleCancel
@@ -371,6 +376,7 @@ HRESULT CKeyStateCandidate::HandleKeyArrow(KeyHandlerEditSessionDTO dto)
 HRESULT CKeyStateCandidate::HandleKeySelectByNumber(KeyHandlerEditSessionDTO dto)
 {
     // return _pTextService->_HandleCandidateSelectByNumber(dto.ec, dto.pContext, dto.code);
-    return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext);
+    return _pTextService->_HandleCandidateFinalize(dto.ec, dto.pContext, dto.requestId,
+                                                    dto.prefetchedText);
 }
 

@@ -114,12 +114,12 @@ LRESULT CALLBACK ThreadKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 BOOL CheckModifiers(UINT uModCurrent, UINT uMod);
 BOOL UpdateModifiers(WPARAM wParam, LPARAM lParam);
 
-extern USHORT ModifiersValue;
-extern BOOL IsShiftKeyDownOnly;
-extern BOOL IsControlKeyDownOnly;
-extern BOOL IsAltKeyDownOnly;
-extern BOOL PureShiftKeyDown;
-extern BOOL PureShiftKeyUp;
+extern thread_local USHORT ModifiersValue;
+extern thread_local BOOL IsShiftKeyDownOnly;
+extern thread_local BOOL IsControlKeyDownOnly;
+extern thread_local BOOL IsAltKeyDownOnly;
+extern thread_local BOOL PureShiftKeyDown;
+extern thread_local BOOL PureShiftKeyUp;
 
 extern const GUID MetasequoiaIMEGuidCompartmentDoubleSingleByte;
 extern const GUID MetasequoiaIMEGuidCompartmentPunctuation;
