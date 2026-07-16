@@ -141,9 +141,14 @@ class CDeferredApplicationTextEditSession : public CEditSessionBase
 
     STDMETHODIMP DoEditSession(TfEditCookie ec) override
     {
-        if (!_pTextService->_IsDeferredKeyReplayCurrent(
-                _replayToken, _focusGeneration, _pContext) ||
-            !_pTextService->_IsFocusSessionCurrent(_focusToken, _pContext))
+        const bool replayCurrent = _pTextService->_IsDeferredKeyReplayCurrent(
+            _replayToken, _focusGeneration, _pContext);
+        const bool fallbackActive =
+            _pTextService->_IsServerUnavailableFallbackActive();
+        const bool focusCurrent =
+            _pTextService->_IsFocusSessionCurrent(_focusToken, _pContext);
+        if (!replayCurrent ||
+            (!fallbackActive && !focusCurrent))
         {
             _pTextService->_RetryDeferredKeyReplay(_replayToken);
             return S_FALSE;
@@ -301,6 +306,7 @@ CMetasequoiaIME::CMetasequoiaIME()
     _deferredProjectedCandidateActive = false;
     _deferredKeyFocusGeneration = 1;
     _deferredKeyDrainPosted = false;
+    _serverUnavailableFallbackActive = false;
 }
 
 //+---------------------------------------------------------------------------
@@ -1701,6 +1707,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             {
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 pIME->_ipcReconnectDelayMs = CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS;
+                pIME->_TryLeaveServerUnavailableFallback();
                 SendCurrentImeStatusSnapshot(pIME);
                 pIME->_ScheduleDeferredKeyDownDrain();
                 break;

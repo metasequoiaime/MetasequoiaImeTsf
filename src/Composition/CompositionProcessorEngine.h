@@ -79,7 +79,7 @@ class CCompositionProcessorEngine
     PreservedKeyAction GetPreservedKeyAction(REFGUID rguid) const;
     void OnPreservedKey(ITfContext *pContext, REFGUID rguid, _Out_ BOOL *pIsEaten, _In_ ITfThreadMgr *pThreadMgr,
                         TfClientId tfClientId, BOOL *pNeedToggleIMEMode,
-                        BOOL isPrevalidated = FALSE);
+                        BOOL isPrevalidated = FALSE, BOOL notifyServer = TRUE);
 
     // Toggle IME Mode
     void ToggleIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);

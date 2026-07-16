@@ -905,7 +905,8 @@ void CCompositionProcessorEngine::OnPreservedKey( //
     _In_ ITfThreadMgr *pThreadMgr,                //
     TfClientId tfClientId,                        //
     BOOL *pNeedToggleIMEMode,                     //
-    BOOL isPrevalidated                           //
+    BOOL isPrevalidated,                          //
+    BOOL notifyServer                             //
 )
 {
     if (IsEqualGUID(rguid, _PreservedKey_IMEMode.Guid))
@@ -943,9 +944,12 @@ void CCompositionProcessorEngine::OnPreservedKey( //
             Global::ModifiersDown |= 0b00000001;
         else
             Global::ModifiersDown &= ~0b00000001;
-        WriteDataToSharedMemory(Global::Keycode, L'\0', Global::ModifiersDown, nullptr, 0, L"", 0b000111);
-        SendKeyEventToUIProcess();
-        ClearNamedpipeDataIfExists();
+        if (notifyServer)
+        {
+            WriteDataToSharedMemory(Global::Keycode, L'\0', Global::ModifiersDown, nullptr, 0, L"", 0b000111);
+            SendKeyEventToUIProcess();
+            ClearNamedpipeDataIfExists();
+        }
     }
     else if (IsEqualGUID(rguid, _PreservedKey_IMEMode02.Guid))
     {
@@ -983,9 +987,12 @@ void CCompositionProcessorEngine::OnPreservedKey( //
             Global::ModifiersDown |= 0b00000001;
         else
             Global::ModifiersDown &= ~0b00000001;
-        WriteDataToSharedMemory(Global::Keycode, L'\0', Global::ModifiersDown, nullptr, 0, L"", 0b000111);
-        SendKeyEventToUIProcess();
-        ClearNamedpipeDataIfExists();
+        if (notifyServer)
+        {
+            WriteDataToSharedMemory(Global::Keycode, L'\0', Global::ModifiersDown, nullptr, 0, L"", 0b000111);
+            SendKeyEventToUIProcess();
+            ClearNamedpipeDataIfExists();
+        }
     }
     else if (IsEqualGUID(rguid, _PreservedKey_DoubleSingleByte.Guid))
     {

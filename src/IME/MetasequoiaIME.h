@@ -121,6 +121,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     {
         return _tfClientId;
     }
+    bool _IsServerUnavailableFallbackActive() const;
 
     // functions for the composition object.
     void _SetComposition(_In_ ITfComposition *pComposition);
@@ -296,6 +297,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     void _ClearDeferredKeyDowns();
     void _ScheduleDeferredKeyDownDrain();
     void _DrainOneDeferredKeyDown();
+    void _TryLeaveServerUnavailableFallback();
     HRESULT _RequestDeferredApplicationTextEditSession(
         _In_ ITfContext *pContext, WCHAR wch, uint64_t expectedFocusToken,
         uint64_t expectedFocusGeneration, uint64_t deferredReplayToken);
@@ -478,6 +480,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     bool _deferredProjectedCandidateActive;
     uint64_t _deferredKeyFocusGeneration;
     bool _deferredKeyDrainPosted;
+    bool _serverUnavailableFallbackActive;
 
     LONG _refCount;
 

@@ -1055,6 +1055,7 @@ void CMetasequoiaIME::_CompleteDeferredKeyReplay(uint64_t replayToken)
         {
             context->Release();
         }
+        _TryLeaveServerUnavailableFallback();
         _ScheduleDeferredKeyDownDrain();
         return;
     }
@@ -1114,6 +1115,7 @@ void CMetasequoiaIME::_CompleteDeferredKeyReplay(uint64_t replayToken)
     {
         context->Release();
     }
+    _TryLeaveServerUnavailableFallback();
     _ScheduleDeferredKeyDownDrain();
 }
 
@@ -1181,6 +1183,25 @@ void CMetasequoiaIME::_ScheduleDeferredKeyDownDrain()
     }
 }
 
+bool CMetasequoiaIME::_IsServerUnavailableFallbackActive() const
+{
+    return _serverUnavailableFallbackActive;
+}
+
+void CMetasequoiaIME::_TryLeaveServerUnavailableFallback()
+{
+    const uint64_t expectedToken =
+        _expectedWorkerFocusToken.load(std::memory_order_acquire);
+    if (_serverUnavailableFallbackActive && !_IsComposing() &&
+        expectedToken != 0 &&
+        _workerCommitReady.load(std::memory_order_acquire) &&
+        _acknowledgedWorkerFocusToken.load(std::memory_order_acquire) ==
+            expectedToken)
+    {
+        _serverUnavailableFallbackActive = false;
+    }
+}
+
 void CMetasequoiaIME::_DrainOneDeferredKeyDown()
 {
     _deferredKeyDrainPosted = false;
@@ -1189,11 +1210,18 @@ void CMetasequoiaIME::_DrainOneDeferredKeyDown()
     {
         return;
     }
-    if (_localSessionResetPending.load(std::memory_order_acquire) ||
-        !EnsureNamedpipeFocusSessionActivated())
+    if (_localSessionResetPending.load(std::memory_order_acquire))
     {
         PostOwnerMessageWithSyncFallback(_msgWndHandle, WM_IpcReconnect);
         return;
+    }
+    if (!_serverUnavailableFallbackActive &&
+        !EnsureNamedpipeFocusSessionActivated())
+    {
+        // Do not strand an eaten key when the Server cannot establish a
+        // focus session. The queued FIFO becomes an isolated local/raw-input
+        // lane until its composition has been finalized.
+        _serverUnavailableFallbackActive = true;
     }
 
     _deferredKeyInFlight = _deferredKeyDowns.front();
@@ -1215,7 +1243,8 @@ void CMetasequoiaIME::_DrainOneDeferredKeyDown()
         _ClearDeferredKeyDowns();
         return;
     }
-    if (!_IsFocusSessionCurrent(focusToken, key.context))
+    if (!_serverUnavailableFallbackActive &&
+        !_IsFocusSessionCurrent(focusToken, key.context))
     {
         // A token/Ready fence can close without a document focus change.
         // Preserve the exact item for the replacement Server epoch; an actual
@@ -1265,6 +1294,36 @@ void CMetasequoiaIME::_DrainOneDeferredKeyDown()
         {
             _CompleteDeferredKeyReplay(replayToken);
         }
+        return;
+    }
+
+    if (_serverUnavailableFallbackActive)
+    {
+        _KEYSTROKE_STATE offlineState = key.keyState;
+        offlineState.Category = CATEGORY_COMPOSING;
+        switch (offlineState.Function)
+        {
+        case FUNCTION_CONVERT:
+        case FUNCTION_FINALIZE_CANDIDATELIST:
+        case FUNCTION_FINALIZE_CANDIDATELISTForVKReturn:
+        case FUNCTION_SELECT_BY_NUMBER:
+        case FUNCTION_SERVER_CANDIDATE_KEY:
+            // There is no candidate authority offline. Commit exactly the
+            // raw text already held by the TSF composition.
+            offlineState.Function = FUNCTION_FINALIZE_TEXTSTORE;
+            break;
+        case FUNCTION_MOVE_PAGE_UP:
+        case FUNCTION_MOVE_PAGE_DOWN:
+        case FUNCTION_MOVE_PAGE_TOP:
+        case FUNCTION_MOVE_PAGE_BOTTOM:
+            _CompleteDeferredKeyReplay(replayToken);
+            return;
+        default:
+            break;
+        }
+        _InvokeKeyHandler(key.context, key.wParam, key.translatedWch,
+                          static_cast<DWORD>(key.lParam), offlineState,
+                          FANY_IME_NO_REQUEST_ID, {}, 0, 0, 0, replayToken);
         return;
     }
 
@@ -1645,6 +1704,36 @@ STDAPI CMetasequoiaIME::OnKeyUp(ITfContext *pContext, WPARAM wParam, LPARAM lPar
 
     if (_HasDeferredKeyBarrier())
     {
+        const bool isShift = wParam == VK_SHIFT || wParam == VK_LSHIFT ||
+                             wParam == VK_RSHIFT;
+        const uint64_t expectedToken =
+            _expectedWorkerFocusToken.load(std::memory_order_acquire);
+        const bool transportUnavailable =
+            expectedToken == 0 ||
+            !_workerCommitReady.load(std::memory_order_acquire) ||
+            _acknowledgedWorkerFocusToken.load(std::memory_order_acquire) !=
+                expectedToken;
+        if (isShift && Global::PureShiftKeyUp && transportUnavailable &&
+            _pCompositionProcessorEngine && _DeferredKeyQueueHasCapacity())
+        {
+            // A preserved Shift is not delivered while the reconnect barrier
+            // owns the keystroke stream. Apply the local compartment toggle
+            // here and queue only the composition-finalization phase. This is
+            // restricted to an unavailable transport, so the ordinary
+            // OnPreservedKey path cannot toggle the same key twice.
+            _serverUnavailableFallbackActive = true;
+            _pCompositionProcessorEngine->ToggleIMEMode(_GetThreadMgr(),
+                                                         _GetClientId());
+            _KEYSTROKE_STATE toggleState = {};
+            toggleState.Category = CATEGORY_COMPOSING;
+            toggleState.Function = FUNCTION_TOGGLE_IME_MODE;
+            *pIsEaten = _QueueDeferredKeyDown(
+                            pContext, wParam, lParam, L'\0',
+                            CaptureIpcModifiers(), toggleState)
+                            ? TRUE
+                            : FALSE;
+            return S_OK;
+        }
         *pIsEaten = FALSE;
         return S_OK;
     }
@@ -1721,7 +1810,8 @@ void CMetasequoiaIME::_DispatchPreservedKey(_In_ ITfContext *pContext,
         _GetThreadMgr(),                         //
         _GetClientId(),                          //
         &pNeedToggleIMEMode,                     //
-        isPrevalidated ? TRUE : FALSE            //
+        isPrevalidated ? TRUE : FALSE,           //
+        _serverUnavailableFallbackActive ? FALSE : TRUE //
     );
 
     if (pNeedToggleIMEMode &&

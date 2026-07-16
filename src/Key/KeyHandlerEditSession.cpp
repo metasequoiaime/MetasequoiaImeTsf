@@ -57,7 +57,8 @@ STDAPI CKeyHandlerEditSession::DoEditSession(TfEditCookie ec)
             return S_FALSE;
         }
     }
-    else if (!_pTextService->_IsFocusSessionCurrent(_focusToken, _pContext))
+    else if (!_pTextService->_IsServerUnavailableFallbackActive() &&
+             !_pTextService->_IsFocusSessionCurrent(_focusToken, _pContext))
     {
         return S_FALSE;
     }
