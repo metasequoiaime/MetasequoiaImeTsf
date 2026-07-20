@@ -723,32 +723,22 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     pContextDocument;
     wndWidth;
 
-    PerfTimer timer;
     HRESULT hr = E_FAIL;
 
-    PerfTimer startLayoutTimer;
     if (FAILED(_StartLayout(pContextDocument, ec, pRangeComposition)))
     {
         goto Exit;
     }
-    double startLayoutElapsedMs = startLayoutTimer.ElapsedMs();
 
-    PerfTimer beginUiTimer;
     BeginUIElement();
     _candidateWindowVisible = FALSE;
-    double beginUiElapsedMs = beginUiTimer.ElapsedMs();
 
     RECT rcTextExt;
-    double getTextExtElapsedMs = 0;
-    double layoutChangeElapsedMs = 0;
     if (SUCCEEDED(_GetTextExt(&rcTextExt)))
     {
-        getTextExtElapsedMs = 0; // _GetTextExt already internally timed
         Global::Point[0] = rcTextExt.left * Global::DpiScale;
         Global::Point[1] = rcTextExt.bottom * Global::DpiScale;
-        PerfTimer layoutChangeTimer;
         _LayoutChangeNotification(&rcTextExt);
-        layoutChangeElapsedMs = layoutChangeTimer.ElapsedMs();
     }
 
     hr = S_OK;
@@ -1208,7 +1198,6 @@ void CCandidateListUIPresenter::AdviseUIChangedByArrowKey(_In_ KEYSTROKE_FUNCTIO
 
 HRESULT CCandidateListUIPresenter::BeginUIElement()
 {
-    PerfTimer timer;
     HRESULT hr = S_OK;
 
     ITfThreadMgr *pThreadMgr = _pTextService->_GetThreadMgr();
@@ -1219,14 +1208,10 @@ HRESULT CCandidateListUIPresenter::BeginUIElement()
     }
 
     ITfUIElementMgr *pUIElementMgr = nullptr;
-    PerfTimer queryUiMgrTimer;
     hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void **)&pUIElementMgr);
-    double queryUiMgrElapsedMs = queryUiMgrTimer.ElapsedMs();
     if (hr == S_OK)
     {
-        PerfTimer beginUiTimer;
         pUIElementMgr->BeginUIElement(this, &_isShowMode, &_uiElementId);
-        double beginUiElapsedMs = beginUiTimer.ElapsedMs();
         pUIElementMgr->Release();
     }
 
@@ -1236,9 +1221,7 @@ Exit:
 
 HRESULT CCandidateListUIPresenter::EndUIElement()
 {
-    PerfTimer timer;
     HRESULT hr = S_OK;
-    const DWORD currentUiElementId = _uiElementId;
 
     ITfThreadMgr *pThreadMgr = _pTextService->_GetThreadMgr();
     if ((nullptr == pThreadMgr) || (-1 == _uiElementId))
@@ -1248,14 +1231,10 @@ HRESULT CCandidateListUIPresenter::EndUIElement()
     }
 
     ITfUIElementMgr *pUIElementMgr = nullptr;
-    PerfTimer queryUiMgrTimer;
     hr = pThreadMgr->QueryInterface(IID_ITfUIElementMgr, (void **)&pUIElementMgr);
-    double queryUiMgrElapsedMs = queryUiMgrTimer.ElapsedMs();
     if (hr == S_OK)
     {
-        PerfTimer endUiTimer;
         pUIElementMgr->EndUIElement(_uiElementId);
-        double endUiElapsedMs = endUiTimer.ElapsedMs();
         pUIElementMgr->Release();
         _uiElementId = static_cast<DWORD>(-1);
     }

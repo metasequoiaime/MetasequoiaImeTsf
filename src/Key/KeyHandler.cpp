@@ -968,12 +968,10 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
 
     CKeyHandlerEditSession *pEditSession = nullptr;
     HRESULT hr = E_FAIL;
-    PerfTimer requestTimer;
 
     // we'll insert a char ourselves in place of this keystroke
     LARGE_INTEGER requestStartQpc;
     QueryPerformanceCounter(&requestStartQpc);
-    PerfTimer allocTimer;
     pEditSession = new (std::nothrow) CKeyHandlerEditSession(this, pContext, code, wch, keyState, requestId,
                                                             requestStartQpc, std::move(prefetchedText),
                                                              localResetToken == 0
@@ -983,7 +981,6 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
                                                                 : 0,
                                                              localResetToken, expectedCompositionEpoch,
                                                              deferredReplayToken);
-    double allocElapsedMs = allocTimer.ElapsedMs();
     if (pEditSession == nullptr)
     {
         if (deferredReplayToken != 0)
@@ -999,10 +996,8 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
     // Do not specify TF_ES_SYNC so edit session is not invoked on WinWord
     //
     HRESULT editSessionHr = E_FAIL;
-    PerfTimer requestCallTimer;
     HRESULT requestHr = pContext->RequestEditSession(_tfClientId, pEditSession, TF_ES_ASYNCDONTCARE | TF_ES_READWRITE,
                                                      &editSessionHr);
-    double requestCallElapsedMs = requestCallTimer.ElapsedMs();
     hr = FAILED(requestHr) ? requestHr : editSessionHr;
     if ((FAILED(requestHr) || FAILED(editSessionHr)) &&
         deferredReplayToken != 0)
@@ -1010,7 +1005,6 @@ HRESULT CMetasequoiaIME::_InvokeKeyHandler(_In_ ITfContext *pContext, UINT code,
         _RetryDeferredKeyReplay(deferredReplayToken);
     }
 
-    PerfTimer releaseTimer;
     pEditSession->Release();
 
 Exit:
