@@ -280,7 +280,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     bool _HasDeferredKeyBarrier() const;
     bool _DeferredKeyQueueHasCapacity() const;
     void _EnsureDeferredKeyProjection();
-    void _ApplyDeferredKeyProjection(const _KEYSTROKE_STATE &keyState);
+    void _ApplyDeferredKeyProjection(const _KEYSTROKE_STATE &keyState, WCHAR wch);
     void _ApplyDeferredPreservedKeyProjection(REFGUID preservedKey);
     bool _RefreshDeferredRecoveryPrefix(_In_ ITfContext *pContext);
     void _ArmDeferredRecoveryForTransport(_In_opt_ ITfContext *pContext);
@@ -478,6 +478,7 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     bool _deferredProjectedDoubleSingleByteOpen;
     size_t _deferredProjectedInputLength;
     bool _deferredProjectedCandidateActive;
+    bool _deferredProjectedUnicodeMode;
     uint64_t _deferredKeyFocusGeneration;
     bool _deferredKeyDrainPosted;
     bool _serverUnavailableFallbackActive;

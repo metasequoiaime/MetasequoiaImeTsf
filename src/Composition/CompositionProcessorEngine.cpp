@@ -255,6 +255,11 @@ Exit:
 //     State of Text Processor Engine.
 //----------------------------------------------------------------------------
 
+BOOL CCompositionProcessorEngine::IsUnicodeModeComposition() const
+{
+    return _keystrokeBuffer.GetLength() > 0 && _keystrokeBuffer.Get() && _keystrokeBuffer.Get()[0] == L'U';
+}
+
 BOOL CCompositionProcessorEngine::AddVirtualKey(WCHAR wch)
 {
     if (!wch)
@@ -1909,6 +1914,40 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         return TRUE;
     }
 
+    // U-mode: bare digits compose hex; Shift+1..9 selects candidates.
+    if (IsUnicodeModeComposition() && uCode >= L'0' && uCode <= L'9')
+    {
+        const bool shift_down = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        const bool ctrl_down = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+        const bool alt_down = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
+        const bool shift_only = shift_down && !ctrl_down && !alt_down;
+        if (shift_only && uCode >= L'1' && uCode <= L'9')
+        {
+            if (pKeyState)
+            {
+                pKeyState->Category = CATEGORY_CANDIDATE;
+                pKeyState->Function = FUNCTION_SELECT_BY_NUMBER;
+            }
+            return TRUE;
+        }
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
+    }
+    if (IsUnicodeModeComposition() && _keystrokeBuffer.GetLength() == 1 && uCode == VK_OEM_PLUS && pwch &&
+        *pwch == L'+')
+    {
+        if (pKeyState)
+        {
+            pKeyState->Category = CATEGORY_COMPOSING;
+            pKeyState->Function = FUNCTION_INPUT;
+        }
+        return TRUE;
+    }
+
     // The Server owns the configurable comma/period behavior. Always route
     // these keys through it while candidates are active; its response decides
     // whether the key navigates or commits the first candidate with punctuation.
@@ -1917,6 +1956,16 @@ BOOL CCompositionProcessorEngine::IsVirtualKeyNeed( //
         (uCode == VK_OEM_MINUS || uCode == VK_OEM_PLUS || isCommaPeriodPagingKey || uCode == VK_TAB ||
          uCode == VK_PRIOR || uCode == VK_NEXT || uCode == VK_UP || uCode == VK_DOWN))
     {
+        if (IsUnicodeModeComposition() && _keystrokeBuffer.GetLength() == 1 && uCode == VK_OEM_PLUS && pwch &&
+            *pwch == L'+')
+        {
+            if (pKeyState)
+            {
+                pKeyState->Category = CATEGORY_COMPOSING;
+                pKeyState->Function = FUNCTION_INPUT;
+            }
+            return TRUE;
+        }
         if (pKeyState)
         {
             pKeyState->Category = CATEGORY_CANDIDATE;
@@ -2524,6 +2573,12 @@ BOOL CCompositionProcessorEngine::IsKeystrokeRange(UINT uCode, _Out_ _KEYSTROKE_
 
     pKeyState->Category = CATEGORY_NONE;
     pKeyState->Function = FUNCTION_NONE;
+
+    // U-mode owns 0-9 as hex composition input.
+    if (IsUnicodeModeComposition() && uCode >= L'0' && uCode <= L'9')
+    {
+        return FALSE;
+    }
 
     if (_candidateListIndexRange.IsRange(uCode))
     {

@@ -64,6 +64,8 @@ class CCompositionProcessorEngine
         return _keystrokeBuffer;
     };
     WCHAR GetVirtualKey(DWORD_PTR dwIndex);
+    // Shift+U unicode input: composition buffer starts with 'U'.
+    BOOL IsUnicodeModeComposition() const;
 
     void GetReadingStrings(                                          //
         _Inout_ CMetasequoiaImeArray<CStringRange> *pReadingStrings, //

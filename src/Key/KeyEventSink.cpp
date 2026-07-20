@@ -35,6 +35,7 @@ struct DeferredShadowState
     bool doubleSingleByteOpen = false;
     size_t inputLength = 0;
     bool candidateActive = false;
+    bool unicodeMode = false;
 };
 
 bool IsBareModifierKey(UINT code)
@@ -59,11 +60,15 @@ bool IsBareModifierKey(UINT code)
 }
 
 void ApplyDeferredKeyState(DeferredShadowState &shadow,
-                           const _KEYSTROKE_STATE &keyState)
+                           const _KEYSTROKE_STATE &keyState, WCHAR wch = 0)
 {
     switch (keyState.Function)
     {
     case FUNCTION_INPUT:
+        if (shadow.inputLength == 0)
+        {
+            shadow.unicodeMode = (wch == L'U');
+        }
         if (shadow.inputLength < MAX_PINYIN_LENGTH)
         {
             ++shadow.inputLength;
@@ -74,6 +79,7 @@ void ApplyDeferredKeyState(DeferredShadowState &shadow,
     case FUNCTION_FINALIZE_CANDIDATELIST_AND_INPUT:
         shadow.inputLength = 1;
         shadow.candidateActive = false;
+        shadow.unicodeMode = (wch == L'U');
         break;
     case FUNCTION_BACKSPACE:
         if (shadow.inputLength > 0)
@@ -83,6 +89,7 @@ void ApplyDeferredKeyState(DeferredShadowState &shadow,
         if (shadow.inputLength == 0)
         {
             shadow.candidateActive = false;
+            shadow.unicodeMode = false;
         }
         break;
     case FUNCTION_CONVERT_WILDCARD:
@@ -93,10 +100,12 @@ void ApplyDeferredKeyState(DeferredShadowState &shadow,
         // commits and ends the composition rather than merely opening a list.
         shadow.inputLength = 0;
         shadow.candidateActive = false;
+        shadow.unicodeMode = false;
         break;
     case FUNCTION_CANCEL:
         shadow.inputLength = 0;
         shadow.candidateActive = false;
+        shadow.unicodeMode = false;
         break;
     case FUNCTION_FINALIZE_TEXTSTORE:
     case FUNCTION_FINALIZE_CANDIDATELIST:
@@ -107,6 +116,7 @@ void ApplyDeferredKeyState(DeferredShadowState &shadow,
     case FUNCTION_DOUBLE_SINGLE_BYTE:
         shadow.inputLength = 0;
         shadow.candidateActive = false;
+        shadow.unicodeMode = false;
         break;
     default:
         break;
@@ -537,10 +547,13 @@ void CMetasequoiaIME::_EnsureDeferredKeyProjection()
     // letter extends the same raw input.  Only an explicit/original candidate
     // list makes the next input a finalize-and-start-new boundary.
     _deferredProjectedCandidateActive = _candidateMode == CANDIDATE_ORIGINAL;
+    _deferredProjectedUnicodeMode =
+        _pCompositionProcessorEngine &&
+        _pCompositionProcessorEngine->IsUnicodeModeComposition() != FALSE;
 }
 
 void CMetasequoiaIME::_ApplyDeferredKeyProjection(
-    const _KEYSTROKE_STATE &keyState)
+    const _KEYSTROKE_STATE &keyState, WCHAR wch)
 {
     _EnsureDeferredKeyProjection();
     DeferredShadowState shadow;
@@ -549,9 +562,11 @@ void CMetasequoiaIME::_ApplyDeferredKeyProjection(
     shadow.doubleSingleByteOpen = _deferredProjectedDoubleSingleByteOpen;
     shadow.inputLength = _deferredProjectedInputLength;
     shadow.candidateActive = _deferredProjectedCandidateActive;
-    ApplyDeferredKeyState(shadow, keyState);
+    shadow.unicodeMode = _deferredProjectedUnicodeMode;
+    ApplyDeferredKeyState(shadow, keyState, wch);
     _deferredProjectedInputLength = shadow.inputLength;
     _deferredProjectedCandidateActive = shadow.candidateActive;
+    _deferredProjectedUnicodeMode = shadow.unicodeMode;
 }
 
 void CMetasequoiaIME::_ApplyDeferredPreservedKeyProjection(
@@ -569,6 +584,7 @@ void CMetasequoiaIME::_ApplyDeferredPreservedKeyProjection(
         _deferredProjectedPunctuationOpen = _deferredProjectedImeOpen;
         _deferredProjectedInputLength = 0;
         _deferredProjectedCandidateActive = false;
+        _deferredProjectedUnicodeMode = false;
         break;
     case CCompositionProcessorEngine::PreservedKeyAction::ToggleDoubleSingleByteMode:
         _deferredProjectedDoubleSingleByteOpen =
@@ -735,6 +751,7 @@ bool CMetasequoiaIME::_ClassifyDeferredKeyDown(
             _deferredProjectedDoubleSingleByteOpen;
         shadow.inputLength = _deferredProjectedInputLength;
         shadow.candidateActive = _deferredProjectedCandidateActive;
+        shadow.unicodeMode = _deferredProjectedUnicodeMode;
     }
     else
     {
@@ -750,6 +767,8 @@ bool CMetasequoiaIME::_ClassifyDeferredKeyDown(
             static_cast<size_t>(
                 _pCompositionProcessorEngine->GetVirtualKeyLength()));
         shadow.candidateActive = _candidateMode == CANDIDATE_ORIGINAL;
+        shadow.unicodeMode =
+            _pCompositionProcessorEngine->IsUnicodeModeComposition() != FALSE;
     }
 
     const auto setKeyState = [keyState](KEYSTROKE_CATEGORY category,
@@ -831,6 +850,11 @@ bool CMetasequoiaIME::_ClassifyDeferredKeyDown(
         case VK_NEXT:
         case VK_UP:
         case VK_DOWN:
+            if (*classifiedCode == VK_OEM_PLUS && shadow.unicodeMode &&
+                shadow.inputLength == 1 && *classifiedWch == L'+')
+            {
+                return setKeyState(CATEGORY_COMPOSING, FUNCTION_INPUT);
+            }
             return setKeyState(CATEGORY_CANDIDATE,
                                FUNCTION_SERVER_CANDIDATE_KEY);
         default:
@@ -839,7 +863,23 @@ bool CMetasequoiaIME::_ClassifyDeferredKeyDown(
 
         if (*classifiedCode >= L'1' && *classifiedCode <= L'9')
         {
+            // U-mode: bare digits compose hex; Shift+1..9 selects candidates.
+            if (shadow.unicodeMode)
+            {
+                const bool shift_only =
+                    (capturedModifiers & 0b00000111u) == 0b00000001u;
+                if (shift_only)
+                {
+                    return setKeyState(CATEGORY_CANDIDATE,
+                                       FUNCTION_SELECT_BY_NUMBER);
+                }
+                return setKeyState(CATEGORY_COMPOSING, FUNCTION_INPUT);
+            }
             return setKeyState(CATEGORY_CANDIDATE, FUNCTION_SELECT_BY_NUMBER);
+        }
+        if (*classifiedCode == L'0' && shadow.unicodeMode)
+        {
+            return setKeyState(CATEGORY_COMPOSING, FUNCTION_INPUT);
         }
         if (shadow.punctuationOpen &&
             _pCompositionProcessorEngine->IsPunctuation(*classifiedWch))
@@ -951,7 +991,7 @@ bool CMetasequoiaIME::_QueueDeferredKeyDown(_In_ ITfContext *pContext, WPARAM wP
     _deferredKeyDowns.push_back(key);
     if (key.kind == DeferredKeyDown::Kind::KeyDown)
     {
-        _ApplyDeferredKeyProjection(keyState);
+        _ApplyDeferredKeyProjection(keyState, translatedWch);
     }
     else
     {
@@ -1026,6 +1066,7 @@ void CMetasequoiaIME::_ClearDeferredKeyDowns()
     _deferredProjectedDoubleSingleByteOpen = false;
     _deferredProjectedInputLength = 0;
     _deferredProjectedCandidateActive = false;
+    _deferredProjectedUnicodeMode = false;
 }
 
 void CMetasequoiaIME::_CompleteDeferredKeyReplay(uint64_t replayToken)
@@ -1047,6 +1088,7 @@ void CMetasequoiaIME::_CompleteDeferredKeyReplay(uint64_t replayToken)
         _deferredKeyProjectionValid = false;
         _deferredProjectedInputLength = 0;
         _deferredProjectedCandidateActive = false;
+        _deferredProjectedUnicodeMode = false;
         (void)_RefreshDeferredRecoveryPrefix(context);
         _deferredKeyInFlight = {};
         _hasDeferredKeyInFlight = false;
