@@ -104,11 +104,11 @@ extern CRITICAL_SECTION CS;
 extern HFONT defaultlFontHandle; // Global font object we use everywhere
 
 extern const CLSID MetasequoiaIMECLSID;
-extern const CLSID MetasequoiaIMEGuidProfile;
-extern const CLSID MetasequoiaIMEGuidImeModePreserveKey;
-extern const CLSID MetasequoiaIMEGuidImeModePreserveKey02;
-extern const CLSID MetasequoiaIMEGuidDoubleSingleBytePreserveKey;
-extern const CLSID MetasequoiaIMEGuidPunctuationPreserveKey;
+extern const GUID MetasequoiaIMEGuidProfile;
+extern const GUID MetasequoiaIMEGuidImeModePreserveKey;
+extern const GUID MetasequoiaIMEGuidImeModePreserveKey02;
+extern const GUID MetasequoiaIMEGuidDoubleSingleBytePreserveKey;
+extern const GUID MetasequoiaIMEGuidPunctuationPreserveKey;
 
 LRESULT CALLBACK ThreadKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 BOOL CheckModifiers(UINT uModCurrent, UINT uMod);
