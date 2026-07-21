@@ -134,7 +134,14 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                     displayPreedit = rest.substr(secondSeparator + 1);
                 }
                 GlobalIme::word_for_creating_word = curWord;
-                GlobalIme::pending_create_word_preedit = displayPreedit;
+                if (GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Pinyin)
+                {
+                    GlobalIme::pending_create_word_preedit = displayPreedit;
+                }
+                else
+                {
+                    GlobalIme::pending_create_word_preedit.clear();
+                }
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
 

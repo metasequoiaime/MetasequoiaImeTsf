@@ -327,18 +327,16 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     {
         CStringRange curReadingStr;
         std::wstring readingStr = readingStrings.GetAt(0)->ToWString();
-        const bool pinyinStyle =
-            GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Pinyin;
+        const auto &preeditStyle = GlobalSettings::getTsfPreeditStyle();
 
-        if (!pinyinStyle)
+        if (preeditStyle == GlobalSettings::TsfPreeditStyle::Empty)
         {
-            if (!GlobalIme::word_for_creating_word.empty())
-            { /* 造词过程中 */
-                readingStr = GlobalIme::word_for_creating_word + readingStr;
-            }
+            // Inline preedit hidden; composition/candidates still run as usual.
+            GlobalIme::pending_create_word_preedit.clear();
+            readingStr.clear();
             curReadingStr.Set(readingStr.c_str(), readingStr.length());
         }
-        else
+        else if (preeditStyle == GlobalSettings::TsfPreeditStyle::Pinyin)
         {
             bool gotServerPreedit = false;
             if (!GlobalIme::pending_create_word_preedit.empty())
@@ -373,11 +371,25 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
             }
             curReadingStr.Set(readingStr.c_str(), readingStr.length());
         }
+        else
+        {
+            // raw (default)
+            GlobalIme::pending_create_word_preedit.clear();
+            if (!GlobalIme::word_for_creating_word.empty())
+            { /* 造词过程中 */
+                readingStr = GlobalIme::word_for_creating_word + readingStr;
+            }
+            curReadingStr.Set(readingStr.c_str(), readingStr.length());
+        }
 
+        const size_t preeditPrefixLength =
+            preeditStyle == GlobalSettings::TsfPreeditStyle::Empty
+                ? 0
+                : GlobalIme::word_for_creating_word.size();
         const DWORD_PTR displayCaret = MapRawCaretToPreedit(
             pCompositionProcessorEngine->GetKeystrokeBuffer(), pCompositionProcessorEngine->GetCaretPosition(),
-            curReadingStr.ToWString(), GlobalIme::word_for_creating_word.size());
-        pCompositionProcessorEngine->SetRenderedPreedit(curReadingStr.ToWString(), GlobalIme::word_for_creating_word.size());
+            curReadingStr.ToWString(), preeditPrefixLength);
+        pCompositionProcessorEngine->SetRenderedPreedit(curReadingStr.ToWString(), preeditPrefixLength);
 
         PerfTimer addComposingTimer;
         hr = _AddComposingAndChar(ec, pContext, &curReadingStr);

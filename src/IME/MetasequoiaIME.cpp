@@ -1487,8 +1487,8 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
         }
         if (validFrame && buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PagingCommaPeriodChanged)
         {
-            // Accepted forms: "0", "1", "0|raw", "1|pinyin". Legacy clients only
-            // inspected data[0]; keep that contract for mixed-version rollouts.
+            // Accepted forms: "0", "1", "0|raw", "1|pinyin", "0|empty".
+            // Legacy clients only inspected data[0]; keep that contract.
             bool hasTerminator = false;
             for (const wchar_t ch : buf.data)
             {
@@ -1509,7 +1509,7 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
             }
             else if (buf.data[1] == L'|')
             {
-                validFrame = wcscmp(buf.data + 2, L"raw") == 0 || wcscmp(buf.data + 2, L"pinyin") == 0;
+                validFrame = GlobalSettings::isKnownTsfPreeditStyleWide(buf.data + 2);
             }
             else
             {
@@ -1593,14 +1593,7 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
             Global::PagingCommaPeriodEnabled.store(enabled, std::memory_order_relaxed);
             if (buf.data[1] == L'|')
             {
-                if (wcscmp(buf.data + 2, L"pinyin") == 0)
-                {
-                    GlobalSettings::setTsfPreeditStyle(GlobalSettings::TsfPreeditStyle::Pinyin);
-                }
-                else
-                {
-                    GlobalSettings::setTsfPreeditStyle(GlobalSettings::TsfPreeditStyle::Raw);
-                }
+                GlobalSettings::setTsfPreeditStyleFromWide(buf.data + 2);
             }
         }
     }
