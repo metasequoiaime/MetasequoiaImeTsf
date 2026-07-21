@@ -175,6 +175,7 @@ HRESULT CMetasequoiaIME::_HandleCancel(TfEditCookie ec, _In_ ITfContext *pContex
     PerfTimer timer;
     g_toggleImeFallbackBuffer.clear();
     GlobalIme::word_for_creating_word = L"";
+    GlobalIme::pending_create_word_preedit.clear();
     PerfTimer removeDummyTimer;
     _RemoveDummyCompositionForComposing(ec, _pComposition);
     double removeDummyElapsedMs = removeDummyTimer.ElapsedMs();
@@ -326,34 +327,51 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
     {
         CStringRange curReadingStr;
         std::wstring readingStr = readingStrings.GetAt(0)->ToWString();
+        const bool pinyinStyle =
+            GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Pinyin;
 
-        if (GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Raw)
+        if (!pinyinStyle)
         {
             if (!GlobalIme::word_for_creating_word.empty())
             { /* 造词过程中 */
                 readingStr = GlobalIme::word_for_creating_word + readingStr;
             }
+            curReadingStr.Set(readingStr.c_str(), readingStr.length());
         }
-        /* 如果想要设置 tsf preedit 为空，可以在这里设置 */
-        // readingStr = L"";
-        curReadingStr.Set(readingStr.c_str(), readingStr.length());
-
-        if (GlobalSettings::getTsfPreeditStyle() == GlobalSettings::TsfPreeditStyle::Pinyin &&
-            requestId != FANY_IME_NO_REQUEST_ID)
+        else
         {
-            PerfTimer preeditPipeTimer;
-            struct FanyImeNamedpipeDataToTsf *receivedData =
-                TryReadDataFromServerPipeWithTimeout(requestId, /*abortTransportOnTimeout=*/false);
-            preeditPipeElapsedMs += preeditPipeTimer.ElapsedMs();
-            if (receivedData->msg_type ==
-                Global::DataFromServerMsgType::TransportUnavailable)
+            bool gotServerPreedit = false;
+            if (!GlobalIme::pending_create_word_preedit.empty())
             {
-                return HRESULT_FROM_WIN32(ERROR_BROKEN_PIPE);
+                readingStr = std::move(GlobalIme::pending_create_word_preedit);
+                GlobalIme::pending_create_word_preedit.clear();
+                gotServerPreedit = true;
             }
-            if (receivedData->msg_type == Global::DataFromServerMsgType::Preedit)
+            else if (requestId != FANY_IME_NO_REQUEST_ID)
             {
-                curReadingStr.Set(receivedData->candidate_string, wcslen(receivedData->candidate_string));
+                PerfTimer preeditPipeTimer;
+                struct FanyImeNamedpipeDataToTsf *receivedData =
+                    TryReadDataFromServerPipeWithTimeout(requestId, /*abortTransportOnTimeout=*/false);
+                preeditPipeElapsedMs += preeditPipeTimer.ElapsedMs();
+                if (receivedData->msg_type == Global::DataFromServerMsgType::TransportUnavailable)
+                {
+                    return HRESULT_FROM_WIN32(ERROR_BROKEN_PIPE);
+                }
+                if (receivedData->msg_type == Global::DataFromServerMsgType::Preedit)
+                {
+                    readingStr.assign(receivedData->candidate_string,
+                                      wcslen(receivedData->candidate_string));
+                    gotServerPreedit = true;
+                }
             }
+
+            if (!gotServerPreedit && !GlobalIme::word_for_creating_word.empty())
+            {
+                // Fallback when Preedit is missing: keep 汉字 + remaining raw,
+                // matching raw create-word structure until the next Preedit.
+                readingStr = GlobalIme::word_for_creating_word + readingStr;
+            }
+            curReadingStr.Set(readingStr.c_str(), readingStr.length());
         }
 
         const DWORD_PTR displayCaret = MapRawCaretToPreedit(

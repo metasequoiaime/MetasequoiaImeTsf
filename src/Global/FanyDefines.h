@@ -47,6 +47,9 @@ inline void setTsfPreeditStyle(std::string_view newStyle)
 namespace GlobalIme
 {
 inline thread_local std::wstring word_for_creating_word = L"";
+// One-shot override for TSF inline preedit after NeedToCreateWord (pinyin mode).
+// Consumed by _HandleCompositionInputWorker, then cleared.
+inline thread_local std::wstring pending_create_word_preedit = L"";
 }
 
 namespace Global

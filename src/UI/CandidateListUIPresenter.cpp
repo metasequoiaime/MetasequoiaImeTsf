@@ -99,6 +99,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         else if (serverMsgType == Global::DataFromServerMsgType::Normal) // 只有正常情况下才会上屏
         {
             GlobalIme::word_for_creating_word = L"";
+            GlobalIme::pending_create_word_preedit.clear();
             candidateString.Set(serverCandidateString.c_str(), serverCandidateString.length());
             PerfTimer insertTextTimer;
             hr = _InsertTextToComposition(ec, pContext, &candidateString);
@@ -119,8 +120,21 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             if (separator != std::wstring::npos)
             {
                 std::wstring remainingRawInput = data.substr(0, separator);
-                std::wstring curWord = data.substr(separator + 1);
+                std::wstring rest = data.substr(separator + 1);
+                const size_t secondSeparator = rest.find(L'\t');
+                std::wstring curWord;
+                std::wstring displayPreedit;
+                if (secondSeparator == std::wstring::npos)
+                {
+                    curWord = rest;
+                }
+                else
+                {
+                    curWord = rest.substr(0, secondSeparator);
+                    displayPreedit = rest.substr(secondSeparator + 1);
+                }
                 GlobalIme::word_for_creating_word = curWord;
+                GlobalIme::pending_create_word_preedit = displayPreedit;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
 
@@ -146,6 +160,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                 }
                 else
                 {
+                    GlobalIme::pending_create_word_preedit.clear();
                     _HandleCancel(ec, pContext);
                 }
             }
