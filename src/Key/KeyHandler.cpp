@@ -342,7 +342,8 @@ HRESULT CMetasequoiaIME::_HandleCompositionInputWorker(_In_ CCompositionProcesso
             requestId != FANY_IME_NO_REQUEST_ID)
         {
             PerfTimer preeditPipeTimer;
-            struct FanyImeNamedpipeDataToTsf *receivedData = TryReadDataFromServerPipeWithTimeout(requestId);
+            struct FanyImeNamedpipeDataToTsf *receivedData =
+                TryReadDataFromServerPipeWithTimeout(requestId, /*abortTransportOnTimeout=*/false);
             preeditPipeElapsedMs += preeditPipeTimer.ElapsedMs();
             if (receivedData->msg_type ==
                 Global::DataFromServerMsgType::TransportUnavailable)

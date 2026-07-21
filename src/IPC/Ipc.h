@@ -226,6 +226,10 @@ int SendMoveCandidateWndEventToUIProcessViaNamedPipe();
 int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea);
 void ClearNamedpipeDataIfExists(bool force = false);
 struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t expectedRequestId);
+// When abortTransportOnTimeout is false, a missed reply leaves the pipe up and
+// returns a non-TransportUnavailable empty frame for the caller to fall back.
+struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t expectedRequestId,
+                                                                      bool abortTransportOnTimeout);
 struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe(uint64_t expectedRequestId);
 
 //
@@ -282,6 +286,9 @@ constexpr UINT FocusSessionReady = 8;
 // Worker-endpoint registration acknowledgement. It is consumed before the
 // handle is published to IpcWorkerThread and before Main can be opened.
 constexpr UINT PipeReady = 9;
+// Highest opcode this build understands. Unknown higher opcodes must be
+// ignored by the worker reader (never tear down the pipe).
+constexpr UINT MaxKnown = PipeReady;
 } // namespace DataToTsfWorkerThreadMsgType
 
 inline std::atomic_bool PagingCommaPeriodEnabled{false};

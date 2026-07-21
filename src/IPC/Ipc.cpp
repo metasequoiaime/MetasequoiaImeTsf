@@ -966,12 +966,26 @@ void ClearNamedpipeDataIfExists(bool force)
  */
 struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t expectedRequestId)
 {
+    return TryReadDataFromServerPipeWithTimeout(expectedRequestId, true);
+}
+
+struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t expectedRequestId,
+                                                                      bool abortTransportOnTimeout)
+{
     constexpr int timeoutMs = 50;
 
     auto transportUnavailable = []() {
         transportUnavailableReply = {};
         transportUnavailableReply.msg_type = Global::DataFromServerMsgType::TransportUnavailable;
         return &transportUnavailableReply;
+    };
+    auto softMiss = [](uint64_t requestId) {
+        // Deliberately not TransportUnavailable: preedit waiters fall back to
+        // the local reading string without tearing down the reply pipe.
+        namedpipeDataFromServer = {};
+        namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
+        namedpipeDataFromServer.request_id = requestId;
+        return &namedpipeDataFromServer;
     };
 
     if (expectedRequestId == FANY_IME_NO_REQUEST_ID)
@@ -1014,6 +1028,10 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t 
             hFromServerPipe, &namedpipeDataFromServer, sizeof(namedpipeDataFromServer), remainingMs, bytesRead);
         if (readResult == OverlappedReadResult::TimedOut)
         {
+            if (!abortTransportOnTimeout)
+            {
+                return softMiss(expectedRequestId);
+            }
             ClosePipeHandleIfValid(hFromServerPipe);
             RequestNamedpipeReconnect();
             return transportUnavailable();
@@ -1065,6 +1083,10 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout(uint64_t 
     // Server may already have committed a selection, so preserving local
     // composition would split the two state machines. Treat this exactly like
     // a broken transport and schedule a tokenized reset plus local cancel.
+    if (!abortTransportOnTimeout)
+    {
+        return softMiss(expectedRequestId);
+    }
     ClosePipeHandleIfValid(hFromServerPipe);
     RequestNamedpipeReconnect();
     return transportUnavailable();

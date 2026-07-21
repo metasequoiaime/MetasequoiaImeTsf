@@ -1454,9 +1454,25 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
         }
         CloseHandle(overlapped.hEvent);
 
-        bool validFrame = readResult && bytesRead == sizeof(buf) &&
-                          buf.msg_type <= Global::DataToTsfWorkerThreadMsgType::PipeReady;
-        if (validFrame && buf.msg_type == Global::DataToTsfWorkerThreadMsgType::CommitCurCandidate)
+        // Transport errors tear down the pipe. Unknown future opcodes and
+        // soft-invalid config payloads are ignored so protocol additions cannot
+        // freeze every host process that loads this TIP.
+        if (!readResult || bytesRead != sizeof(buf))
+        {
+            if (pIME->_shouldStopIpcThread.load())
+            {
+                return;
+            }
+            notifyDisconnected(workerPipe, workerGeneration);
+            continue;
+        }
+        if (buf.msg_type > Global::DataToTsfWorkerThreadMsgType::MaxKnown)
+        {
+            continue;
+        }
+
+        bool validFrame = true;
+        if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::CommitCurCandidate)
         {
             bool hasTerminator = false;
             for (const wchar_t ch : buf.data)
@@ -1471,7 +1487,34 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
         }
         if (validFrame && buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PagingCommaPeriodChanged)
         {
-            validFrame = buf.data[0] == L'0' || buf.data[0] == L'1';
+            // Accepted forms: "0", "1", "0|raw", "1|pinyin". Legacy clients only
+            // inspected data[0]; keep that contract for mixed-version rollouts.
+            bool hasTerminator = false;
+            for (const wchar_t ch : buf.data)
+            {
+                if (ch == L'\0')
+                {
+                    hasTerminator = true;
+                    break;
+                }
+            }
+            const bool pagingOk = buf.data[0] == L'0' || buf.data[0] == L'1';
+            if (!hasTerminator || !pagingOk)
+            {
+                validFrame = false;
+            }
+            else if (buf.data[1] == L'\0')
+            {
+                // Legacy "0"/"1" payload.
+            }
+            else if (buf.data[1] == L'|')
+            {
+                validFrame = wcscmp(buf.data + 2, L"raw") == 0 || wcscmp(buf.data + 2, L"pinyin") == 0;
+            }
+            else
+            {
+                validFrame = false;
+            }
         }
         if (validFrame && buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PipeReady)
         {
@@ -1505,6 +1548,13 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
 
         if (!validFrame)
         {
+            // Soft config/control frames: drop without killing the worker pipe.
+            if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PagingCommaPeriodChanged ||
+                buf.msg_type == Global::DataToTsfWorkerThreadMsgType::PipeReady ||
+                buf.msg_type == Global::DataToTsfWorkerThreadMsgType::FocusSessionReady)
+            {
+                continue;
+            }
             if (pIME->_shouldStopIpcThread.load())
             {
                 return;
@@ -1541,6 +1591,17 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
         {
             const bool enabled = buf.data[0] == L'1';
             Global::PagingCommaPeriodEnabled.store(enabled, std::memory_order_relaxed);
+            if (buf.data[1] == L'|')
+            {
+                if (wcscmp(buf.data + 2, L"pinyin") == 0)
+                {
+                    GlobalSettings::setTsfPreeditStyle(GlobalSettings::TsfPreeditStyle::Pinyin);
+                }
+                else
+                {
+                    GlobalSettings::setTsfPreeditStyle(GlobalSettings::TsfPreeditStyle::Raw);
+                }
+            }
         }
     }
 }
