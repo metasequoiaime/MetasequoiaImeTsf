@@ -20,7 +20,7 @@ vcpkg_include_path = normpath(
         MetasequoiaImeTsf_root_path,
         "build",
         "vcpkg_installed",
-        "x64-windows",
+        "x64-windows-static",
         "include",
     )
 )
@@ -84,10 +84,10 @@ lines[29] = f'      "-I{MetasequoiaImeTsf_root_path}/src/Window",\n'
 lines[31] = f'      "-I{utfcpp_path}",\n'
 # vcpkg
 lines[33] = (
-    f'      "-I{MetasequoiaImeTsf_root_path}/build64/vcpkg_installed/x64-windows/include",\n'
+    f'      "-I{MetasequoiaImeTsf_root_path}/build64/vcpkg_installed/x64-windows-static/include",\n'
 )
 lines[34] = (
-    f'      "-I{MetasequoiaImeTsf_root_path}/build32/vcpkg_installed/x86-windows/include",\n'
+    f'      "-I{MetasequoiaImeTsf_root_path}/build32/vcpkg_installed/x86-windows-static/include",\n'
 )
 with open(dot_clangd_output_file, "w", encoding="utf-8") as f:
     f.writelines(lines)

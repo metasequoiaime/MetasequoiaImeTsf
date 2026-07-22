@@ -9,6 +9,28 @@
 #include "Ipc.h"
 #include "../Utils/PerfTimer.h"
 
+namespace
+{
+// Keep SEH helpers free of C++ objects with destructors (C2712).
+HRESULT SafeRangeSetText(_In_ ITfRange *range, TfEditCookie ec, DWORD flags, _In_reads_opt_(len) const WCHAR *text,
+                         LONG len)
+{
+    if (range == nullptr)
+    {
+        return E_INVALIDARG;
+    }
+
+    __try
+    {
+        return range->SetText(ec, flags, text, len);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return E_FAIL;
+    }
+}
+} // namespace
+
 //+---------------------------------------------------------------------------
 //
 // ITfCompositionSink::OnCompositionTerminated
@@ -62,7 +84,10 @@ STDAPI CMetasequoiaIME::OnCompositionTerminated(TfEditCookie ecWrite, _In_ ITfCo
         SendHideCandidateWndEventToUIProcess();
     }
 
-    _RemoveDummyCompositionForComposing(ecWrite, terminatedComposition);
+    // Do NOT SetText(empty) here. Cancel paths already wipe via
+    // _HandleCancel → _RemoveDummyCompositionForComposing. Wiping again after
+    // a normal commit/EndComposition can delete the just-committed text and
+    // destabilize fragile hosts (notably QQ).
     if (ownerContext)
     {
         _ClearCompositionDisplayAttributes(ecWrite, ownerContext,
@@ -124,7 +149,7 @@ HRESULT CMetasequoiaIME::_AddComposingAndChar(TfEditCookie ec, _In_ ITfContext *
         if (SUCCEEDED(hr) && pRangeComposition != nullptr)
         {
             PerfTimer setTextTimer;
-            hr = pRangeComposition->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+            hr = SafeRangeSetText(pRangeComposition, ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
             double setTextElapsedMs = setTextTimer.ElapsedMs();
             if (SUCCEEDED(hr))
             {
@@ -220,7 +245,7 @@ HRESULT CMetasequoiaIME::_AddCharAndFinalize(TfEditCookie ec, _In_ ITfContext *p
     // We use SetText here instead of InsertTextAtSelection because we've already started a composition
     // We don't want to the app to adjust the insertion point inside our composition
     PerfTimer setTextTimer;
-    hr = tfSelection.range->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+    hr = SafeRangeSetText(tfSelection.range, ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
     double setTextElapsedMs = setTextTimer.ElapsedMs();
     double setSelectionElapsedMs = 0;
     if (hr == S_OK)
@@ -257,7 +282,7 @@ HRESULT CMetasequoiaIME::_InsertTextToComposition(TfEditCookie ec, _In_ ITfConte
     }
 
     PerfTimer setTextTimer;
-    hr = pRangeComposition->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+    hr = SafeRangeSetText(pRangeComposition, ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
     double setTextElapsedMs = setTextTimer.ElapsedMs();
     double setSelectionElapsedMs = 0;
     if (SUCCEEDED(hr))
@@ -301,7 +326,7 @@ HRESULT CMetasequoiaIME::_SetCompositionTextAndSelection(TfEditCookie ec, _In_ I
     }
 
     PerfTimer setTextTimer;
-    hr = pRangeComposition->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+    hr = SafeRangeSetText(pRangeComposition, ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
     double setTextElapsedMs = setTextTimer.ElapsedMs();
     double setSelectionElapsedMs = 0;
     if (SUCCEEDED(hr))
@@ -405,7 +430,7 @@ HRESULT CMetasequoiaIME::_SetInputString(TfEditCookie ec, _In_ ITfContext *pCont
     }
     if (pRange != nullptr)
     {
-        pRange->SetText(ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
+        SafeRangeSetText(pRange, ec, 0, pstrAddString->Get(), (LONG)pstrAddString->GetLength());
     }
 
     _SetCompositionLanguage(ec, pContext);
@@ -498,7 +523,7 @@ HRESULT CMetasequoiaIME::_RemoveDummyCompositionForComposing(TfEditCookie ec, _I
         hr = pComposition->GetRange(&pRange);
         if (SUCCEEDED(hr))
         {
-            pRange->SetText(ec, 0, nullptr, 0);
+            hr = SafeRangeSetText(pRange, ec, 0, nullptr, 0);
             pRange->Release();
         }
     }

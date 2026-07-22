@@ -8,7 +8,7 @@
       "architecture": "x64",
       "binaryDir": "${sourceDir}/build64",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
       }
     },
     {
@@ -18,7 +18,7 @@
       "architecture": "Win32",
       "binaryDir": "${sourceDir}/build32",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x86-windows"
+        "VCPKG_TARGET_TRIPLET": "x86-windows-static"
       }
     },
     {
@@ -28,7 +28,7 @@
       "architecture": "x64",
       "binaryDir": "${sourceDir}/build64-release",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static"
       }
     },
     {
@@ -38,7 +38,7 @@
       "architecture": "Win32",
       "binaryDir": "${sourceDir}/build32-release",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x86-windows"
+        "VCPKG_TARGET_TRIPLET": "x86-windows-static"
       }
     }
   ]

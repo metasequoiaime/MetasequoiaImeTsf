@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.25.0)
+
+# TSF tip loads into host processes (QQ/Chrome/...). Static CRT avoids
+# colliding with the host's MSVCP140/VCRUNTIME140 (common QQ crash signature).
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 set(PROJECT_NAME MetasequoiaImeTsf)
 project(${PROJECT_NAME} LANGUAGES CXX C)
 
@@ -12,16 +17,21 @@ add_definitions(
 
 # For utf8cpp, make it use C++11 and later
 add_compile_options(/Zc:__cplusplus)
+# Match WeaselTSF: avoid dynamic TLS init guards in in-proc tip DLLs
+add_compile_options(/Zc:threadSafeInit-)
 
 # add_definitions(
 #     /DFANY_DEBUG=1
+#     /DFANY_IPC_DEBUG=1
 # )
 
 # fmt
 find_package(fmt CONFIG REQUIRED)
 
 # For pure-header libs installed by vcpkg like utf8cpp
-include_directories("./build/vcpkg_installed/x64-windows/include")
+if(DEFINED VCPKG_TARGET_TRIPLET)
+    include_directories("${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/include")
+endif()
 
 include_directories("./src")
 include_directories("./src/Candidate")
@@ -134,3 +144,6 @@ add_library(${PROJECT_NAME} SHARED
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt-header-only)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

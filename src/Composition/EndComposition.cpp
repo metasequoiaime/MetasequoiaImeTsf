@@ -6,6 +6,26 @@
 #include <fmt/xchar.h>
 #include "../Utils/PerfTimer.h"
 
+namespace
+{
+HRESULT SafeEndComposition(_In_ ITfComposition *composition, TfEditCookie ec)
+{
+    if (composition == nullptr)
+    {
+        return E_INVALIDARG;
+    }
+
+    __try
+    {
+        return composition->EndComposition(ec);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        return E_FAIL;
+    }
+}
+} // namespace
+
 //////////////////////////////////////////////////////////////////////
 //
 //    ITfEditSession
@@ -94,7 +114,7 @@ void CMetasequoiaIME::_TerminateComposition(TfEditCookie ec, _In_ ITfContext *pC
         double clearDisplayAttrElapsedMs = clearDisplayAttrTimer.ElapsedMs();
 
         PerfTimer endCompositionTimer;
-        const HRESULT endResult = terminatingComposition->EndComposition(ec);
+        const HRESULT endResult = SafeEndComposition(terminatingComposition, ec);
         if (FAILED(endResult) && _pComposition == terminatingComposition)
         {
             // if we fail to EndComposition, then we need to close the reverse reading window.
