@@ -1,0 +1,131 @@
+name: Bug 反馈 / Bug Report
+description: 报告水杉输入法的错误或异常行为。Report a bug or unexpected behavior.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！本仓库统一接收水杉输入法相关 Issue（TSF、Server、词典、设置、安装器等）。
+
+        Thanks for the report! Please file all Metasequoia IME issues here (TSF, Server, dictionary, settings, installer, etc.).
+
+        提问 / 讨论请优先使用 [Telegram](https://t.me/msimegroup) 或 QQ 群 `829919142`。
+  - type: dropdown
+    id: component
+    attributes:
+      label: 相关组件 / Component
+      description: 问题主要出现在哪个部分？Which part is primarily affected?
+      multiple: true
+      options:
+        - TSF 前端 / MetasequoiaImeTsf
+        - Server / 引擎服务 / MetasequoiaImeServer
+        - 设置界面 / Settings
+        - 候选窗 UI / Candidate UI
+        - 词典 / MetasequoiaImeDict
+        - 辅助码 / MetasequoiaImeHelpCode
+        - 安装器 / Installer
+        - 文档 / 官网
+        - 不确定 / Not sure
+        - 其他 / Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述 / Description
+      description: 发生了什么？期望是什么？What happened, and what did you expect?
+      placeholder: |
+        简要说明问题现象与预期行为。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to Reproduce
+      description: 请尽量给出可复现步骤。Please provide reproducible steps.
+      placeholder: |
+        1. …
+        2. …
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为 / Expected Behavior
+      description: 正常情况下应该怎样？What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为 / Actual Behavior
+      description: 实际观察到了什么？What actually happened?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / Version
+      description: 安装包版本、Release 标签，或 commit hash。Installer version, release tag, or commit hash.
+      placeholder: e.g. 0.0.1 / v0.x.x / abc1234
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 系统环境 / OS
+      description: Windows 版本与版本号。Windows edition and version.
+      placeholder: e.g. Windows 11 24H2 / Windows 10 Pro 22H2
+    validations:
+      required: true
+  - type: dropdown
+    id: scheme
+    attributes:
+      label: 输入方案 / Input Scheme
+      options:
+        - 小鹤双拼 / Xiaohe Shuangpin
+        - 全拼 / Quanpin
+        - 其他 / Other
+        - 不适用 / N/A
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: 应用架构 / App Architecture
+      description: 出问题的目标应用是 32 位还是 64 位？（若不确定可选「不确定」）
+      options:
+        - 64-bit
+        - 32-bit
+        - 两者都有 / Both
+        - 不确定 / Not sure
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图 / 录屏（可选）
+      description: |
+        可粘贴相关日志，或附上截图 / 录屏链接。
+        Paste relevant logs, or attach screenshots / recordings.
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息 / Additional Context
+      description: 例如应用名称、是否必现、是否仅特定软件出现等。
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前确认 / Checklist
+      options:
+        - label: 我已搜索过现有 Issue，确认这不是重复反馈。I searched existing issues and this is not a duplicate.
+          required: true
+        - label: 我已尽量提供可复现信息。I provided enough detail to reproduce the issue.
+          required: true

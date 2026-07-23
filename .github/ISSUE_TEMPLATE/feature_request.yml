@@ -1,0 +1,79 @@
+name: 功能建议 / Feature Request
+description: 为水杉输入法提出新功能或改进建议。Propose a new feature or improvement.
+title: "[Feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢建议！本仓库统一接收水杉输入法相关功能请求（TSF、Server、词典、设置、安装器等）。
+
+        Thanks for the suggestion! Please file all Metasequoia IME feature requests here.
+
+        使用问题 / 讨论请优先使用 [Telegram](https://t.me/msimegroup) 或 QQ 群 `829919142`。
+  - type: dropdown
+    id: component
+    attributes:
+      label: 相关组件 / Component
+      description: 该功能主要涉及哪个部分？Which part does this mainly involve?
+      multiple: true
+      options:
+        - TSF 前端 / MetasequoiaImeTsf
+        - Server / 引擎服务 / MetasequoiaImeServer
+        - 设置界面 / Settings
+        - 候选窗 UI / Candidate UI
+        - 词典 / MetasequoiaImeDict
+        - 辅助码 / MetasequoiaImeHelpCode
+        - 安装器 / Installer
+        - 文档 / 官网
+        - 不确定 / Not sure
+        - 其他 / Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题 / Problem
+      description: 当前缺少什么，或现有体验哪里不够好？What problem does this solve?
+      placeholder: |
+        例如：无法…… / 使用某功能时很麻烦……
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案 / Proposal
+      description: 希望如何实现？可包含交互、快捷键、配置项等。Describe the desired behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案（可选） / Alternatives
+      description: 你考虑过哪些其他做法？Any alternatives you considered?
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 对你的重要程度 / Importance to you
+      options:
+        - 很重要 / Critical for my workflow
+        - 有帮助 / Nice to have
+        - 可有可无 / Low priority
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息 / Additional Context
+      description: 可附上参考输入法、截图、录屏或相关链接。
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前确认 / Checklist
+      options:
+        - label: 我已搜索过现有 Issue，确认这不是重复建议。I searched existing issues and this is not a duplicate.
+          required: true

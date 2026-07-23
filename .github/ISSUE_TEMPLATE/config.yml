@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Telegram 群组 / Telegram Group
+    url: https://t.me/msimegroup
+    about: 使用问题、讨论与日常交流。Questions and discussions.
+  - name: QQ 群 / QQ Group
+    url: https://github.com/metasequoiaime/MetasequoiaImeTsf
+    about: QQ 群号 829919142（见仓库简介）。QQ Group: 829919142.
+  - name: 项目文档 / Documentation
+    url: https://github.com/metasequoiaime/MetasequoiaIME
+    about: 水杉输入法文档仓库。Docs for Metasequoia IME.
