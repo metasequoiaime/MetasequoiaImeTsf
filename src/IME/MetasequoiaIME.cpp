@@ -10,7 +10,12 @@
 #include <winnt.h>
 #include <winuser.h>
 #include <Windows.h>
+#include <shlobj.h>
 #include <shellscalingapi.h>
+#include <algorithm>
+#include <atomic>
+#include <string>
+#include <vector>
 #include "FanyLog.h"
 #include "Ipc.h"
 #include "CommonUtils.h"
@@ -20,6 +25,8 @@
 
 
 #pragma comment(lib, "Shcore.lib")
+#pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "Ole32.lib")
 
 namespace
 {
@@ -27,7 +34,110 @@ constexpr UINT_PTR TIMER_CONNECT_ALL_NAMEDPIPE = 1;
 constexpr UINT_PTR TIMER_CONNECT_TO_TSF_NAMEDPIPE = 2;
 constexpr UINT CONNECT_NAMEDPIPE_RETRY_INTERVAL_MS = 50;
 constexpr UINT CONNECT_NAMEDPIPE_MAX_RETRY_INTERVAL_MS = 2000;
+constexpr wchar_t WATCHDOG_MUTEX_NAME[] = L"Local\\MetasequoiaImeWatchdog.SingleInstance";
+constexpr wchar_t WATCHDOG_RELATIVE_PATH[] = L"metasequoiaime\\server\\MetasequoiaImeWatchdog.exe";
+constexpr ULONGLONG WATCHDOG_START_RETRY_INTERVAL_MS = 60'000;
+// FOLDERID_ProgramFilesX64 is not declared by every Windows SDK header when
+// compiling an x86 target. The KNOWNFOLDERID itself is architecture-neutral,
+// so keep its documented value locally for both TSF builds.
+constexpr GUID PROGRAM_FILES_X64_FOLDER_ID = {
+    0x6D809377, 0x6AF0, 0x444B, {0x89, 0x57, 0xA3, 0x77, 0x3F, 0x02, 0x20, 0x0E}};
 std::atomic<UINT> nextWindowMessageToken{0};
+std::atomic<ULONGLONG> lastWatchdogStartAttempt{0};
+
+bool IsWatchdogAlreadyRunning()
+{
+    HANDLE mutex = OpenMutexW(SYNCHRONIZE, FALSE, WATCHDOG_MUTEX_NAME);
+    if (mutex)
+    {
+        CloseHandle(mutex);
+        return true;
+    }
+
+    // A watchdog at another integrity level may own the mutex while denying
+    // this host access. Treat that as running instead of creating a process
+    // storm from every application that loads the TIP.
+    return GetLastError() == ERROR_ACCESS_DENIED;
+}
+
+std::wstring ReadWatchdogPath()
+{
+    PWSTR programFiles = nullptr;
+    const HRESULT result = SHGetKnownFolderPath(PROGRAM_FILES_X64_FOLDER_ID, KF_FLAG_DEFAULT, nullptr, &programFiles);
+    if (FAILED(result) || !programFiles)
+    {
+        return {};
+    }
+
+    std::wstring path(programFiles);
+    CoTaskMemFree(programFiles);
+    if (path.empty())
+    {
+        return {};
+    }
+    if (path.back() != L'\\' && path.back() != L'/')
+    {
+        path.push_back(L'\\');
+    }
+    path.append(WATCHDOG_RELATIVE_PATH);
+    return path;
+}
+
+void EnsureWatchdogRunning()
+{
+    if (IsWatchdogAlreadyRunning())
+    {
+        return;
+    }
+
+    const ULONGLONG now = GetTickCount64();
+    ULONGLONG previous = lastWatchdogStartAttempt.load(std::memory_order_relaxed);
+    for (;;)
+    {
+        if (previous != 0 && now - previous < WATCHDOG_START_RETRY_INTERVAL_MS)
+        {
+            return;
+        }
+        if (lastWatchdogStartAttempt.compare_exchange_weak(previous, now == 0 ? 1 : now,
+                                                            std::memory_order_relaxed))
+        {
+            break;
+        }
+    }
+
+    // Recheck after winning the process-local throttle. Another TSF host may
+    // have started the watchdog between the first check and this point.
+    if (IsWatchdogAlreadyRunning())
+    {
+        return;
+    }
+
+    const std::wstring watchdogPath = ReadWatchdogPath();
+    if (watchdogPath.empty() || GetFileAttributesW(watchdogPath.c_str()) == INVALID_FILE_ATTRIBUTES)
+    {
+        OutputDebugStringW(L"[msime]: Watchdog path is unavailable; skipping TSF keepalive repair.\n");
+        return;
+    }
+
+    const size_t separator = watchdogPath.find_last_of(L"\\/");
+    const std::wstring workingDirectory = separator == std::wstring::npos
+                                              ? std::wstring{}
+                                              : watchdogPath.substr(0, separator);
+    std::wstring commandLine = L"\"" + watchdogPath + L"\"";
+    STARTUPINFOW startupInfo{sizeof(startupInfo)};
+    PROCESS_INFORMATION processInfo{};
+    if (CreateProcessW(watchdogPath.c_str(), commandLine.data(), nullptr, nullptr, FALSE, 0, nullptr,
+                       workingDirectory.empty() ? nullptr : workingDirectory.c_str(),
+                       &startupInfo, &processInfo))
+    {
+        CloseHandle(processInfo.hThread);
+        CloseHandle(processInfo.hProcess);
+    }
+    else
+    {
+        OutputDebugStringW(L"[msime]: TSF keepalive repair could not start the watchdog.\n");
+    }
+}
 
 UINT NextWindowMessageToken()
 {
@@ -1381,6 +1491,14 @@ STDAPI CMetasequoiaIME::Deactivate()
 //----------------------------------------------------------------------------
 void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
 {
+    // Never attempt to escape an AppContainer or a secure/COM-less TSF host.
+    // This runs on the owned IPC worker so ActivateEx remains non-blocking and
+    // no detached code can outlive the TIP DLL during host shutdown.
+    if (!pIME->_IsStoreAppMode() && !pIME->_IsSecureMode() && !pIME->_IsComLess())
+    {
+        EnsureWatchdogRunning();
+    }
+
     const auto notifyDisconnected = [pIME](HANDLE disconnectedPipe, UINT disconnectedGeneration) {
         if (disconnectedGeneration == 0 ||
             pIME->_workerPipeGeneration.load(std::memory_order_acquire) != disconnectedGeneration)
