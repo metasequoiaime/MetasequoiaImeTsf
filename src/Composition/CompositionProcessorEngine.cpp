@@ -68,7 +68,7 @@ BOOL CMetasequoiaIME::_AddTextProcessorEngine()
     // Create composition processor engine
     if (_pCompositionProcessorEngine == nullptr)
     {
-        _pCompositionProcessorEngine = new (std::nothrow) CCompositionProcessorEngine();
+        _pCompositionProcessorEngine = new (std::nothrow) CCompositionProcessorEngine(this);
     }
     if (!_pCompositionProcessorEngine)
     {
@@ -97,7 +97,8 @@ BOOL CMetasequoiaIME::_AddTextProcessorEngine()
 //
 //----------------------------------------------------------------------------
 
-CCompositionProcessorEngine::CCompositionProcessorEngine()
+CCompositionProcessorEngine::CCompositionProcessorEngine(
+    _In_ CMetasequoiaIME *pTextService)
 {
     _langid = 0xffff;
     _guidProfile = GUID_NULL;
@@ -114,6 +115,10 @@ CCompositionProcessorEngine::CCompositionProcessorEngine()
     _pCompartmentPunctuationEventSink = nullptr;
     _pOwnerThreadMgr = nullptr;
     _ownerMsgWndHandle = nullptr;
+    _pTextService = pTextService;
+    _keyboardOpen = FALSE;
+    _keyboardOpenKnown = FALSE;
+    _suppressKeyboardCloseCommit = FALSE;
 
     _hasWildcardIncludedInKeystrokeBuffer = FALSE;
 
@@ -926,7 +931,7 @@ void CCompositionProcessorEngine::OnPreservedKey( //
         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
         isOpen = isOpen ? FALSE : TRUE;
-        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen);
+        SetKeyboardOpenCompartment(pThreadMgr, tfClientId, isOpen);
 
         // Also toggle punctuation mode
         BOOL isPunctuation = FALSE;
@@ -968,7 +973,7 @@ void CCompositionProcessorEngine::OnPreservedKey( //
         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
         isOpen = isOpen ? FALSE : TRUE;
-        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen);
+        SetKeyboardOpenCompartment(pThreadMgr, tfClientId, isOpen);
 
         // Also toggle punctuation mode
         BOOL isPunctuation = FALSE;
@@ -1046,7 +1051,7 @@ void CCompositionProcessorEngine::ToggleIMEMode(_In_ ITfThreadMgr *pThreadMgr, T
     BOOL isOpen = FALSE;
     CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
     CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-    CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+    SetKeyboardOpenCompartment(pThreadMgr, tfClientId, isOpen ? FALSE : TRUE);
 
     // Also toggle punctuation mode
     BOOL isPunctuation = FALSE;
@@ -1068,8 +1073,20 @@ void CCompositionProcessorEngine::SetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfCl
 
     if (isOpen != bOpen)
     {
-        CompartmentKeyboardOpen._SetCompartmentBOOL(bOpen);
+        SetKeyboardOpenCompartment(pThreadMgr, tfClientId, bOpen);
     }
+}
+
+HRESULT CCompositionProcessorEngine::SetKeyboardOpenCompartment(
+    _In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL isOpen)
+{
+    CCompartment compartment(pThreadMgr, tfClientId,
+                             GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    const BOOL previousSuppression = _suppressKeyboardCloseCommit;
+    _suppressKeyboardCloseCommit = TRUE;
+    const HRESULT result = compartment._SetCompartmentBOOL(isOpen);
+    _suppressKeyboardCloseCommit = previousSuppression;
+    return result;
 }
 
 /**
@@ -1314,6 +1331,8 @@ void CCompositionProcessorEngine::InitializeMetasequoiaIMECompartment(_In_ ITfTh
     // set initial mode
     CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
     CompartmentKeyboardOpen._SetCompartmentBOOL(TRUE);
+    _keyboardOpen = TRUE;
+    _keyboardOpenKnown = TRUE;
 
     CCompartment CompartmentDoubleSingleByte(pThreadMgr, tfClientId,
                                              Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte);
@@ -1384,8 +1403,20 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         // 如果标点状态和当前输入法状态不一致，那么，需要更新标点状态
         BOOL isOpen = FALSE;
         CCompartment CompartmentKeyboardOpen(pThreadMgr, fakeThis->_tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
-        CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-
+        if (FAILED(CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen)))
+        {
+            pThreadMgr->Release();
+            return S_OK;
+        }
+        const BOOL keyboardWasOpen = fakeThis->_keyboardOpen;
+        const BOOL keyboardStateWasKnown = fakeThis->_keyboardOpenKnown;
+        fakeThis->_keyboardOpen = isOpen;
+        fakeThis->_keyboardOpenKnown = TRUE;
+        const BOOL keyboardStateChanged =
+            keyboardStateWasKnown && keyboardWasOpen != isOpen;
+        const BOOL externallyClosed =
+            keyboardStateChanged && keyboardWasOpen && !isOpen &&
+            !fakeThis->_suppressKeyboardCloseCommit;
         BOOL isPunctuation = FALSE;
         CCompartment CompartmentPunctuation(pThreadMgr, fakeThis->_tfClientId,
                                             Global::MetasequoiaIMEGuidCompartmentPunctuation);
@@ -1406,6 +1437,10 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         }
 
         fakeThis->KeyboardOpenCompartmentUpdated(pThreadMgr);
+        if (externallyClosed)
+        {
+            fakeThis->CommitCompositionOnExternalKeyboardClose();
+        }
     }
 
     pThreadMgr->Release();
@@ -1573,6 +1608,29 @@ void CCompositionProcessorEngine::KeyboardOpenCompartmentUpdated(_In_ ITfThreadM
     {
         _pCompartmentConversion->_SetCompartmentDWORD(conversionMode);
     }
+}
+
+void CCompositionProcessorEngine::CommitCompositionOnExternalKeyboardClose()
+{
+    CMetasequoiaIME *textService = _pTextService;
+    if (textService == nullptr || !textService->_IsComposing() ||
+        textService->_pContext == nullptr)
+    {
+        return;
+    }
+
+    ITfContext *context = textService->_pContext;
+    context->AddRef();
+    const uint64_t compositionEpoch = textService->_CaptureCompositionEpoch();
+    const uint64_t focusToken = textService->_CaptureFocusSessionToken();
+
+    _KEYSTROKE_STATE keyState = {};
+    keyState.Category = CATEGORY_COMPOSING;
+    keyState.Function = FUNCTION_TOGGLE_IME_MODE;
+    textService->_InvokeKeyHandler(context, 0, L'\0', 0, keyState,
+                                   FANY_IME_NO_REQUEST_ID, {}, 0,
+                                   compositionEpoch, focusToken);
+    context->Release();
 }
 
 //////////////////////////////////////////////////////////////////////

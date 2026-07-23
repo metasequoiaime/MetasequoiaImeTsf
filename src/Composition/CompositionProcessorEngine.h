@@ -20,7 +20,7 @@ class CCompositionProcessorEngine
         TogglePunctuationMode
     };
 
-    CCompositionProcessorEngine(void);
+    explicit CCompositionProcessorEngine(_In_ CMetasequoiaIME *pTextService);
     ~CCompositionProcessorEngine(void);
 
     BOOL SetupLanguageProfile(LANGID langid, REFGUID guidLanguageProfile, _In_ ITfThreadMgr *pThreadMgr,
@@ -177,6 +177,9 @@ class CCompositionProcessorEngine
     static HRESULT CompartmentCallback(_In_ void *pv, REFGUID guidCompartment);
     void PrivateCompartmentsUpdated(_In_ ITfThreadMgr *pThreadMgr);
     void KeyboardOpenCompartmentUpdated(_In_ ITfThreadMgr *pThreadMgr);
+    HRESULT SetKeyboardOpenCompartment(_In_ ITfThreadMgr *pThreadMgr,
+                                       TfClientId tfClientId, BOOL isOpen);
+    void CommitCompositionOnExternalKeyboardClose();
 
   private:
     struct _KEYSTROKE
@@ -247,6 +250,10 @@ class CCompositionProcessorEngine
     CCompartmentEventSink *_pCompartmentPunctuationEventSink;
     ITfThreadMgr *_pOwnerThreadMgr;
     HWND _ownerMsgWndHandle;
+    CMetasequoiaIME *_pTextService;
+    BOOL _keyboardOpen;
+    BOOL _keyboardOpenKnown;
+    BOOL _suppressKeyboardCloseCommit;
 
     // Configuration data
     BOOL _isWildcard : 1;

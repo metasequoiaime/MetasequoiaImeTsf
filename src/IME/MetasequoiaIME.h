@@ -46,6 +46,8 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
                         public ITfFunctionProvider,
                         public ITfFnGetPreferredTouchKeyboardLayout
 {
+    friend class CCompositionProcessorEngine;
+
   public:
     CMetasequoiaIME();
     ~CMetasequoiaIME();

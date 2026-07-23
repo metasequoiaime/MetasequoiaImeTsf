@@ -31,8 +31,8 @@ CompileFlags:
       # Third-party include paths via git submodules
       "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/utfcpp/source",
       # Third-party include paths via vcpkg
-      "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/build64/vcpkg_installed/x64-windows/include",
-      "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/build32/vcpkg_installed/x86-windows/include",
+      "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/build64/vcpkg_installed/x64-windows-static/include",
+      "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/build32/vcpkg_installed/x86-windows-static/include",
       -Wno-unused-includes,
       -Wno-microsoft-goto,
       # -Wno-unused-value,
