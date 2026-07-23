@@ -1237,15 +1237,15 @@ int SendMoveCandidateWndEventToUIProcessViaNamedPipe()
 
 int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea)
 {
-    namedpipeData = {};
-    namedpipeData.event_type = FanyImePipeEventType::LangbarRightClick;
-    /* 利用其他的字段，把图标的坐标传递过去 */
-    namedpipeData.point[0] = prcArea->left;
-    namedpipeData.point[1] = prcArea->top;
-    namedpipeData.keycode = prcArea->right;
-    namedpipeData.modifiers_down = prcArea->bottom;
-    SendToNamedpipe();
-
+    // Menu is global UI: send on the session-less Aux pipe so a suspended /
+    // unfocused TIP can still ask Server to show it. Do not use Main / focus
+    // session activation — that path is intentionally down after focus loss.
+    if (!prcArea)
+    {
+        return -1;
+    }
+    SendToAuxNamedpipe(fmt::format(L"LangbarRightClick|{}|{}|{}|{}", prcArea->left, prcArea->top, prcArea->right,
+                                   prcArea->bottom));
     return 0;
 }
 

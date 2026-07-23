@@ -53,7 +53,7 @@ struct FanyImeSharedMemoryData
 //   1: FanyHideCandidateWndEvent
 //   2: FanyShowCandidateWndEvent
 //   3: FanyMoveCandidateWndEvent
-//   4: FanyLangbarRightClickEvent
+//   4: FanyLangbarRightClickEvent (legacy Main enum; tip now sends via Aux)
 //
 struct FanyImeNamedpipeData
 {
@@ -74,7 +74,7 @@ constexpr UINT KeyEvent = 0;
 constexpr UINT HideCandidateWnd = 1;
 constexpr UINT ShowCandidateWnd = 2;
 constexpr UINT MoveCandidateWnd = 3;
-constexpr UINT LangbarRightClick = 4;
+constexpr UINT LangbarRightClick = 4; // Aux text protocol; not accepted on Main
 constexpr UINT ClientHello = 10;
 constexpr UINT ClientActivated = 11;
 constexpr UINT ClientDeactivated = 12; // terminal TIP switch; toolbar hidden
