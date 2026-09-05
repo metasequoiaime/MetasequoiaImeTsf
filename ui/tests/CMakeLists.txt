@@ -7,7 +7,7 @@ add_executable(${TEST_EXECUTABLE_NAME}
 )
 
 # The test sources include their headers as "tests/includes/...", mirroring how
-# MSIME-Server lays its tests out.
+# server/ lays its tests out.
 target_include_directories(${TEST_EXECUTABLE_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(${TEST_EXECUTABLE_NAME} PRIVATE msimeui)
 

@@ -21,7 +21,7 @@ triplet and the installer copies its whole build output, so the Server's
 dependencies are installed beside it as DLLs rather than linked into it.
 
   MSIME-Engine            GPL-3.0       https://github.com/metasequoiaime/MSIME-Engine
-  MSIME-UI (msimeui)      GPL-3.0       https://github.com/metasequoiaime/MSIME-UI
+  msimeui                 GPL-3.0       ui/ in this repository
   googlepinyinime-rev     Apache-2.0    https://github.com/metasequoiaime/Google-PinyinIME-Rev
   OpenCC                  Apache-2.0    https://github.com/byvoid/opencc
   cpp-pinyin              Apache-2.0    https://github.com/wolfgitpr/cpp-pinyin
@@ -49,25 +49,27 @@ application: https://developer.microsoft.com/microsoft-edge/webview2/
 Interface resources
 -------------------
 
-  MSIME-UiHtml            GPL-3.0       https://github.com/metasequoiaime/MSIME-UiHtml
+  ui-html                 GPL-3.0       ui-html/ in this repository
 
 The candidate window, floating toolbar, tray menu and settings page are HTML,
 CSS and JavaScript loaded by the Server at runtime. They are part of this
 project and carry the same license as the rest of it.
 
 ------------------------------------------------------------------------------
-1. MSIME-Engine, MSIME-UI and MSIME-UiHtml - GNU General Public License version 3
+1. MSIME-Engine, msimeui and the interface resources - GNU General Public License version 3
 ------------------------------------------------------------------------------
 
 The shared input engine, the msimeui GUI framework and the WebView2 interface
 resources are all parts of this project and are licensed under the GNU General
 Public License version 3. Its full text is reproduced in the LICENSE file at the
-root of this repository and is not duplicated here.
+root of this repository and is not duplicated here. The GUI framework and the
+interface resources are directories of this repository rather than separate
+projects; they were MSIME-UI and MSIME-UiHtml until those repositories were
+archived and their history moved here.
 
 Sources:
   https://github.com/metasequoiaime/MSIME-Engine
-  https://github.com/metasequoiaime/MSIME-UI
-  https://github.com/metasequoiaime/MSIME-UiHtml
+  ui/ and ui-html/ in this repository
 
 ------------------------------------------------------------------------------
 2. googlepinyinime-rev, OpenCC and cpp-pinyin - Apache License 2.0
@@ -546,10 +548,11 @@ public domain and it carries no copyright claim; see https://www.sqlite.org/copy
 12. miniaudio - MIT No Attribution
 ------------------------------------------------------------------------------
 
-Audio capture and playback for the voice input feature. It is vendored as a single header at
-src/voice-input/third_party/miniaudio.h in MSIME-Server and compiled into the Server, so its code is
-redistributed in the installer. Its author offers a choice of the Unlicense or MIT-0; MIT-0 is taken
-here and reproduced below.
+Audio capture and playback for the voice input feature. The Server used to vendor its own copy of
+the single header; it now builds against the one the engine pins at
+vendor/MetasequoiaImeEngine/voice/third_party/miniaudio, so there is one copy for every platform.
+Either way its code is compiled into the Server and redistributed in the installer. Its author
+offers a choice of the Unlicense or MIT-0; MIT-0 is taken here and reproduced below.
 
 Source: https://github.com/mackron/miniaudio
 
@@ -576,17 +579,19 @@ Bundled data files
 
 The installer writes dictionary and helpcode data built from these repositories:
 
-  MSIME-Dict                https://github.com/metasequoiaime/MSIME-Dict
-  MSIME-HelpCode            https://github.com/metasequoiaime/MSIME-HelpCode
+  MSIME-Engine/dictionary   https://github.com/metasequoiaime/MSIME-Engine/tree/main/dictionary
+  MSIME-Engine/helpcode     https://github.com/metasequoiaime/MSIME-Engine/tree/main/helpcode
+  (imported from the archived MSIME-Dict and MSIME-HelpCode; the upstream
+   attribution below is retained)
 
 Installed as msime.db, others.db, english.db, dict_japanese.dat, pinyin.txt and
 helpcodes/*.txt under the application data directory.
 
-Neither repository declares a license of its own, because most of their content
+The sources do not declare a license of their own, because most of their content
 is not their own work. They aggregate word lists and code tables from upstream
 projects. The upstream terms, which travel with the data, are as follows.
 
-Sources of msime.db, others.db and english.db, via MSIME-Dict:
+Sources of msime.db, others.db and english.db:
 
   rime-ice                GPL-3.0    https://github.com/iDvel/rime-ice
   CustomPinyinDictionary  none       https://github.com/wuhgit/CustomPinyinDictionary

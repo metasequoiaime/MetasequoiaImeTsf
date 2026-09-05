@@ -16,24 +16,21 @@ Make sure vcpkg and Boost are installed by **Scoop**.
 
 ### Build steps(For Dev)
 
-**First**, build IME dictonary and prepare assets,
-
-```powershell
-cd $env:LOCALAPPDATA
-mkdir metasequoiaime
-cd metasequoiaime
-git clone --recursive https://github.com/metasequoiaime/MSIME-Dict.git MetasequoiaImeDict
-cd .\MetasequoiaImeDict\makecikudb\xnheulpb\makedb\separated_jp_version
-python .\create_db_and_table.py
-python .\insert_data.py
-python .\create_index_for_db.py
-Copy-Item -Path .\out\msime.db -Destination $env:LOCALAPPDATA\metasequoiaime
-```
-
-**Then**, clone the product repository and build the server,
+**First**, clone the product repository,
 
 ```powershell
 git clone --recursive https://github.com/metasequoiaime/MSIME-Windows.git
+```
+
+**Then**, put the dictionary data where the engine reads it. It is not built locally any more: the
+product lock names a published release and records the SHA256 of every asset, which is the same
+data Windows, macOS and Linux all ship, so building your own would only produce something the
+product never runs against.
+
+```powershell
+python .\MSIME-Windows\scripts\product_lock.py fetch-dictionaries --staging-root $env:TEMP\msime-data
+Copy-Item -Path "$env:TEMP\msime-data\MetasequoiaImeDict\out\*" -Destination $env:LOCALAPPDATA\metasequoiaime
+Copy-Item -Path .\MSIME-Windows\vendor\MetasequoiaImeEngine\helpcode\helpcodes -Destination $env:LOCALAPPDATA\metasequoiaime -Recurse
 ```
 
 Prepare environment,
@@ -48,10 +45,10 @@ New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\metasequoiaime\config.t
 e.g.
 
 ```powershell
-cd MetasequoiaImeServer
+cd MSIME-Windows\server
 python .\scripts\prepare_env.py
 Copy-Item -Path .\assets\tables\* -Destination $env:LOCALAPPDATA\metasequoiaime
-New-Item -ItemType SymbolicLink -Path "C:\Users\sonnycalcr\AppData\Local\metasequoiaime\config.toml" -Target "C:\Users\sonnycalcr\EDisk\CppCodes\IMECodes\MetasequoiaImeServer\assets\config\config.toml"
+New-Item -ItemType SymbolicLink -Path "$env:LOCALAPPDATA\metasequoiaime\config.toml" -Target (Resolve-Path .\assets\config\config.toml)
 ```
 
 Then, build and run,
