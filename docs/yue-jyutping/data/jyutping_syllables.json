@@ -1,0 +1,9758 @@
+{
+ "onsets": [
+  "b",
+  "p",
+  "m",
+  "f",
+  "d",
+  "t",
+  "n",
+  "l",
+  "g",
+  "k",
+  "ng",
+  "h",
+  "gw",
+  "kw",
+  "w",
+  "z",
+  "c",
+  "s",
+  "j"
+ ],
+ "finals": [
+  "aa",
+  "aai",
+  "aau",
+  "aam",
+  "aan",
+  "aang",
+  "aap",
+  "aat",
+  "aak",
+  "a",
+  "ai",
+  "au",
+  "am",
+  "an",
+  "ang",
+  "ap",
+  "at",
+  "ak",
+  "e",
+  "ei",
+  "eu",
+  "em",
+  "en",
+  "eng",
+  "ep",
+  "et",
+  "ek",
+  "eoi",
+  "eon",
+  "eot",
+  "oe",
+  "oeng",
+  "oet",
+  "oek",
+  "o",
+  "oi",
+  "ou",
+  "on",
+  "ong",
+  "ot",
+  "ok",
+  "i",
+  "iu",
+  "im",
+  "in",
+  "ing",
+  "ip",
+  "it",
+  "ik",
+  "yu",
+  "yun",
+  "yut",
+  "u",
+  "ui",
+  "um",
+  "un",
+  "ung",
+  "up",
+  "ut",
+  "uk",
+  "m",
+  "ng"
+ ],
+ "tones": [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6"
+ ],
+ "syllables": {
+  "aa": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "5",
+    "6"
+   ],
+   "onset": "",
+   "final": "aa",
+   "char_count": 54,
+   "examples": [
+    "㝞",
+    "㢌",
+    "㰳"
+   ]
+  },
+  "aai": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "",
+   "final": "aai",
+   "char_count": 13,
+   "examples": [
+    "㗒",
+    "㞒",
+    "伌"
+   ]
+  },
+  "aak": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "",
+   "final": "aak",
+   "char_count": 9,
+   "examples": [
+    "軛",
+    "軶",
+    "轭"
+   ]
+  },
+  "aan": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "aan",
+   "char_count": 13,
+   "examples": [
+    "䨃",
+    "䳡",
+    "俺"
+   ]
+  },
+  "aang": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "aang",
+   "char_count": 6,
+   "examples": [
+    "䓨",
+    "甇",
+    "甖"
+   ]
+  },
+  "aap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "",
+   "final": "aap",
+   "char_count": 5,
+   "examples": [
+    "㔩",
+    "圔",
+    "庘"
+   ]
+  },
+  "aat": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "",
+   "final": "aat",
+   "char_count": 17,
+   "examples": [
+    "䝟",
+    "劜",
+    "压"
+   ]
+  },
+  "aau": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "aau",
+   "char_count": 10,
+   "examples": [
+    "㕭",
+    "㘭",
+    "凹"
+   ]
+  },
+  "ai": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "ai",
+   "char_count": 21,
+   "examples": [
+    "㝣",
+    "㢊",
+    "㥷"
+   ]
+  },
+  "ak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "ak",
+   "char_count": 30,
+   "examples": [
+    "㧖",
+    "䝈",
+    "䠎"
+   ]
+  },
+  "am": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "",
+   "final": "am",
+   "char_count": 37,
+   "examples": [
+    "㞄",
+    "㽢",
+    "䅖"
+   ]
+  },
+  "an": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "an",
+   "char_count": 2,
+   "examples": [
+    "䅰",
+    "䟴"
+   ]
+  },
+  "ang": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "ang",
+   "char_count": 15,
+   "examples": [
+    "䴍",
+    "罃",
+    "莺"
+   ]
+  },
+  "ap": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "ap",
+   "char_count": 5,
+   "examples": [
+    "䞩",
+    "匎",
+    "姶"
+   ]
+  },
+  "au": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "au",
+   "char_count": 42,
+   "examples": [
+    "䉩",
+    "䉱",
+    "䙔"
+   ]
+  },
+  "baa": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aa",
+   "char_count": 52,
+   "examples": [
+    "㞎",
+    "㶚",
+    "㸭"
+   ]
+  },
+  "baai": {
+   "tones": [
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aai",
+   "char_count": 21,
+   "examples": [
+    "㗑",
+    "䒔",
+    "䙓"
+   ]
+  },
+  "baak": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aak",
+   "char_count": 34,
+   "examples": [
+    "㓦",
+    "㼟",
+    "㼣"
+   ]
+  },
+  "baan": {
+   "tones": [
+    "1",
+    "2",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aan",
+   "char_count": 41,
+   "examples": [
+    "㿀",
+    "䃑",
+    "丬"
+   ]
+  },
+  "baat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aat",
+   "char_count": 18,
+   "examples": [
+    "㭭",
+    "㺴",
+    "䤢"
+   ]
+  },
+  "baau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "aau",
+   "char_count": 23,
+   "examples": [
+    "䭋",
+    "佨",
+    "勹"
+   ]
+  },
+  "bai": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ai",
+   "char_count": 39,
+   "examples": [
+    "㙄",
+    "㡀",
+    "㢢"
+   ]
+  },
+  "bak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "b",
+   "final": "ak",
+   "char_count": 2,
+   "examples": [
+    "北",
+    "鉳"
+   ]
+  },
+  "bam": {
+   "tones": [
+    "1"
+   ],
+   "onset": "b",
+   "final": "am",
+   "char_count": 2,
+   "examples": [
+    "乓",
+    "泵"
+   ]
+  },
+  "ban": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "an",
+   "char_count": 83,
+   "examples": [
+    "㟗",
+    "㤓",
+    "㯽"
+   ]
+  },
+  "bang": {
+   "tones": [
+    "1",
+    "2",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ang",
+   "char_count": 27,
+   "examples": [
+    "䑫",
+    "䔊",
+    "䙀"
+   ]
+  },
+  "bap": {
+   "tones": [
+    "6"
+   ],
+   "onset": "b",
+   "final": "ap",
+   "char_count": 1,
+   "examples": [
+    "𫫈"
+   ]
+  },
+  "bat": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "at",
+   "char_count": 76,
+   "examples": [
+    "㢶",
+    "㧞",
+    "㳼"
+   ]
+  },
+  "bau": {
+   "tones": [
+    "6"
+   ],
+   "onset": "b",
+   "final": "au",
+   "char_count": 4,
+   "examples": [
+    "勏",
+    "犃",
+    "餢"
+   ]
+  },
+  "be": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "b",
+   "final": "e",
+   "char_count": 2,
+   "examples": [
+    "啤",
+    "嚊"
+   ]
+  },
+  "bei": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ei",
+   "char_count": 119,
+   "examples": [
+    "㑭",
+    "㘩",
+    "㠲"
+   ]
+  },
+  "beng": {
+   "tones": [
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "eng",
+   "char_count": 7,
+   "examples": [
+    "柄",
+    "病",
+    "鉼"
+   ]
+  },
+  "bik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ik",
+   "char_count": 40,
+   "examples": [
+    "㨽",
+    "㷶",
+    "䧗"
+   ]
+  },
+  "bin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "in",
+   "char_count": 72,
+   "examples": [
+    "㝸",
+    "㣐",
+    "㦚"
+   ]
+  },
+  "bing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ing",
+   "char_count": 60,
+   "examples": [
+    "㨀",
+    "䗒",
+    "䴵"
+   ]
+  },
+  "bit": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "it",
+   "char_count": 41,
+   "examples": [
+    "㔡",
+    "㢼",
+    "㻫"
+   ]
+  },
+  "biu": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "b",
+   "final": "iu",
+   "char_count": 69,
+   "examples": [
+    "㟽",
+    "㠒",
+    "㧼"
+   ]
+  },
+  "bo": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "b",
+   "final": "o",
+   "char_count": 21,
+   "examples": [
+    "㝿",
+    "䝛",
+    "啵"
+   ]
+  },
+  "bok": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ok",
+   "char_count": 75,
+   "examples": [
+    "㗘",
+    "㩧",
+    "㬍"
+   ]
+  },
+  "bong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ong",
+   "char_count": 34,
+   "examples": [
+    "㨍",
+    "㮄",
+    "㿶"
+   ]
+  },
+  "bou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ou",
+   "char_count": 106,
+   "examples": [
+    "㕊",
+    "㘵",
+    "㙅"
+   ]
+  },
+  "bui": {
+   "tones": [
+    "1",
+    "3",
+    "5",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ui",
+   "char_count": 50,
+   "examples": [
+    "㔨",
+    "㛝",
+    "㮎"
+   ]
+  },
+  "buk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "b",
+   "final": "uk",
+   "char_count": 29,
+   "examples": [
+    "㒒",
+    "㓀",
+    "㯷"
+   ]
+  },
+  "bun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "un",
+   "char_count": 32,
+   "examples": [
+    "㚘",
+    "㡷",
+    "㪵"
+   ]
+  },
+  "bung": {
+   "tones": [
+    "2",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ung",
+   "char_count": 15,
+   "examples": [
+    "䩬",
+    "䭰",
+    "埄"
+   ]
+  },
+  "but": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "b",
+   "final": "ut",
+   "char_count": 46,
+   "examples": [
+    "㔜",
+    "㟑",
+    "㴾"
+   ]
+  },
+  "caa": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "c",
+   "final": "aa",
+   "char_count": 49,
+   "examples": [
+    "㜁",
+    "㢉",
+    "㢒"
+   ]
+  },
+  "caai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "aai",
+   "char_count": 31,
+   "examples": [
+    "㑪",
+    "㼮",
+    "㾹"
+   ]
+  },
+  "caak": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "c",
+   "final": "aak",
+   "char_count": 40,
+   "examples": [
+    "㥽",
+    "㨲",
+    "㩍"
+   ]
+  },
+  "caam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "aam",
+   "char_count": 70,
+   "examples": [
+    "㔆",
+    "㕘",
+    "㦧"
+   ]
+  },
+  "caan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "aan",
+   "char_count": 47,
+   "examples": [
+    "㛑",
+    "㣓",
+    "㯆"
+   ]
+  },
+  "caang": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "aang",
+   "char_count": 26,
+   "examples": [
+    "䁎",
+    "䚘",
+    "䟫"
+   ]
+  },
+  "caap": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "aap",
+   "char_count": 13,
+   "examples": [
+    "㬁",
+    "㮑",
+    "囃"
+   ]
+  },
+  "caat": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "c",
+   "final": "aat",
+   "char_count": 22,
+   "examples": [
+    "㕞",
+    "䃰",
+    "䕓"
+   ]
+  },
+  "caau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "aau",
+   "char_count": 32,
+   "examples": [
+    "㶤",
+    "㷅",
+    "䰫"
+   ]
+  },
+  "cai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "ai",
+   "char_count": 58,
+   "examples": [
+    "䀙",
+    "䏅",
+    "䟷"
+   ]
+  },
+  "cak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "c",
+   "final": "ak",
+   "char_count": 6,
+   "examples": [
+    "䔴",
+    "墄",
+    "恻"
+   ]
+  },
+  "cam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "am",
+   "char_count": 95,
+   "examples": [
+    "㑴",
+    "㖊",
+    "㚯"
+   ]
+  },
+  "can": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "an",
+   "char_count": 67,
+   "examples": [
+    "㐱",
+    "㥲",
+    "㶊"
+   ]
+  },
+  "cang": {
+   "tones": [
+    "1",
+    "4"
+   ],
+   "onset": "c",
+   "final": "ang",
+   "char_count": 16,
+   "examples": [
+    "㓌",
+    "㬝",
+    "㲂"
+   ]
+  },
+  "cap": {
+   "tones": [
+    "1"
+   ],
+   "onset": "c",
+   "final": "ap",
+   "char_count": 21,
+   "examples": [
+    "㣬",
+    "䙄",
+    "偮"
+   ]
+  },
+  "cat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "c",
+   "final": "at",
+   "char_count": 16,
+   "examples": [
+    "㓒",
+    "㓼",
+    "㔑"
+   ]
+  },
+  "cau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "au",
+   "char_count": 137,
+   "examples": [
+    "㗜",
+    "㤽",
+    "㦞"
+   ]
+  },
+  "ce": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "e",
+   "char_count": 34,
+   "examples": [
+    "㙦",
+    "㚗",
+    "㾝"
+   ]
+  },
+  "cek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "ek",
+   "char_count": 12,
+   "examples": [
+    "䤲",
+    "伬",
+    "叺"
+   ]
+  },
+  "ceoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "eoi",
+   "char_count": 120,
+   "examples": [
+    "㜠",
+    "㝮",
+    "㪜"
+   ]
+  },
+  "ceon": {
+   "tones": [
+    "1",
+    "2",
+    "4"
+   ],
+   "onset": "c",
+   "final": "eon",
+   "char_count": 63,
+   "examples": [
+    "㖺",
+    "㫩",
+    "㫬"
+   ]
+  },
+  "ceot": {
+   "tones": [
+    "1"
+   ],
+   "onset": "c",
+   "final": "eot",
+   "char_count": 7,
+   "examples": [
+    "䟣",
+    "䢺",
+    "出"
+   ]
+  },
+  "ci": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "i",
+   "char_count": 261,
+   "examples": [
+    "㐶",
+    "㓨",
+    "㔭"
+   ]
+  },
+  "cik": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "c",
+   "final": "ik",
+   "char_count": 45,
+   "examples": [
+    "㞝",
+    "㡿",
+    "㥻"
+   ]
+  },
+  "cim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "im",
+   "char_count": 83,
+   "examples": [
+    "㑒",
+    "㔐",
+    "㔾"
+   ]
+  },
+  "cin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "in",
+   "char_count": 83,
+   "examples": [
+    "㕓",
+    "㙻",
+    "㢆"
+   ]
+  },
+  "cing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "ing",
+   "char_count": 86,
+   "examples": [
+    "㐼",
+    "㛵",
+    "䄇"
+   ]
+  },
+  "cip": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "ip",
+   "char_count": 10,
+   "examples": [
+    "䧪",
+    "妾",
+    "淁"
+   ]
+  },
+  "cit": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "it",
+   "char_count": 25,
+   "examples": [
+    "㬚",
+    "䒆",
+    "䚢"
+   ]
+  },
+  "ciu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "iu",
+   "char_count": 67,
+   "examples": [
+    "㡑",
+    "㯧",
+    "㴥"
+   ]
+  },
+  "co": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "o",
+   "char_count": 80,
+   "examples": [
+    "㐥",
+    "㛀",
+    "㭫"
+   ]
+  },
+  "coek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "oek",
+   "char_count": 29,
+   "examples": [
+    "㔬",
+    "㚟",
+    "㪬"
+   ]
+  },
+  "coeng": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "oeng",
+   "char_count": 130,
+   "examples": [
+    "㘟",
+    "㘯",
+    "㙊"
+   ]
+  },
+  "coi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "oi",
+   "char_count": 43,
+   "examples": [
+    "㒲",
+    "㗷",
+    "㘔"
+   ]
+  },
+  "cok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "ok",
+   "char_count": 7,
+   "examples": [
+    "䱜",
+    "剒",
+    "娖"
+   ]
+  },
+  "cong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "ong",
+   "char_count": 69,
+   "examples": [
+    "㡖",
+    "㫤",
+    "㵴"
+   ]
+  },
+  "cou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "ou",
+   "char_count": 60,
+   "examples": [
+    "㜖",
+    "㯥",
+    "䄚"
+   ]
+  },
+  "cuk": {
+   "tones": [
+    "1"
+   ],
+   "onset": "c",
+   "final": "uk",
+   "char_count": 79,
+   "examples": [
+    "㙇",
+    "㯈",
+    "㾥"
+   ]
+  },
+  "cung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "ung",
+   "char_count": 153,
+   "examples": [
+    "㓍",
+    "㗰",
+    "㤝"
+   ]
+  },
+  "cyu": {
+   "tones": [
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "c",
+   "final": "yu",
+   "char_count": 60,
+   "examples": [
+    "㑏",
+    "㕏",
+    "㕑"
+   ]
+  },
+  "cyun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "c",
+   "final": "yun",
+   "char_count": 126,
+   "examples": [
+    "㒰",
+    "㟫",
+    "㠝"
+   ]
+  },
+  "cyut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "c",
+   "final": "yut",
+   "char_count": 5,
+   "examples": [
+    "撮",
+    "猝",
+    "茓"
+   ]
+  },
+  "daa": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "d",
+   "final": "aa",
+   "char_count": 2,
+   "examples": [
+    "咑",
+    "打"
+   ]
+  },
+  "daai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "aai",
+   "char_count": 37,
+   "examples": [
+    "㐲",
+    "㛿",
+    "㞭"
+   ]
+  },
+  "daam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "aam",
+   "char_count": 59,
+   "examples": [
+    "㗖",
+    "㚮",
+    "㜬"
+   ]
+  },
+  "daan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "aan",
+   "char_count": 61,
+   "examples": [
+    "㠆",
+    "㡺",
+    "㣋"
+   ]
+  },
+  "daap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "aap",
+   "char_count": 49,
+   "examples": [
+    "㙮",
+    "㜓",
+    "㯚"
+   ]
+  },
+  "daat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "aat",
+   "char_count": 34,
+   "examples": [
+    "㼀",
+    "䃮",
+    "䵣"
+   ]
+  },
+  "dai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ai",
+   "char_count": 103,
+   "examples": [
+    "㓳",
+    "㪆",
+    "㫝"
+   ]
+  },
+  "dak": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ak",
+   "char_count": 18,
+   "examples": [
+    "㝵",
+    "㝶",
+    "㥁"
+   ]
+  },
+  "dam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "am",
+   "char_count": 16,
+   "examples": [
+    "㕪",
+    "㱽",
+    "䏙"
+   ]
+  },
+  "dan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "an",
+   "char_count": 15,
+   "examples": [
+    "㩐",
+    "墪",
+    "扥"
+   ]
+  },
+  "dang": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ang",
+   "char_count": 36,
+   "examples": [
+    "㲪",
+    "㽅",
+    "䒭"
+   ]
+  },
+  "dap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ap",
+   "char_count": 4,
+   "examples": [
+    "㗳",
+    "𠳖",
+    "𢱕"
+   ]
+  },
+  "dat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "at",
+   "char_count": 18,
+   "examples": [
+    "㷝",
+    "䃐",
+    "凸"
+   ]
+  },
+  "dau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "au",
+   "char_count": 56,
+   "examples": [
+    "㐙",
+    "㖍",
+    "㞳"
+   ]
+  },
+  "de": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "d",
+   "final": "e",
+   "char_count": 2,
+   "examples": [
+    "嗲",
+    "爹"
+   ]
+  },
+  "dei": {
+   "tones": [
+    "6"
+   ],
+   "onset": "d",
+   "final": "ei",
+   "char_count": 6,
+   "examples": [
+    "哋",
+    "地",
+    "坔"
+   ]
+  },
+  "dek": {
+   "tones": [
+    "6"
+   ],
+   "onset": "d",
+   "final": "ek",
+   "char_count": 7,
+   "examples": [
+    "䨀",
+    "笛",
+    "篴"
+   ]
+  },
+  "deng": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "eng",
+   "char_count": 3,
+   "examples": [
+    "埞",
+    "掟",
+    "矴"
+   ]
+  },
+  "deoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "eoi",
+   "char_count": 60,
+   "examples": [
+    "㕍",
+    "㦠",
+    "㨃"
+   ]
+  },
+  "deon": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "eon",
+   "char_count": 35,
+   "examples": [
+    "㢯",
+    "㥫",
+    "㪟"
+   ]
+  },
+  "deot": {
+   "tones": [
+    "1"
+   ],
+   "onset": "d",
+   "final": "eot",
+   "char_count": 4,
+   "examples": [
+    "咄",
+    "柮",
+    "飿"
+   ]
+  },
+  "di": {
+   "tones": [
+    "1"
+   ],
+   "onset": "d",
+   "final": "i",
+   "char_count": 1,
+   "examples": [
+    "啲"
+   ]
+  },
+  "dik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ik",
+   "char_count": 51,
+   "examples": [
+    "㠃",
+    "㢩",
+    "㰅"
+   ]
+  },
+  "dim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "im",
+   "char_count": 23,
+   "examples": [
+    "㓠",
+    "㝪",
+    "㸃"
+   ]
+  },
+  "din": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "in",
+   "char_count": 51,
+   "examples": [
+    "㒹",
+    "㞟",
+    "㭵"
+   ]
+  },
+  "ding": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ing",
+   "char_count": 55,
+   "examples": [
+    "㐉",
+    "㝎",
+    "㣔"
+   ]
+  },
+  "dip": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ip",
+   "char_count": 42,
+   "examples": [
+    "㥈",
+    "㩸",
+    "㩹"
+   ]
+  },
+  "dit": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "it",
+   "char_count": 41,
+   "examples": [
+    "㦶",
+    "㲳",
+    "䏲"
+   ]
+  },
+  "diu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "iu",
+   "char_count": 72,
+   "examples": [
+    "㓮",
+    "㚋",
+    "㪕"
+   ]
+  },
+  "do": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "o",
+   "char_count": 55,
+   "examples": [
+    "㙐",
+    "㥩",
+    "㻔"
+   ]
+  },
+  "doe": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "d",
+   "final": "oe",
+   "char_count": 6,
+   "examples": [
+    "哚",
+    "𡃏",
+    "𡇙"
+   ]
+  },
+  "doek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "d",
+   "final": "oek",
+   "char_count": 11,
+   "examples": [
+    "剁",
+    "啄",
+    "啅"
+   ]
+  },
+  "doeng": {
+   "tones": [
+    "1"
+   ],
+   "onset": "d",
+   "final": "oeng",
+   "char_count": 1,
+   "examples": [
+    "𡁷"
+   ]
+  },
+  "doi": {
+   "tones": [
+    "6"
+   ],
+   "onset": "d",
+   "final": "oi",
+   "char_count": 31,
+   "examples": [
+    "㭖",
+    "㻖",
+    "䒫"
+   ]
+  },
+  "dok": {
+   "tones": [
+    "6"
+   ],
+   "onset": "d",
+   "final": "ok",
+   "char_count": 9,
+   "examples": [
+    "䐾",
+    "凙",
+    "剫"
+   ]
+  },
+  "dong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ong",
+   "char_count": 70,
+   "examples": [
+    "㜭",
+    "㼕",
+    "㽆"
+   ]
+  },
+  "dou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ou",
+   "char_count": 101,
+   "examples": [
+    "㓃",
+    "㘏",
+    "㠀"
+   ]
+  },
+  "duk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "d",
+   "final": "uk",
+   "char_count": 74,
+   "examples": [
+    "㞘",
+    "㧻",
+    "㱩"
+   ]
+  },
+  "dun": {
+   "tones": [
+    "1"
+   ],
+   "onset": "d",
+   "final": "un",
+   "char_count": 1,
+   "examples": [
+    "𠓎"
+   ]
+  },
+  "dung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "ung",
+   "char_count": 90,
+   "examples": [
+    "㐑",
+    "㑈",
+    "㓊"
+   ]
+  },
+  "dyun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "yun",
+   "char_count": 30,
+   "examples": [
+    "㫁",
+    "㱭",
+    "偳"
+   ]
+  },
+  "dyut": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "d",
+   "final": "yut",
+   "char_count": 18,
+   "examples": [
+    "㔢",
+    "㣞",
+    "䟾"
+   ]
+  },
+  "e": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "e",
+   "char_count": 1,
+   "examples": [
+    "𫫃"
+   ]
+  },
+  "eot": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "eot",
+   "char_count": 1,
+   "examples": [
+    "𠰲"
+   ]
+  },
+  "faa": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "f",
+   "final": "aa",
+   "char_count": 13,
+   "examples": [
+    "㳸",
+    "化",
+    "埖"
+   ]
+  },
+  "faai": {
+   "tones": [
+    "3"
+   ],
+   "onset": "f",
+   "final": "aai",
+   "char_count": 16,
+   "examples": [
+    "㙕",
+    "䈛",
+    "䉬"
+   ]
+  },
+  "faan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "f",
+   "final": "aan",
+   "char_count": 125,
+   "examples": [
+    "㕨",
+    "㠫",
+    "㠶"
+   ]
+  },
+  "faat": {
+   "tones": [
+    "3"
+   ],
+   "onset": "f",
+   "final": "aat",
+   "char_count": 21,
+   "examples": [
+    "㛲",
+    "㳒",
+    "䂲"
+   ]
+  },
+  "fai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "f",
+   "final": "ai",
+   "char_count": 79,
+   "examples": [
+    "㧑",
+    "㫎",
+    "㵒"
+   ]
+  },
+  "fan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "f",
+   "final": "an",
+   "char_count": 167,
+   "examples": [
+    "㛰",
+    "㞣",
+    "㡪"
+   ]
+  },
+  "fang": {
+   "tones": [
+    "4"
+   ],
+   "onset": "f",
+   "final": "ang",
+   "char_count": 1,
+   "examples": [
+    "揈"
+   ]
+  },
+  "fat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "f",
+   "final": "at",
+   "char_count": 95,
+   "examples": [
+    "㕹",
+    "㗵",
+    "㘺"
+   ]
+  },
+  "fau": {
+   "tones": [
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "f",
+   "final": "au",
+   "char_count": 35,
+   "examples": [
+    "㐢",
+    "剖",
+    "否"
+   ]
+  },
+  "fe": {
+   "tones": [
+    "1"
+   ],
+   "onset": "f",
+   "final": "e",
+   "char_count": 1,
+   "examples": [
+    "啡"
+   ]
+  },
+  "fei": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "f",
+   "final": "ei",
+   "char_count": 66,
+   "examples": [
+    "㐟",
+    "㔈",
+    "㥱"
+   ]
+  },
+  "fik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "f",
+   "final": "ik",
+   "char_count": 1,
+   "examples": [
+    "𠱥"
+   ]
+  },
+  "fit": {
+   "tones": [
+    "1"
+   ],
+   "onset": "f",
+   "final": "it",
+   "char_count": 2,
+   "examples": [
+    "𢝵",
+    "𢞵"
+   ]
+  },
+  "fiu": {
+   "tones": [
+    "3"
+   ],
+   "onset": "f",
+   "final": "iu",
+   "char_count": 1,
+   "examples": [
+    "覅"
+   ]
+  },
+  "fo": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "f",
+   "final": "o",
+   "char_count": 31,
+   "examples": [
+    "㚌",
+    "㪙",
+    "㸯"
+   ]
+  },
+  "fok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "f",
+   "final": "ok",
+   "char_count": 26,
+   "examples": [
+    "㸌",
+    "㸕",
+    "䣤"
+   ]
+  },
+  "fong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "f",
+   "final": "ong",
+   "char_count": 99,
+   "examples": [
+    "㑂",
+    "㠩",
+    "㠵"
+   ]
+  },
+  "fu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "f",
+   "final": "u",
+   "char_count": 257,
+   "examples": [
+    "㐣",
+    "㓡",
+    "㓫"
+   ]
+  },
+  "fui": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "f",
+   "final": "ui",
+   "char_count": 55,
+   "examples": [
+    "㒮",
+    "㞀",
+    "㨒"
+   ]
+  },
+  "fuk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "f",
+   "final": "uk",
+   "char_count": 68,
+   "examples": [
+    "㙏",
+    "㚆",
+    "㬼"
+   ]
+  },
+  "fun": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "f",
+   "final": "un",
+   "char_count": 37,
+   "examples": [
+    "㯘",
+    "䕀",
+    "䝔"
+   ]
+  },
+  "fung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "f",
+   "final": "ung",
+   "char_count": 124,
+   "examples": [
+    "㐽",
+    "㒥",
+    "㛔"
+   ]
+  },
+  "fut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "f",
+   "final": "ut",
+   "char_count": 4,
+   "examples": [
+    "䦢",
+    "濶",
+    "闊"
+   ]
+  },
+  "gaa": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aa",
+   "char_count": 86,
+   "examples": [
+    "㔔",
+    "㔖",
+    "㖙"
+   ]
+  },
+  "gaai": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aai",
+   "char_count": 75,
+   "examples": [
+    "㑘",
+    "㖋",
+    "㖎"
+   ]
+  },
+  "gaak": {
+   "tones": [
+    "3"
+   ],
+   "onset": "g",
+   "final": "aak",
+   "char_count": 29,
+   "examples": [
+    "㗆",
+    "㦴",
+    "䎥"
+   ]
+  },
+  "gaam": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aam",
+   "char_count": 32,
+   "examples": [
+    "䛓",
+    "䶠",
+    "䶢"
+   ]
+  },
+  "gaan": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aan",
+   "char_count": 84,
+   "examples": [
+    "㵎",
+    "㶕",
+    "䉍"
+   ]
+  },
+  "gaang": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aang",
+   "char_count": 6,
+   "examples": [
+    "䎴",
+    "挭",
+    "畊"
+   ]
+  },
+  "gaap": {
+   "tones": [
+    "3"
+   ],
+   "onset": "g",
+   "final": "aap",
+   "char_count": 46,
+   "examples": [
+    "㕅",
+    "㿓",
+    "䀫"
+   ]
+  },
+  "gaat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "aat",
+   "char_count": 7,
+   "examples": [
+    "嘎",
+    "嘠",
+    "尜"
+   ]
+  },
+  "gaau": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "aau",
+   "char_count": 54,
+   "examples": [
+    "㚣",
+    "㩭",
+    "㬵"
+   ]
+  },
+  "gai": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "g",
+   "final": "ai",
+   "char_count": 37,
+   "examples": [
+    "㛷",
+    "㡭",
+    "㮷"
+   ]
+  },
+  "gak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "g",
+   "final": "ak",
+   "char_count": 1,
+   "examples": [
+    "呄"
+   ]
+  },
+  "gam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "am",
+   "char_count": 64,
+   "examples": [
+    "㩒",
+    "㯲",
+    "㲐"
+   ]
+  },
+  "gan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "an",
+   "char_count": 53,
+   "examples": [
+    "㝻",
+    "㫔",
+    "䈥"
+   ]
+  },
+  "gang": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "g",
+   "final": "ang",
+   "char_count": 58,
+   "examples": [
+    "㗮",
+    "㪅",
+    "㮓"
+   ]
+  },
+  "gap": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ap",
+   "char_count": 23,
+   "examples": [
+    "㤂",
+    "㧀",
+    "㽺"
+   ]
+  },
+  "gat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "g",
+   "final": "at",
+   "char_count": 20,
+   "examples": [
+    "㓤",
+    "䓀",
+    "䞘"
+   ]
+  },
+  "gau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "au",
+   "char_count": 109,
+   "examples": [
+    "㐇",
+    "㝅",
+    "㝌"
+   ]
+  },
+  "ge": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "e",
+   "char_count": 2,
+   "examples": [
+    "嘅",
+    "𠸏"
+   ]
+  },
+  "gei": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ei",
+   "char_count": 138,
+   "examples": [
+    "㒫",
+    "㙋",
+    "㙨"
+   ]
+  },
+  "geng": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "eng",
+   "char_count": 7,
+   "examples": [
+    "猄",
+    "鏡",
+    "镜"
+   ]
+  },
+  "geoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "eoi",
+   "char_count": 120,
+   "examples": [
+    "㐦",
+    "㝒",
+    "㞐"
+   ]
+  },
+  "gi": {
+   "tones": [
+    "1"
+   ],
+   "onset": "g",
+   "final": "i",
+   "char_count": 1,
+   "examples": [
+    "𠼻"
+   ]
+  },
+  "gik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ik",
+   "char_count": 37,
+   "examples": [
+    "㥛",
+    "㦘",
+    "㦸"
+   ]
+  },
+  "gim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "im",
+   "char_count": 33,
+   "examples": [
+    "㻩",
+    "䈩",
+    "䯡"
+   ]
+  },
+  "gin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "in",
+   "char_count": 70,
+   "examples": [
+    "㑠",
+    "㔓",
+    "㩃"
+   ]
+  },
+  "ging": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ing",
+   "char_count": 74,
+   "examples": [
+    "㜔",
+    "㥤",
+    "㬌"
+   ]
+  },
+  "gip": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ip",
+   "char_count": 22,
+   "examples": [
+    "㤼",
+    "㥘",
+    "䀷"
+   ]
+  },
+  "git": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "it",
+   "char_count": 40,
+   "examples": [
+    "㓗",
+    "㘶",
+    "㛃"
+   ]
+  },
+  "giu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "iu",
+   "char_count": 60,
+   "examples": [
+    "㟕",
+    "㠐",
+    "㤭"
+   ]
+  },
+  "go": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "o",
+   "char_count": 31,
+   "examples": [
+    "㗻",
+    "㢦",
+    "㤎"
+   ]
+  },
+  "goe": {
+   "tones": [
+    "1",
+    "4"
+   ],
+   "onset": "g",
+   "final": "oe",
+   "char_count": 2,
+   "examples": [
+    "啹",
+    "𢤹"
+   ]
+  },
+  "goek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "g",
+   "final": "oek",
+   "char_count": 7,
+   "examples": [
+    "匷",
+    "屩",
+    "屫"
+   ]
+  },
+  "goeng": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "g",
+   "final": "oeng",
+   "char_count": 35,
+   "examples": [
+    "㳾",
+    "㹔",
+    "䕬"
+   ]
+  },
+  "goi": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "oi",
+   "char_count": 35,
+   "examples": [
+    "㨟",
+    "㯼",
+    "㱾"
+   ]
+  },
+  "gok": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "g",
+   "final": "ok",
+   "char_count": 32,
+   "examples": [
+    "䁷",
+    "䇶",
+    "䧄"
+   ]
+  },
+  "gon": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "on",
+   "char_count": 42,
+   "examples": [
+    "㶥",
+    "㿻",
+    "䧲"
+   ]
+  },
+  "gong": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "ong",
+   "char_count": 70,
+   "examples": [
+    "㓻",
+    "㟠",
+    "㟵"
+   ]
+  },
+  "got": {
+   "tones": [
+    "3"
+   ],
+   "onset": "g",
+   "final": "ot",
+   "char_count": 13,
+   "examples": [
+    "㖵",
+    "㵧",
+    "䈓"
+   ]
+  },
+  "gou": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "ou",
+   "char_count": 63,
+   "examples": [
+    "㗝",
+    "㚏",
+    "㚖"
+   ]
+  },
+  "gu": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "u",
+   "char_count": 99,
+   "examples": [
+    "㑬",
+    "㖛",
+    "㚉"
+   ]
+  },
+  "gui": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ui",
+   "char_count": 6,
+   "examples": [
+    "䐴",
+    "攰",
+    "椢"
+   ]
+  },
+  "guk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "g",
+   "final": "uk",
+   "char_count": 76,
+   "examples": [
+    "㘲",
+    "㥌",
+    "㮂"
+   ]
+  },
+  "gun": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "g",
+   "final": "un",
+   "char_count": 71,
+   "examples": [
+    "㮡",
+    "㴦",
+    "䏓"
+   ]
+  },
+  "gung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "ung",
+   "char_count": 79,
+   "examples": [
+    "㒶",
+    "㓋",
+    "㓚"
+   ]
+  },
+  "gwaa": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "aa",
+   "char_count": 26,
+   "examples": [
+    "㧓",
+    "䈑",
+    "䒷"
+   ]
+  },
+  "gwaai": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "aai",
+   "char_count": 17,
+   "examples": [
+    "㾩",
+    "䂯",
+    "䂷"
+   ]
+  },
+  "gwaak": {
+   "tones": [
+    "3"
+   ],
+   "onset": "gw",
+   "final": "aak",
+   "char_count": 2,
+   "examples": [
+    "掴",
+    "摑"
+   ]
+  },
+  "gwaan": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "aan",
+   "char_count": 27,
+   "examples": [
+    "䚪",
+    "䤽",
+    "丱"
+   ]
+  },
+  "gwaang": {
+   "tones": [
+    "6"
+   ],
+   "onset": "gw",
+   "final": "aang",
+   "char_count": 1,
+   "examples": [
+    "俇"
+   ]
+  },
+  "gwaat": {
+   "tones": [
+    "3"
+   ],
+   "onset": "gw",
+   "final": "aat",
+   "char_count": 7,
+   "examples": [
+    "䏦",
+    "傄",
+    "刮"
+   ]
+  },
+  "gwai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "gw",
+   "final": "ai",
+   "char_count": 136,
+   "examples": [
+    "㑧",
+    "㔲",
+    "㪈"
+   ]
+  },
+  "gwan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "gw",
+   "final": "an",
+   "char_count": 78,
+   "examples": [
+    "㚬",
+    "㯻",
+    "䃂"
+   ]
+  },
+  "gwang": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "gw",
+   "final": "ang",
+   "char_count": 21,
+   "examples": [
+    "䧀",
+    "厷",
+    "嚝"
+   ]
+  },
+  "gwat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "gw",
+   "final": "at",
+   "char_count": 38,
+   "examples": [
+    "㒴",
+    "㭾",
+    "㻕"
+   ]
+  },
+  "gwe": {
+   "tones": [
+    "1"
+   ],
+   "onset": "gw",
+   "final": "e",
+   "char_count": 1,
+   "examples": [
+    "𠺌"
+   ]
+  },
+  "gwi": {
+   "tones": [
+    "1"
+   ],
+   "onset": "gw",
+   "final": "i",
+   "char_count": 1,
+   "examples": [
+    "𪚩"
+   ]
+  },
+  "gwik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "gw",
+   "final": "ik",
+   "char_count": 41,
+   "examples": [
+    "㶁",
+    "㷦",
+    "䦗"
+   ]
+  },
+  "gwing": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "ing",
+   "char_count": 44,
+   "examples": [
+    "㓏",
+    "㢠",
+    "㤯"
+   ]
+  },
+  "gwit": {
+   "tones": [
+    "1"
+   ],
+   "onset": "gw",
+   "final": "it",
+   "char_count": 1,
+   "examples": [
+    "𠵯"
+   ]
+  },
+  "gwo": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "o",
+   "char_count": 36,
+   "examples": [
+    "㳀",
+    "㿆",
+    "䙨"
+   ]
+  },
+  "gwok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "gw",
+   "final": "ok",
+   "char_count": 37,
+   "examples": [
+    "㕵",
+    "㬑",
+    "䂸"
+   ]
+  },
+  "gwong": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "gw",
+   "final": "ong",
+   "char_count": 40,
+   "examples": [
+    "㫕",
+    "㹰",
+    "㼅"
+   ]
+  },
+  "gyun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "g",
+   "final": "yun",
+   "char_count": 66,
+   "examples": [
+    "㢧",
+    "㢾",
+    "㪻"
+   ]
+  },
+  "haa": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aa",
+   "char_count": 53,
+   "examples": [
+    "㗇",
+    "㰺",
+    "䠍"
+   ]
+  },
+  "haai": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aai",
+   "char_count": 51,
+   "examples": [
+    "㒠",
+    "㕢",
+    "㜾"
+   ]
+  },
+  "haak": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aak",
+   "char_count": 19,
+   "examples": [
+    "㬨",
+    "䞦",
+    "吓"
+   ]
+  },
+  "haam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aam",
+   "char_count": 59,
+   "examples": [
+    "㖤",
+    "㗸",
+    "㘅"
+   ]
+  },
+  "haan": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aan",
+   "char_count": 56,
+   "examples": [
+    "㛠",
+    "㡾",
+    "㯗"
+   ]
+  },
+  "haang": {
+   "tones": [
+    "1",
+    "4"
+   ],
+   "onset": "h",
+   "final": "aang",
+   "char_count": 8,
+   "examples": [
+    "䂫",
+    "劥",
+    "坈"
+   ]
+  },
+  "haap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aap",
+   "char_count": 35,
+   "examples": [
+    "㗐",
+    "㘡",
+    "㭱"
+   ]
+  },
+  "haau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "aau",
+   "char_count": 79,
+   "examples": [
+    "㘼",
+    "㚽",
+    "㛈"
+   ]
+  },
+  "hai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ai",
+   "char_count": 35,
+   "examples": [
+    "㚛",
+    "䐼",
+    "係"
+   ]
+  },
+  "hak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "h",
+   "final": "ak",
+   "char_count": 22,
+   "examples": [
+    "㩏",
+    "㳳",
+    "䙐"
+   ]
+  },
+  "ham": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "am",
+   "char_count": 86,
+   "examples": [
+    "㙳",
+    "㟏",
+    "㟔"
+   ]
+  },
+  "han": {
+   "tones": [
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "an",
+   "char_count": 15,
+   "examples": [
+    "㯊",
+    "佷",
+    "垦"
+   ]
+  },
+  "hang": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ang",
+   "char_count": 76,
+   "examples": [
+    "㐔",
+    "㔰",
+    "㧶"
+   ]
+  },
+  "hap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ap",
+   "char_count": 50,
+   "examples": [
+    "㕉",
+    "㕎",
+    "㥺"
+   ]
+  },
+  "hat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "h",
+   "final": "at",
+   "char_count": 48,
+   "examples": [
+    "㔠",
+    "㮝",
+    "䇄"
+   ]
+  },
+  "hau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "au",
+   "char_count": 61,
+   "examples": [
+    "㗋",
+    "㠬",
+    "㢿"
+   ]
+  },
+  "he": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "e",
+   "char_count": 3,
+   "examples": [
+    "㹃",
+    "𠺬",
+    "𠾍"
+   ]
+  },
+  "hei": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "ei",
+   "char_count": 166,
+   "examples": [
+    "㐹",
+    "㑶",
+    "㙿"
+   ]
+  },
+  "hek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "h",
+   "final": "ek",
+   "char_count": 3,
+   "examples": [
+    "吃",
+    "喫",
+    "噄"
+   ]
+  },
+  "heoi": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "eoi",
+   "char_count": 57,
+   "examples": [
+    "㚎",
+    "㞰",
+    "㠊"
+   ]
+  },
+  "hik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "h",
+   "final": "ik",
+   "char_count": 1,
+   "examples": [
+    "赥"
+   ]
+  },
+  "him": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "im",
+   "char_count": 34,
+   "examples": [
+    "㐸",
+    "䈴",
+    "傔"
+   ]
+  },
+  "hin": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "in",
+   "char_count": 77,
+   "examples": [
+    "㗔",
+    "㩷",
+    "㫫"
+   ]
+  },
+  "hing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "5"
+   ],
+   "onset": "h",
+   "final": "ing",
+   "char_count": 54,
+   "examples": [
+    "㑆",
+    "㒷",
+    "㚾"
+   ]
+  },
+  "hip": {
+   "tones": [
+    "3"
+   ],
+   "onset": "h",
+   "final": "ip",
+   "char_count": 38,
+   "examples": [
+    "㙝",
+    "㢵",
+    "㤲"
+   ]
+  },
+  "hit": {
+   "tones": [
+    "3"
+   ],
+   "onset": "h",
+   "final": "it",
+   "char_count": 6,
+   "examples": [
+    "娎",
+    "歇",
+    "烲"
+   ]
+  },
+  "hiu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "h",
+   "final": "iu",
+   "char_count": 69,
+   "examples": [
+    "㕺",
+    "㚠",
+    "㺧"
+   ]
+  },
+  "hm": {
+   "tones": [
+    "1"
+   ],
+   "onset": "h",
+   "final": "m",
+   "char_count": 1,
+   "examples": [
+    "噷"
+   ]
+  },
+  "ho": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "o",
+   "char_count": 29,
+   "examples": [
+    "㐓",
+    "㞹",
+    "㪼"
+   ]
+  },
+  "hoe": {
+   "tones": [
+    "1"
+   ],
+   "onset": "h",
+   "final": "oe",
+   "char_count": 5,
+   "examples": [
+    "㗾",
+    "吙",
+    "靴"
+   ]
+  },
+  "hoeng": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "oeng",
+   "char_count": 48,
+   "examples": [
+    "㗽",
+    "㬀",
+    "㴡"
+   ]
+  },
+  "hoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "oi",
+   "char_count": 63,
+   "examples": [
+    "㚊",
+    "㝩",
+    "㤥"
+   ]
+  },
+  "hok": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ok",
+   "char_count": 49,
+   "examples": [
+    "㙾",
+    "㰒",
+    "㶅"
+   ]
+  },
+  "hon": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "h",
+   "final": "on",
+   "char_count": 83,
+   "examples": [
+    "㒏",
+    "㢨",
+    "㪋"
+   ]
+  },
+  "hong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ong",
+   "char_count": 75,
+   "examples": [
+    "㑌",
+    "㟟",
+    "㤚"
+   ]
+  },
+  "hot": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ot",
+   "char_count": 19,
+   "examples": [
+    "㓭",
+    "㬞",
+    "㵣"
+   ]
+  },
+  "hou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ou",
+   "char_count": 93,
+   "examples": [
+    "㘪",
+    "㚪",
+    "㞻"
+   ]
+  },
+  "huk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "h",
+   "final": "uk",
+   "char_count": 33,
+   "examples": [
+    "㜅",
+    "㩂",
+    "㪶"
+   ]
+  },
+  "hung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "h",
+   "final": "ung",
+   "char_count": 110,
+   "examples": [
+    "㐫",
+    "㓙",
+    "㕳"
+   ]
+  },
+  "hyun": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "h",
+   "final": "yun",
+   "char_count": 89,
+   "examples": [
+    "㒽",
+    "㓩",
+    "㦥"
+   ]
+  },
+  "hyut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "h",
+   "final": "yut",
+   "char_count": 12,
+   "examples": [
+    "㞽",
+    "䒸",
+    "䛎"
+   ]
+  },
+  "jaa": {
+   "tones": [
+    "1",
+    "5"
+   ],
+   "onset": "j",
+   "final": "aa",
+   "char_count": 2,
+   "examples": [
+    "也",
+    "吔"
+   ]
+  },
+  "jaai": {
+   "tones": [
+    "5"
+   ],
+   "onset": "j",
+   "final": "aai",
+   "char_count": 1,
+   "examples": [
+    "䑂"
+   ]
+  },
+  "jaak": {
+   "tones": [
+    "3"
+   ],
+   "onset": "j",
+   "final": "aak",
+   "char_count": 1,
+   "examples": [
+    "窫"
+   ]
+  },
+  "jaang": {
+   "tones": [
+    "3"
+   ],
+   "onset": "j",
+   "final": "aang",
+   "char_count": 3,
+   "examples": [
+    "𨅝",
+    "𨆪",
+    "𫏕"
+   ]
+  },
+  "jaap": {
+   "tones": [
+    "3"
+   ],
+   "onset": "j",
+   "final": "aap",
+   "char_count": 2,
+   "examples": [
+    "𣚕",
+    "𫼸"
+   ]
+  },
+  "jaau": {
+   "tones": [
+    "1"
+   ],
+   "onset": "j",
+   "final": "aau",
+   "char_count": 1,
+   "examples": [
+    "𠰋"
+   ]
+  },
+  "jai": {
+   "tones": [
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ai",
+   "char_count": 21,
+   "examples": [
+    "㹭",
+    "呭",
+    "怈"
+   ]
+  },
+  "jam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "am",
+   "char_count": 93,
+   "examples": [
+    "㱃",
+    "㶩",
+    "㸒"
+   ]
+  },
+  "jan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "an",
+   "char_count": 169,
+   "examples": [
+    "㞬",
+    "㣼",
+    "㥯"
+   ]
+  },
+  "jap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ap",
+   "char_count": 29,
+   "examples": [
+    "㐈",
+    "㠳",
+    "㬤"
+   ]
+  },
+  "jat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "j",
+   "final": "at",
+   "char_count": 30,
+   "examples": [
+    "一",
+    "佚",
+    "佾"
+   ]
+  },
+  "jau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "au",
+   "char_count": 204,
+   "examples": [
+    "㐀",
+    "㐕",
+    "㐛"
+   ]
+  },
+  "je": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "e",
+   "char_count": 34,
+   "examples": [
+    "㖡",
+    "㖱",
+    "㖿"
+   ]
+  },
+  "jeoi": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "eoi",
+   "char_count": 33,
+   "examples": [
+    "㣸",
+    "㵝",
+    "㶋"
+   ]
+  },
+  "jeon": {
+   "tones": [
+    "2",
+    "6"
+   ],
+   "onset": "j",
+   "final": "eon",
+   "char_count": 8,
+   "examples": [
+    "橍",
+    "润",
+    "潤"
+   ]
+  },
+  "ji": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "i",
+   "char_count": 320,
+   "examples": [
+    "㐌",
+    "㓷",
+    "㕥"
+   ]
+  },
+  "jik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ik",
+   "char_count": 120,
+   "examples": [
+    "㘮",
+    "㷜",
+    "䋇"
+   ]
+  },
+  "jim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "im",
+   "char_count": 141,
+   "examples": [
+    "㚩",
+    "㤿",
+    "䀋"
+   ]
+  },
+  "jin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "in",
+   "char_count": 182,
+   "examples": [
+    "㕣",
+    "㝚",
+    "㢇"
+   ]
+  },
+  "jing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ing",
+   "char_count": 199,
+   "examples": [
+    "㒣",
+    "㖜",
+    "㗡"
+   ]
+  },
+  "jip": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ip",
+   "char_count": 70,
+   "examples": [
+    "㒯",
+    "㡤",
+    "䈎"
+   ]
+  },
+  "jit": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "j",
+   "final": "it",
+   "char_count": 33,
+   "examples": [
+    "䥟",
+    "噎",
+    "孼"
+   ]
+  },
+  "jiu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "iu",
+   "char_count": 131,
+   "examples": [
+    "㛉",
+    "㝔",
+    "䙅"
+   ]
+  },
+  "jo": {
+   "tones": [
+    "1"
+   ],
+   "onset": "j",
+   "final": "o",
+   "char_count": 3,
+   "examples": [
+    "哟",
+    "唷",
+    "喲"
+   ]
+  },
+  "joek": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "j",
+   "final": "oek",
+   "char_count": 45,
+   "examples": [
+    "㒢",
+    "䖈",
+    "䤀"
+   ]
+  },
+  "joeng": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "oeng",
+   "char_count": 135,
+   "examples": [
+    "㨾",
+    "㳱",
+    "䄃"
+   ]
+  },
+  "ju": {
+   "tones": [
+    "4"
+   ],
+   "onset": "j",
+   "final": "u",
+   "char_count": 1,
+   "examples": [
+    "𩵋"
+   ]
+  },
+  "juk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "j",
+   "final": "uk",
+   "char_count": 88,
+   "examples": [
+    "㓇",
+    "㻙",
+    "䜡"
+   ]
+  },
+  "jung": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "ung",
+   "char_count": 143,
+   "examples": [
+    "㐯",
+    "㙲",
+    "㨣"
+   ]
+  },
+  "jyu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "yu",
+   "char_count": 297,
+   "examples": [
+    "㐠",
+    "㐵",
+    "㔱"
+   ]
+  },
+  "jyun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "j",
+   "final": "yun",
+   "char_count": 238,
+   "examples": [
+    "㝨",
+    "㞍",
+    "㨬"
+   ]
+  },
+  "jyut": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "j",
+   "final": "yut",
+   "char_count": 48,
+   "examples": [
+    "㳉",
+    "䄴",
+    "䜳"
+   ]
+  },
+  "kaa": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "k",
+   "final": "aa",
+   "char_count": 17,
+   "examples": [
+    "䯊",
+    "䶗",
+    "佧"
+   ]
+  },
+  "kaai": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "k",
+   "final": "aai",
+   "char_count": 9,
+   "examples": [
+    "䒓",
+    "楷",
+    "炌"
+   ]
+  },
+  "kaak": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "k",
+   "final": "aak",
+   "char_count": 4,
+   "examples": [
+    "喀",
+    "硌",
+    "緙"
+   ]
+  },
+  "kaau": {
+   "tones": [
+    "3"
+   ],
+   "onset": "k",
+   "final": "aau",
+   "char_count": 7,
+   "examples": [
+    "㸆",
+    "䎋",
+    "銬"
+   ]
+  },
+  "kai": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "k",
+   "final": "ai",
+   "char_count": 37,
+   "examples": [
+    "㒅",
+    "㬖",
+    "㶉"
+   ]
+  },
+  "kak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "ak",
+   "char_count": 2,
+   "examples": [
+    "揢",
+    "𠸉"
+   ]
+  },
+  "kam": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5"
+   ],
+   "onset": "k",
+   "final": "am",
+   "char_count": 34,
+   "examples": [
+    "㕋",
+    "㪁",
+    "䔷"
+   ]
+  },
+  "kan": {
+   "tones": [
+    "4"
+   ],
+   "onset": "k",
+   "final": "an",
+   "char_count": 17,
+   "examples": [
+    "㘦",
+    "㢙",
+    "䓅"
+   ]
+  },
+  "kang": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "k",
+   "final": "ang",
+   "char_count": 5,
+   "examples": [
+    "掯",
+    "裉",
+    "褃"
+   ]
+  },
+  "kap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "k",
+   "final": "ap",
+   "char_count": 27,
+   "examples": [
+    "㒆",
+    "㬛",
+    "㲸"
+   ]
+  },
+  "kat": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "at",
+   "char_count": 2,
+   "examples": [
+    "咳",
+    "欬"
+   ]
+  },
+  "kau": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "k",
+   "final": "au",
+   "char_count": 104,
+   "examples": [
+    "㛏",
+    "㞗",
+    "㟈"
+   ]
+  },
+  "ke": {
+   "tones": [
+    "1",
+    "2",
+    "4"
+   ],
+   "onset": "k",
+   "final": "e",
+   "char_count": 11,
+   "examples": [
+    "拁",
+    "瘸",
+    "癿"
+   ]
+  },
+  "kei": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "k",
+   "final": "ei",
+   "char_count": 149,
+   "examples": [
+    "㐞",
+    "㖉",
+    "㞿"
+   ]
+  },
+  "kek": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "k",
+   "final": "ek",
+   "char_count": 5,
+   "examples": [
+    "乪",
+    "剧",
+    "劇"
+   ]
+  },
+  "keoi": {
+   "tones": [
+    "1",
+    "4",
+    "5"
+   ],
+   "onset": "k",
+   "final": "eoi",
+   "char_count": 116,
+   "examples": [
+    "㐝",
+    "㘗",
+    "㜹"
+   ]
+  },
+  "keu": {
+   "tones": [
+    "4"
+   ],
+   "onset": "k",
+   "final": "eu",
+   "char_count": 1,
+   "examples": [
+    "𠵇"
+   ]
+  },
+  "kik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "ik",
+   "char_count": 4,
+   "examples": [
+    "欫",
+    "缼",
+    "𠽤"
+   ]
+  },
+  "kim": {
+   "tones": [
+    "4"
+   ],
+   "onset": "k",
+   "final": "im",
+   "char_count": 16,
+   "examples": [
+    "䈤",
+    "仱",
+    "岒"
+   ]
+  },
+  "kin": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "k",
+   "final": "in",
+   "char_count": 15,
+   "examples": [
+    "㓺",
+    "㨜",
+    "㨴"
+   ]
+  },
+  "king": {
+   "tones": [
+    "1",
+    "2",
+    "4"
+   ],
+   "onset": "k",
+   "final": "ing",
+   "char_count": 49,
+   "examples": [
+    "㒌",
+    "㔀",
+    "㢣"
+   ]
+  },
+  "kip": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "ip",
+   "char_count": 1,
+   "examples": [
+    "𥈲"
+   ]
+  },
+  "kit": {
+   "tones": [
+    "3"
+   ],
+   "onset": "k",
+   "final": "it",
+   "char_count": 53,
+   "examples": [
+    "㓞",
+    "㓶",
+    "㔛"
+   ]
+  },
+  "kiu": {
+   "tones": [
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "k",
+   "final": "iu",
+   "char_count": 44,
+   "examples": [
+    "㚁",
+    "㝯",
+    "㳢"
+   ]
+  },
+  "ko": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "o",
+   "char_count": 3,
+   "examples": [
+    "鈳",
+    "钶",
+    "𠹭"
+   ]
+  },
+  "koek": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "k",
+   "final": "oek",
+   "char_count": 10,
+   "examples": [
+    "㑢",
+    "㕁",
+    "㾡"
+   ]
+  },
+  "koeng": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "k",
+   "final": "oeng",
+   "char_count": 22,
+   "examples": [
+    "㩖",
+    "䃨",
+    "勥"
+   ]
+  },
+  "koi": {
+   "tones": [
+    "3"
+   ],
+   "onset": "k",
+   "final": "oi",
+   "char_count": 21,
+   "examples": [
+    "㮣",
+    "丐",
+    "匃"
+   ]
+  },
+  "kok": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "k",
+   "final": "ok",
+   "char_count": 36,
+   "examples": [
+    "㕡",
+    "㤩",
+    "㩁"
+   ]
+  },
+  "kong": {
+   "tones": [
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "k",
+   "final": "ong",
+   "char_count": 33,
+   "examples": [
+    "㢜",
+    "亢",
+    "伉"
+   ]
+  },
+  "ku": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "u",
+   "char_count": 4,
+   "examples": [
+    "圐",
+    "笟",
+    "箍"
+   ]
+  },
+  "kui": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "k",
+   "final": "ui",
+   "char_count": 48,
+   "examples": [
+    "㱮",
+    "䈐",
+    "䙌"
+   ]
+  },
+  "kuk": {
+   "tones": [
+    "1"
+   ],
+   "onset": "k",
+   "final": "uk",
+   "char_count": 16,
+   "examples": [
+    "㖆",
+    "㻃",
+    "䒼"
+   ]
+  },
+  "kung": {
+   "tones": [
+    "4"
+   ],
+   "onset": "k",
+   "final": "ung",
+   "char_count": 22,
+   "examples": [
+    "㧭",
+    "㮪",
+    "䅃"
+   ]
+  },
+  "kut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "k",
+   "final": "ut",
+   "char_count": 26,
+   "examples": [
+    "㺢",
+    "䟯",
+    "䯺"
+   ]
+  },
+  "kwaa": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "kw",
+   "final": "aa",
+   "char_count": 16,
+   "examples": [
+    "㐄",
+    "䠸",
+    "䯞"
+   ]
+  },
+  "kwaai": {
+   "tones": [
+    "5"
+   ],
+   "onset": "kw",
+   "final": "aai",
+   "char_count": 3,
+   "examples": [
+    "㧟",
+    "㨤",
+    "擓"
+   ]
+  },
+  "kwaang": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "kw",
+   "final": "aang",
+   "char_count": 4,
+   "examples": [
+    "䆲",
+    "框",
+    "眶"
+   ]
+  },
+  "kwaat": {
+   "tones": [
+    "1"
+   ],
+   "onset": "kw",
+   "final": "aat",
+   "char_count": 1,
+   "examples": [
+    "𡁸"
+   ]
+  },
+  "kwai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "kw",
+   "final": "ai",
+   "char_count": 108,
+   "examples": [
+    "㔒",
+    "㙓",
+    "㟡"
+   ]
+  },
+  "kwan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "kw",
+   "final": "an",
+   "char_count": 82,
+   "examples": [
+    "㟒",
+    "㪊",
+    "㬷"
+   ]
+  },
+  "kwang": {
+   "tones": [
+    "1"
+   ],
+   "onset": "kw",
+   "final": "ang",
+   "char_count": 2,
+   "examples": [
+    "㚚",
+    "錓"
+   ]
+  },
+  "kwik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "kw",
+   "final": "ik",
+   "char_count": 2,
+   "examples": [
+    "䠐",
+    "郥"
+   ]
+  },
+  "kwok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "kw",
+   "final": "ok",
+   "char_count": 10,
+   "examples": [
+    "㗥",
+    "彉",
+    "彍"
+   ]
+  },
+  "kwong": {
+   "tones": [
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "kw",
+   "final": "ong",
+   "char_count": 24,
+   "examples": [
+    "䵃",
+    "儣",
+    "圹"
+   ]
+  },
+  "kyun": {
+   "tones": [
+    "4"
+   ],
+   "onset": "k",
+   "final": "yun",
+   "char_count": 24,
+   "examples": [
+    "㩲",
+    "䑏",
+    "䟒"
+   ]
+  },
+  "kyut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "k",
+   "final": "yut",
+   "char_count": 77,
+   "examples": [
+    "㙭",
+    "㭈",
+    "㵐"
+   ]
+  },
+  "laa": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "5"
+   ],
+   "onset": "l",
+   "final": "aa",
+   "char_count": 13,
+   "examples": [
+    "㙤",
+    "啦",
+    "喇"
+   ]
+  },
+  "laai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aai",
+   "char_count": 32,
+   "examples": [
+    "䄤",
+    "䓶",
+    "孻"
+   ]
+  },
+  "laak": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aak",
+   "char_count": 2,
+   "examples": [
+    "砳",
+    "𨊛"
+   ]
+  },
+  "laam": {
+   "tones": [
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aam",
+   "char_count": 72,
+   "examples": [
+    "㜮",
+    "㞩",
+    "㧛"
+   ]
+  },
+  "laan": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aan",
+   "char_count": 62,
+   "examples": [
+    "㘓",
+    "㦨",
+    "㱫"
+   ]
+  },
+  "laang": {
+   "tones": [
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aang",
+   "char_count": 2,
+   "examples": [
+    "冷",
+    "唥"
+   ]
+  },
+  "laap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aap",
+   "char_count": 29,
+   "examples": [
+    "㧜",
+    "㼃",
+    "䁽"
+   ]
+  },
+  "laat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "aat",
+   "char_count": 16,
+   "examples": [
+    "㻋",
+    "㻝",
+    "䓥"
+   ]
+  },
+  "laau": {
+   "tones": [
+    "4"
+   ],
+   "onset": "l",
+   "final": "aau",
+   "char_count": 5,
+   "examples": [
+    "捞",
+    "撈",
+    "賿"
+   ]
+  },
+  "lai": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ai",
+   "char_count": 108,
+   "examples": [
+    "㒧",
+    "㘑",
+    "㠟"
+   ]
+  },
+  "lak": {
+   "tones": [
+    "6"
+   ],
+   "onset": "l",
+   "final": "ak",
+   "char_count": 19,
+   "examples": [
+    "㔹",
+    "仂",
+    "勒"
+   ]
+  },
+  "lam": {
+   "tones": [
+    "1",
+    "4",
+    "5"
+   ],
+   "onset": "l",
+   "final": "am",
+   "char_count": 41,
+   "examples": [
+    "㐭",
+    "㛦",
+    "㝝"
+   ]
+  },
+  "lan": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "l",
+   "final": "an",
+   "char_count": 2,
+   "examples": [
+    "𠹹",
+    "𨶙"
+   ]
+  },
+  "lang": {
+   "tones": [
+    "1"
+   ],
+   "onset": "l",
+   "final": "ang",
+   "char_count": 1,
+   "examples": [
+    "㘄"
+   ]
+  },
+  "lap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ap",
+   "char_count": 10,
+   "examples": [
+    "㕸",
+    "䲞",
+    "搚"
+   ]
+  },
+  "lat": {
+   "tones": [
+    "1"
+   ],
+   "onset": "l",
+   "final": "at",
+   "char_count": 2,
+   "examples": [
+    "甩",
+    "𢫫"
+   ]
+  },
+  "lau": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "au",
+   "char_count": 162,
+   "examples": [
+    "㐬",
+    "㔷",
+    "㙀"
+   ]
+  },
+  "le": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "l",
+   "final": "e",
+   "char_count": 2,
+   "examples": [
+    "咧",
+    "𠻗"
+   ]
+  },
+  "lei": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ei",
+   "char_count": 126,
+   "examples": [
+    "㒿",
+    "㓯",
+    "㛤"
+   ]
+  },
+  "lek": {
+   "tones": [
+    "6"
+   ],
+   "onset": "l",
+   "final": "ek",
+   "char_count": 1,
+   "examples": [
+    "坜"
+   ]
+  },
+  "leng": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "l",
+   "final": "eng",
+   "char_count": 3,
+   "examples": [
+    "靓",
+    "靚",
+    "𡃁"
+   ]
+  },
+  "leoi": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "eoi",
+   "char_count": 181,
+   "examples": [
+    "㒦",
+    "㔧",
+    "㗊"
+   ]
+  },
+  "leon": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "eon",
+   "char_count": 126,
+   "examples": [
+    "㓆",
+    "㔂",
+    "㖁"
+   ]
+  },
+  "leot": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "eot",
+   "char_count": 33,
+   "examples": [
+    "㖀",
+    "㗚",
+    "㟳"
+   ]
+  },
+  "leu": {
+   "tones": [
+    "1"
+   ],
+   "onset": "l",
+   "final": "eu",
+   "char_count": 1,
+   "examples": [
+    "𠺫"
+   ]
+  },
+  "li": {
+   "tones": [
+    "1"
+   ],
+   "onset": "l",
+   "final": "i",
+   "char_count": 2,
+   "examples": [
+    "哩",
+    "唎"
+   ]
+  },
+  "lik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ik",
+   "char_count": 85,
+   "examples": [
+    "㔏",
+    "㠣",
+    "㧰"
+   ]
+  },
+  "lim": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "im",
+   "char_count": 69,
+   "examples": [
+    "㝺",
+    "㡘",
+    "㢘"
+   ]
+  },
+  "lin": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "in",
+   "char_count": 66,
+   "examples": [
+    "㜕",
+    "㟀",
+    "㥕"
+   ]
+  },
+  "ling": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ing",
+   "char_count": 163,
+   "examples": [
+    "㖫",
+    "㚑",
+    "㡵"
+   ]
+  },
+  "lip": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ip",
+   "char_count": 23,
+   "examples": [
+    "㯿",
+    "㲱",
+    "䉭"
+   ]
+  },
+  "lit": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "it",
+   "char_count": 31,
+   "examples": [
+    "㤠",
+    "䅀",
+    "䮋"
+   ]
+  },
+  "liu": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "iu",
+   "char_count": 77,
+   "examples": [
+    "㙩",
+    "㞠",
+    "㡻"
+   ]
+  },
+  "lo": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "o",
+   "char_count": 63,
+   "examples": [
+    "㑩",
+    "㒩",
+    "㩡"
+   ]
+  },
+  "loe": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "l",
+   "final": "oe",
+   "char_count": 2,
+   "examples": [
+    "𢶤",
+    "𦧲"
+   ]
+  },
+  "loek": {
+   "tones": [
+    "6"
+   ],
+   "onset": "l",
+   "final": "oek",
+   "char_count": 13,
+   "examples": [
+    "㑼",
+    "㗉",
+    "㨼"
+   ]
+  },
+  "loeng": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "oeng",
+   "char_count": 76,
+   "examples": [
+    "㒳",
+    "㔝",
+    "㹁"
+   ]
+  },
+  "loi": {
+   "tones": [
+    "4",
+    "6"
+   ],
+   "onset": "l",
+   "final": "oi",
+   "char_count": 61,
+   "examples": [
+    "㚓",
+    "㾢",
+    "䅘"
+   ]
+  },
+  "lok": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ok",
+   "char_count": 39,
+   "examples": [
+    "㦡",
+    "㪾",
+    "㴖"
+   ]
+  },
+  "long": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ong",
+   "char_count": 65,
+   "examples": [
+    "㓪",
+    "㙟",
+    "㟍"
+   ]
+  },
+  "lou": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ou",
+   "char_count": 210,
+   "examples": [
+    "㐗",
+    "㔪",
+    "㖈"
+   ]
+  },
+  "luk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "l",
+   "final": "uk",
+   "char_count": 102,
+   "examples": [
+    "㓐",
+    "㖨",
+    "㛬"
+   ]
+  },
+  "lung": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "ung",
+   "char_count": 122,
+   "examples": [
+    "㑝",
+    "㔫",
+    "㙙"
+   ]
+  },
+  "lyun": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "l",
+   "final": "yun",
+   "char_count": 57,
+   "examples": [
+    "㘘",
+    "㜃",
+    "㜻"
+   ]
+  },
+  "lyut": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "l",
+   "final": "yut",
+   "char_count": 24,
+   "examples": [
+    "㭞",
+    "㭩",
+    "㸹"
+   ]
+  },
+  "m": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "",
+   "final": "m",
+   "char_count": 2,
+   "examples": [
+    "呣",
+    "唔"
+   ]
+  },
+  "maa": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "aa",
+   "char_count": 58,
+   "examples": [
+    "㐷",
+    "㦄",
+    "㾺"
+   ]
+  },
+  "maai": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "aai",
+   "char_count": 26,
+   "examples": [
+    "㜥",
+    "䁲",
+    "䚑"
+   ]
+  },
+  "maak": {
+   "tones": [
+    "3"
+   ],
+   "onset": "m",
+   "final": "aak",
+   "char_count": 3,
+   "examples": [
+    "孹",
+    "掰",
+    "擘"
+   ]
+  },
+  "maan": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "aan",
+   "char_count": 67,
+   "examples": [
+    "㗈",
+    "㡢",
+    "㬅"
+   ]
+  },
+  "maang": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "aang",
+   "char_count": 17,
+   "examples": [
+    "䁅",
+    "䇇",
+    "勐"
+   ]
+  },
+  "maat": {
+   "tones": [
+    "3"
+   ],
+   "onset": "m",
+   "final": "aat",
+   "char_count": 3,
+   "examples": [
+    "睰",
+    "礣",
+    "閁"
+   ]
+  },
+  "maau": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "aau",
+   "char_count": 32,
+   "examples": [
+    "䖥",
+    "䡚",
+    "䫉"
+   ]
+  },
+  "mai": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ai",
+   "char_count": 29,
+   "examples": [
+    "㐘",
+    "㴹",
+    "䋛"
+   ]
+  },
+  "mak": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ak",
+   "char_count": 40,
+   "examples": [
+    "㷵",
+    "䁼",
+    "䁿"
+   ]
+  },
+  "man": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "an",
+   "char_count": 148,
+   "examples": [
+    "㐎",
+    "㖴",
+    "㞶"
+   ]
+  },
+  "mang": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ang",
+   "char_count": 17,
+   "examples": [
+    "䈍",
+    "䫤",
+    "掹"
+   ]
+  },
+  "mat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "m",
+   "final": "at",
+   "char_count": 44,
+   "examples": [
+    "㫘",
+    "㳴",
+    "㴵"
+   ]
+  },
+  "mau": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "au",
+   "char_count": 57,
+   "examples": [
+    "㖼",
+    "㛌",
+    "㮊"
+   ]
+  },
+  "me": {
+   "tones": [
+    "1"
+   ],
+   "onset": "m",
+   "final": "e",
+   "char_count": 12,
+   "examples": [
+    "咩",
+    "哶",
+    "孭"
+   ]
+  },
+  "mei": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ei",
+   "char_count": 132,
+   "examples": [
+    "㖝",
+    "㜫",
+    "㞑"
+   ]
+  },
+  "meng": {
+   "tones": [
+    "5"
+   ],
+   "onset": "m",
+   "final": "eng",
+   "char_count": 1,
+   "examples": [
+    "茗"
+   ]
+  },
+  "mik": {
+   "tones": [
+    "6"
+   ],
+   "onset": "m",
+   "final": "ik",
+   "char_count": 30,
+   "examples": [
+    "㨠",
+    "㯒",
+    "㵋"
+   ]
+  },
+  "min": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "in",
+   "char_count": 65,
+   "examples": [
+    "㒙",
+    "㝃",
+    "㝰"
+   ]
+  },
+  "ming": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ing",
+   "char_count": 50,
+   "examples": [
+    "㝠",
+    "㟰",
+    "㫥"
+   ]
+  },
+  "mit": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "m",
+   "final": "it",
+   "char_count": 29,
+   "examples": [
+    "㒝",
+    "㓕",
+    "㩢"
+   ]
+  },
+  "miu": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "iu",
+   "char_count": 34,
+   "examples": [
+    "䁧",
+    "䖢",
+    "喵"
+   ]
+  },
+  "mo": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "o",
+   "char_count": 26,
+   "examples": [
+    "䃺",
+    "䶸",
+    "劘"
+   ]
+  },
+  "mok": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ok",
+   "char_count": 24,
+   "examples": [
+    "㡍",
+    "㱳",
+    "㷬"
+   ]
+  },
+  "mong": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ong",
+   "char_count": 88,
+   "examples": [
+    "㒺",
+    "㓁",
+    "㟌"
+   ]
+  },
+  "mou": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ou",
+   "char_count": 161,
+   "examples": [
+    "㑄",
+    "㒇",
+    "㒻"
+   ]
+  },
+  "mui": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ui",
+   "char_count": 58,
+   "examples": [
+    "㭑",
+    "㺳",
+    "䆀"
+   ]
+  },
+  "muk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "m",
+   "final": "uk",
+   "char_count": 30,
+   "examples": [
+    "㕲",
+    "㜈",
+    "㣎"
+   ]
+  },
+  "mun": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "un",
+   "char_count": 62,
+   "examples": [
+    "㒼",
+    "㥃",
+    "㦖"
+   ]
+  },
+  "mung": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ung",
+   "char_count": 53,
+   "examples": [
+    "㝱",
+    "㠓",
+    "㩚"
+   ]
+  },
+  "mut": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "m",
+   "final": "ut",
+   "char_count": 33,
+   "examples": [
+    "㶬",
+    "䏞",
+    "䱅"
+   ]
+  },
+  "naa": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5"
+   ],
+   "onset": "n",
+   "final": "aa",
+   "char_count": 18,
+   "examples": [
+    "㧱",
+    "䛔",
+    "乸"
+   ]
+  },
+  "naai": {
+   "tones": [
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "aai",
+   "char_count": 17,
+   "examples": [
+    "㜨",
+    "㭆",
+    "乃"
+   ]
+  },
+  "naam": {
+   "tones": [
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "aam",
+   "char_count": 29,
+   "examples": [
+    "㑲",
+    "㣮",
+    "㭷"
+   ]
+  },
+  "naan": {
+   "tones": [
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "n",
+   "final": "aan",
+   "char_count": 7,
+   "examples": [
+    "戁",
+    "赧",
+    "难"
+   ]
+  },
+  "naap": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "aap",
+   "char_count": 18,
+   "examples": [
+    "䪏",
+    "吶",
+    "呐"
+   ]
+  },
+  "naat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "n",
+   "final": "aat",
+   "char_count": 4,
+   "examples": [
+    "䖧",
+    "捺",
+    "焫"
+   ]
+  },
+  "naau": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "aau",
+   "char_count": 28,
+   "examples": [
+    "呶",
+    "孬",
+    "峱"
+   ]
+  },
+  "nai": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ai",
+   "char_count": 9,
+   "examples": [
+    "䦵",
+    "呢",
+    "坭"
+   ]
+  },
+  "nak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "n",
+   "final": "ak",
+   "char_count": 1,
+   "examples": [
+    "𪙛"
+   ]
+  },
+  "nam": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "am",
+   "char_count": 9,
+   "examples": [
+    "惗",
+    "拰",
+    "焾"
+   ]
+  },
+  "nan": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "n",
+   "final": "an",
+   "char_count": 2,
+   "examples": [
+    "囜",
+    "撚"
+   ]
+  },
+  "nang": {
+   "tones": [
+    "4"
+   ],
+   "onset": "n",
+   "final": "ang",
+   "char_count": 2,
+   "examples": [
+    "䏻",
+    "能"
+   ]
+  },
+  "nap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ap",
+   "char_count": 5,
+   "examples": [
+    "粒",
+    "𠕄",
+    "𢈈"
+   ]
+  },
+  "nau": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "au",
+   "char_count": 26,
+   "examples": [
+    "㝹",
+    "䨲",
+    "啂"
+   ]
+  },
+  "ne": {
+   "tones": [
+    "1"
+   ],
+   "onset": "n",
+   "final": "e",
+   "char_count": 1,
+   "examples": [
+    "𫬤"
+   ]
+  },
+  "nei": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ei",
+   "char_count": 51,
+   "examples": [
+    "㛅",
+    "㛋",
+    "㞾"
+   ]
+  },
+  "neng": {
+   "tones": [
+    "2"
+   ],
+   "onset": "n",
+   "final": "eng",
+   "char_count": 1,
+   "examples": [
+    "𠽒"
+   ]
+  },
+  "neoi": {
+   "tones": [
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "eoi",
+   "char_count": 13,
+   "examples": [
+    "㼏",
+    "䲎",
+    "女"
+   ]
+  },
+  "neot": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "eot",
+   "char_count": 9,
+   "examples": [
+    "㕯",
+    "䖓",
+    "抐"
+   ]
+  },
+  "ng": {
+   "tones": [
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "",
+   "final": "ng",
+   "char_count": 61,
+   "examples": [
+    "㐅",
+    "㐏",
+    "㐚"
+   ]
+  },
+  "ngaa": {
+   "tones": [
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aa",
+   "char_count": 34,
+   "examples": [
+    "㧎",
+    "㧚",
+    "㼘"
+   ]
+  },
+  "ngaai": {
+   "tones": [
+    "4",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aai",
+   "char_count": 25,
+   "examples": [
+    "䝽",
+    "乂",
+    "刈"
+   ]
+  },
+  "ngaak": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aak",
+   "char_count": 11,
+   "examples": [
+    "㟯",
+    "峉",
+    "磀"
+   ]
+  },
+  "ngaam": {
+   "tones": [
+    "1",
+    "4"
+   ],
+   "onset": "ng",
+   "final": "aam",
+   "char_count": 20,
+   "examples": [
+    "䖗",
+    "儑",
+    "啱"
+   ]
+  },
+  "ngaan": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aan",
+   "char_count": 17,
+   "examples": [
+    "偐",
+    "楌",
+    "眼"
+   ]
+  },
+  "ngaang": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aang",
+   "char_count": 2,
+   "examples": [
+    "硬",
+    "鞕"
+   ]
+  },
+  "ngaap": {
+   "tones": [
+    "3"
+   ],
+   "onset": "ng",
+   "final": "aap",
+   "char_count": 1,
+   "examples": [
+    "𫫄"
+   ]
+  },
+  "ngaat": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "aat",
+   "char_count": 7,
+   "examples": [
+    "㩵",
+    "䦪",
+    "屵"
+   ]
+  },
+  "ngaau": {
+   "tones": [
+    "1",
+    "4",
+    "5"
+   ],
+   "onset": "ng",
+   "final": "aau",
+   "char_count": 16,
+   "examples": [
+    "䶧",
+    "咬",
+    "崤"
+   ]
+  },
+  "ngai": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "ai",
+   "char_count": 94,
+   "examples": [
+    "㫉",
+    "䧧",
+    "䭳"
+   ]
+  },
+  "ngak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "ng",
+   "final": "ak",
+   "char_count": 1,
+   "examples": [
+    "搹"
+   ]
+  },
+  "ngam": {
+   "tones": [
+    "4"
+   ],
+   "onset": "ng",
+   "final": "am",
+   "char_count": 4,
+   "examples": [
+    "䜙",
+    "扲",
+    "玵"
+   ]
+  },
+  "ngan": {
+   "tones": [
+    "1",
+    "4",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "an",
+   "char_count": 29,
+   "examples": [
+    "㙬",
+    "䓄",
+    "䖐"
+   ]
+  },
+  "ngang": {
+   "tones": [
+    "2"
+   ],
+   "onset": "ng",
+   "final": "ang",
+   "char_count": 1,
+   "examples": [
+    "𬒔"
+   ]
+  },
+  "ngap": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "ap",
+   "char_count": 10,
+   "examples": [
+    "䑥",
+    "䑪",
+    "岋"
+   ]
+  },
+  "ngat": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "at",
+   "char_count": 20,
+   "examples": [
+    "㐳",
+    "䎲",
+    "䦍"
+   ]
+  },
+  "ngau": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "au",
+   "char_count": 20,
+   "examples": [
+    "䋅",
+    "乄",
+    "偶"
+   ]
+  },
+  "ngit": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "it",
+   "char_count": 7,
+   "examples": [
+    "䥹",
+    "啮",
+    "噛"
+   ]
+  },
+  "ngo": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "o",
+   "char_count": 50,
+   "examples": [
+    "㦱",
+    "㧴",
+    "䄉"
+   ]
+  },
+  "ngoi": {
+   "tones": [
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "oi",
+   "char_count": 21,
+   "examples": [
+    "㕌",
+    "㚈",
+    "㱯"
+   ]
+  },
+  "ngok": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "ok",
+   "char_count": 52,
+   "examples": [
+    "㓵",
+    "㖾",
+    "㗁"
+   ]
+  },
+  "ngon": {
+   "tones": [
+    "6"
+   ],
+   "onset": "ng",
+   "final": "on",
+   "char_count": 10,
+   "examples": [
+    "㟁",
+    "䮗",
+    "堓"
+   ]
+  },
+  "ngong": {
+   "tones": [
+    "4",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "ong",
+   "char_count": 12,
+   "examples": [
+    "㭿",
+    "䀚",
+    "䒢"
+   ]
+  },
+  "ngou": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "ng",
+   "final": "ou",
+   "char_count": 46,
+   "examples": [
+    "㜜",
+    "㥿",
+    "㾲"
+   ]
+  },
+  "ngung": {
+   "tones": [
+    "2"
+   ],
+   "onset": "ng",
+   "final": "ung",
+   "char_count": 2,
+   "examples": [
+    "𢫨",
+    "𢶜"
+   ]
+  },
+  "ni": {
+   "tones": [
+    "1"
+   ],
+   "onset": "n",
+   "final": "i",
+   "char_count": 2,
+   "examples": [
+    "𨉖",
+    "𰿰"
+   ]
+  },
+  "nik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ik",
+   "char_count": 22,
+   "examples": [
+    "㥾",
+    "㲻",
+    "䁥"
+   ]
+  },
+  "nim": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "n",
+   "final": "im",
+   "char_count": 18,
+   "examples": [
+    "㑫",
+    "䧔",
+    "卄"
+   ]
+  },
+  "nin": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "in",
+   "char_count": 17,
+   "examples": [
+    "㞋",
+    "䄭",
+    "䄹"
+   ]
+  },
+  "ning": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ing",
+   "char_count": 53,
+   "examples": [
+    "㝕",
+    "㣷",
+    "㲌"
+   ]
+  },
+  "nip": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ip",
+   "char_count": 44,
+   "examples": [
+    "㘨",
+    "㚔",
+    "㩶"
+   ]
+  },
+  "nit": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "it",
+   "char_count": 3,
+   "examples": [
+    "圼",
+    "篞",
+    "𣵀"
+   ]
+  },
+  "niu": {
+   "tones": [
+    "1",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "iu",
+   "char_count": 28,
+   "examples": [
+    "㒟",
+    "㜵",
+    "㞙"
+   ]
+  },
+  "no": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "o",
+   "char_count": 23,
+   "examples": [
+    "㐡",
+    "㔮",
+    "㛂"
+   ]
+  },
+  "noek": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "oek",
+   "char_count": 2,
+   "examples": [
+    "蹃",
+    "逽"
+   ]
+  },
+  "noeng": {
+   "tones": [
+    "4"
+   ],
+   "onset": "n",
+   "final": "oeng",
+   "char_count": 3,
+   "examples": [
+    "娘",
+    "嬢",
+    "孃"
+   ]
+  },
+  "noi": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "oi",
+   "char_count": 22,
+   "examples": [
+    "㐻",
+    "㮈",
+    "㮏"
+   ]
+  },
+  "nok": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "ok",
+   "char_count": 6,
+   "examples": [
+    "掿",
+    "諾",
+    "诺"
+   ]
+  },
+  "nong": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ong",
+   "char_count": 18,
+   "examples": [
+    "㶞",
+    "儾",
+    "嚢"
+   ]
+  },
+  "nou": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ou",
+   "char_count": 37,
+   "examples": [
+    "㐐",
+    "㑎",
+    "㚢"
+   ]
+  },
+  "nuk": {
+   "tones": [
+    "6"
+   ],
+   "onset": "n",
+   "final": "uk",
+   "char_count": 11,
+   "examples": [
+    "䖡",
+    "䘐",
+    "䚼"
+   ]
+  },
+  "nung": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "ung",
+   "char_count": 41,
+   "examples": [
+    "㶶",
+    "㺜",
+    "䙶"
+   ]
+  },
+  "nyun": {
+   "tones": [
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "n",
+   "final": "yun",
+   "char_count": 13,
+   "examples": [
+    "㬉",
+    "㯎",
+    "㶧"
+   ]
+  },
+  "o": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "",
+   "final": "o",
+   "char_count": 15,
+   "examples": [
+    "䋍",
+    "䋪",
+    "嚄"
+   ]
+  },
+  "oi": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "oi",
+   "char_count": 45,
+   "examples": [
+    "㤅",
+    "㦈",
+    "䔽"
+   ]
+  },
+  "ok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "",
+   "final": "ok",
+   "char_count": 11,
+   "examples": [
+    "僫",
+    "噁",
+    "垩"
+   ]
+  },
+  "on": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "",
+   "final": "on",
+   "char_count": 24,
+   "examples": [
+    "㫨",
+    "䀂",
+    "䅁"
+   ]
+  },
+  "ong": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "ong",
+   "char_count": 11,
+   "examples": [
+    "㼜",
+    "䤑",
+    "傟"
+   ]
+  },
+  "ou": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "",
+   "final": "ou",
+   "char_count": 34,
+   "examples": [
+    "㜩",
+    "㠗",
+    "㤇"
+   ]
+  },
+  "paa": {
+   "tones": [
+    "1",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "aa",
+   "char_count": 19,
+   "examples": [
+    "䎬",
+    "䎱",
+    "䔤"
+   ]
+  },
+  "paai": {
+   "tones": [
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "aai",
+   "char_count": 21,
+   "examples": [
+    "㭛",
+    "䱝",
+    "俳"
+   ]
+  },
+  "paak": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "p",
+   "final": "aak",
+   "char_count": 15,
+   "examples": [
+    "啪",
+    "岶",
+    "帕"
+   ]
+  },
+  "paan": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "p",
+   "final": "aan",
+   "char_count": 12,
+   "examples": [
+    "㐴",
+    "䙪",
+    "扳"
+   ]
+  },
+  "paang": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "p",
+   "final": "aang",
+   "char_count": 37,
+   "examples": [
+    "㤣",
+    "㧸",
+    "嘭"
+   ]
+  },
+  "paat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "p",
+   "final": "aat",
+   "char_count": 2,
+   "examples": [
+    "坺",
+    "𥐙"
+   ]
+  },
+  "paau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "aau",
+   "char_count": 32,
+   "examples": [
+    "䶌",
+    "刨",
+    "匏"
+   ]
+  },
+  "pai": {
+   "tones": [
+    "1",
+    "3",
+    "5"
+   ],
+   "onset": "p",
+   "final": "ai",
+   "char_count": 10,
+   "examples": [
+    "㓟",
+    "批",
+    "濞"
+   ]
+  },
+  "pan": {
+   "tones": [
+    "1",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "an",
+   "char_count": 38,
+   "examples": [
+    "㰋",
+    "呠",
+    "喯"
+   ]
+  },
+  "pang": {
+   "tones": [
+    "2",
+    "4"
+   ],
+   "onset": "p",
+   "final": "ang",
+   "char_count": 23,
+   "examples": [
+    "㥊",
+    "㱶",
+    "㵗"
+   ]
+  },
+  "pat": {
+   "tones": [
+    "1"
+   ],
+   "onset": "p",
+   "final": "at",
+   "char_count": 6,
+   "examples": [
+    "㺼",
+    "䏘",
+    "匹"
+   ]
+  },
+  "pau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "au",
+   "char_count": 11,
+   "examples": [
+    "㧵",
+    "垺",
+    "娝"
+   ]
+  },
+  "pe": {
+   "tones": [
+    "5"
+   ],
+   "onset": "p",
+   "final": "e",
+   "char_count": 2,
+   "examples": [
+    "䠋",
+    "𠵿"
+   ]
+  },
+  "pei": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "ei",
+   "char_count": 124,
+   "examples": [
+    "㔻",
+    "㗪",
+    "㨢"
+   ]
+  },
+  "peng": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "p",
+   "final": "eng",
+   "char_count": 3,
+   "examples": [
+    "𠝭",
+    "𣖕",
+    "𩩍"
+   ]
+  },
+  "pik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "p",
+   "final": "ik",
+   "char_count": 28,
+   "examples": [
+    "䑀",
+    "䤨",
+    "䴙"
+   ]
+  },
+  "pin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "in",
+   "char_count": 45,
+   "examples": [
+    "㛹",
+    "㴜",
+    "㸤"
+   ]
+  },
+  "ping": {
+   "tones": [
+    "1",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "ing",
+   "char_count": 75,
+   "examples": [
+    "㺸",
+    "㻂",
+    "䀻"
+   ]
+  },
+  "pit": {
+   "tones": [
+    "3"
+   ],
+   "onset": "p",
+   "final": "it",
+   "char_count": 15,
+   "examples": [
+    "㧙",
+    "䥕",
+    "丿"
+   ]
+  },
+  "piu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "iu",
+   "char_count": 39,
+   "examples": [
+    "㬓",
+    "㼼",
+    "䏇"
+   ]
+  },
+  "po": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "o",
+   "char_count": 23,
+   "examples": [
+    "㗞",
+    "㜑",
+    "㨇"
+   ]
+  },
+  "pok": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "p",
+   "final": "ok",
+   "char_count": 34,
+   "examples": [
+    "㹒",
+    "㺪",
+    "㿺"
+   ]
+  },
+  "pong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "ong",
+   "char_count": 42,
+   "examples": [
+    "㝑",
+    "㥬",
+    "㫄"
+   ]
+  },
+  "pou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "ou",
+   "char_count": 44,
+   "examples": [
+    "䈬",
+    "䈻",
+    "䔕"
+   ]
+  },
+  "pui": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "p",
+   "final": "ui",
+   "char_count": 54,
+   "examples": [
+    "㚰",
+    "㟝",
+    "㤄"
+   ]
+  },
+  "pun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "un",
+   "char_count": 48,
+   "examples": [
+    "㢖",
+    "㩯",
+    "㮽"
+   ]
+  },
+  "pung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "p",
+   "final": "ung",
+   "char_count": 22,
+   "examples": [
+    "䡫",
+    "䴶",
+    "捧"
+   ]
+  },
+  "put": {
+   "tones": [
+    "3"
+   ],
+   "onset": "p",
+   "final": "ut",
+   "char_count": 14,
+   "examples": [
+    "㔇",
+    "㗶",
+    "㧊"
+   ]
+  },
+  "saa": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "s",
+   "final": "aa",
+   "char_count": 36,
+   "examples": [
+    "㠺",
+    "㲚",
+    "㸺"
+   ]
+  },
+  "saai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "s",
+   "final": "aai",
+   "char_count": 36,
+   "examples": [
+    "㩄",
+    "㬠",
+    "䑛"
+   ]
+  },
+  "saak": {
+   "tones": [
+    "3"
+   ],
+   "onset": "s",
+   "final": "aak",
+   "char_count": 8,
+   "examples": [
+    "愬",
+    "摵",
+    "擌"
+   ]
+  },
+  "saam": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "s",
+   "final": "aam",
+   "char_count": 40,
+   "examples": [
+    "㡎",
+    "㣌",
+    "㭅"
+   ]
+  },
+  "saan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "s",
+   "final": "aan",
+   "char_count": 62,
+   "examples": [
+    "㛽",
+    "㢫",
+    "㪔"
+   ]
+  },
+  "saang": {
+   "tones": [
+    "2"
+   ],
+   "onset": "s",
+   "final": "aang",
+   "char_count": 8,
+   "examples": [
+    "㗂",
+    "㨘",
+    "㾪"
+   ]
+  },
+  "saap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "s",
+   "final": "aap",
+   "char_count": 34,
+   "examples": [
+    "㗺",
+    "㚫",
+    "㩑"
+   ]
+  },
+  "saat": {
+   "tones": [
+    "3"
+   ],
+   "onset": "s",
+   "final": "aat",
+   "char_count": 27,
+   "examples": [
+    "㷺",
+    "䊛",
+    "摋"
+   ]
+  },
+  "saau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "s",
+   "final": "aau",
+   "char_count": 23,
+   "examples": [
+    "㪢",
+    "哨",
+    "娋"
+   ]
+  },
+  "sai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "s",
+   "final": "ai",
+   "char_count": 65,
+   "examples": [
+    "㓾",
+    "㔟",
+    "㢴"
+   ]
+  },
+  "sak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "s",
+   "final": "ak",
+   "char_count": 5,
+   "examples": [
+    "㥶",
+    "㩙",
+    "噻"
+   ]
+  },
+  "sam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "s",
+   "final": "am",
+   "char_count": 94,
+   "examples": [
+    "㚞",
+    "㝳",
+    "㣺"
+   ]
+  },
+  "san": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "an",
+   "char_count": 85,
+   "examples": [
+    "㚨",
+    "㛙",
+    "㛛"
+   ]
+  },
+  "sang": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "s",
+   "final": "ang",
+   "char_count": 22,
+   "examples": [
+    "㽒",
+    "䲼",
+    "䴤"
+   ]
+  },
+  "sap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "s",
+   "final": "ap",
+   "char_count": 20,
+   "examples": [
+    "㗩",
+    "䇆",
+    "什"
+   ]
+  },
+  "sat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "s",
+   "final": "at",
+   "char_count": 23,
+   "examples": [
+    "㺙",
+    "㻎",
+    "㻭"
+   ]
+  },
+  "sau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "s",
+   "final": "au",
+   "char_count": 130,
+   "examples": [
+    "㐿",
+    "㖌",
+    "㖟"
+   ]
+  },
+  "se": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "e",
+   "char_count": 50,
+   "examples": [
+    "㕐",
+    "㝍",
+    "㱔"
+   ]
+  },
+  "sei": {
+   "tones": [
+    "2",
+    "3"
+   ],
+   "onset": "s",
+   "final": "ei",
+   "char_count": 10,
+   "examples": [
+    "㱝",
+    "䦉",
+    "亖"
+   ]
+  },
+  "sek": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "s",
+   "final": "ek",
+   "char_count": 20,
+   "examples": [
+    "㒪",
+    "㸴",
+    "䂖"
+   ]
+  },
+  "seng": {
+   "tones": [
+    "3"
+   ],
+   "onset": "s",
+   "final": "eng",
+   "char_count": 2,
+   "examples": [
+    "鍟",
+    "𰾝"
+   ]
+  },
+  "seoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "eoi",
+   "char_count": 177,
+   "examples": [
+    "㑔",
+    "㑕",
+    "㑯"
+   ]
+  },
+  "seon": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "eon",
+   "char_count": 137,
+   "examples": [
+    "㐰",
+    "㒐",
+    "㔼"
+   ]
+  },
+  "seot": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "s",
+   "final": "eot",
+   "char_count": 45,
+   "examples": [
+    "㖅",
+    "㞊",
+    "㲞"
+   ]
+  },
+  "si": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "i",
+   "char_count": 212,
+   "examples": [
+    "㐊",
+    "㐪",
+    "㒋"
+   ]
+  },
+  "sik": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "s",
+   "final": "ik",
+   "char_count": 106,
+   "examples": [
+    "㙽",
+    "㛭",
+    "㝜"
+   ]
+  },
+  "sim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "s",
+   "final": "im",
+   "char_count": 38,
+   "examples": [
+    "㚒",
+    "㨛",
+    "㪎"
+   ]
+  },
+  "sin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "in",
+   "char_count": 140,
+   "examples": [
+    "㒨",
+    "㧥",
+    "㪇"
+   ]
+  },
+  "sing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "s",
+   "final": "ing",
+   "char_count": 118,
+   "examples": [
+    "㙚",
+    "㝭",
+    "㞼"
+   ]
+  },
+  "sip": {
+   "tones": [
+    "3"
+   ],
+   "onset": "s",
+   "final": "ip",
+   "char_count": 26,
+   "examples": [
+    "㦪",
+    "䜓",
+    "䤮"
+   ]
+  },
+  "sit": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "s",
+   "final": "it",
+   "char_count": 55,
+   "examples": [
+    "㔎",
+    "㞕",
+    "㣯"
+   ]
+  },
+  "siu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "s",
+   "final": "iu",
+   "char_count": 92,
+   "examples": [
+    "㔅",
+    "㕾",
+    "㗛"
+   ]
+  },
+  "so": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "s",
+   "final": "o",
+   "char_count": 64,
+   "examples": [
+    "㛖",
+    "㧧",
+    "㪽"
+   ]
+  },
+  "soe": {
+   "tones": [
+    "4"
+   ],
+   "onset": "s",
+   "final": "oe",
+   "char_count": 2,
+   "examples": [
+    "𠿬",
+    "𡄽"
+   ]
+  },
+  "soek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "s",
+   "final": "oek",
+   "char_count": 10,
+   "examples": [
+    "䀥",
+    "䁻",
+    "削"
+   ]
+  },
+  "soeng": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "oeng",
+   "char_count": 111,
+   "examples": [
+    "㐮",
+    "㕠",
+    "㜀"
+   ]
+  },
+  "soi": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "s",
+   "final": "oi",
+   "char_count": 11,
+   "examples": [
+    "䈢",
+    "䚡",
+    "䰄"
+   ]
+  },
+  "sok": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "s",
+   "final": "ok",
+   "char_count": 24,
+   "examples": [
+    "㩋",
+    "㮦",
+    "㮶"
+   ]
+  },
+  "song": {
+   "tones": [
+    "1",
+    "2"
+   ],
+   "onset": "s",
+   "final": "ong",
+   "char_count": 28,
+   "examples": [
+    "䔪",
+    "䗮",
+    "䘮"
+   ]
+  },
+  "sou": {
+   "tones": [
+    "1",
+    "2",
+    "3"
+   ],
+   "onset": "s",
+   "final": "ou",
+   "char_count": 67,
+   "examples": [
+    "㕖",
+    "㛐",
+    "㛮"
+   ]
+  },
+  "suk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "s",
+   "final": "uk",
+   "char_count": 98,
+   "examples": [
+    "㑐",
+    "㒔",
+    "㓘"
+   ]
+  },
+  "sung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "s",
+   "final": "ung",
+   "char_count": 55,
+   "examples": [
+    "㓽",
+    "㞞",
+    "㟣"
+   ]
+  },
+  "syu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "s",
+   "final": "yu",
+   "char_count": 83,
+   "examples": [
+    "㒘",
+    "㓿",
+    "㛸"
+   ]
+  },
+  "syun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "s",
+   "final": "yun",
+   "char_count": 92,
+   "examples": [
+    "㔵",
+    "㩊",
+    "㫌"
+   ]
+  },
+  "syut": {
+   "tones": [
+    "1",
+    "3"
+   ],
+   "onset": "s",
+   "final": "yut",
+   "char_count": 14,
+   "examples": [
+    "䨮",
+    "哾",
+    "樰"
+   ]
+  },
+  "taa": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "aa",
+   "char_count": 7,
+   "examples": [
+    "他",
+    "咜",
+    "她"
+   ]
+  },
+  "taai": {
+   "tones": [
+    "1",
+    "3",
+    "5"
+   ],
+   "onset": "t",
+   "final": "aai",
+   "char_count": 32,
+   "examples": [
+    "㑀",
+    "㑷",
+    "㣖"
+   ]
+  },
+  "taam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "aam",
+   "char_count": 57,
+   "examples": [
+    "㻼",
+    "㽎",
+    "㽑"
+   ]
+  },
+  "taan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "aan",
+   "char_count": 54,
+   "examples": [
+    "㘱",
+    "㛶",
+    "㨏"
+   ]
+  },
+  "taap": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "aap",
+   "char_count": 33,
+   "examples": [
+    "㯓",
+    "㲩",
+    "㲮"
+   ]
+  },
+  "taat": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "aat",
+   "char_count": 18,
+   "examples": [
+    "㒓",
+    "㣵",
+    "㳠"
+   ]
+  },
+  "tai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "ai",
+   "char_count": 99,
+   "examples": [
+    "㖒",
+    "㡗",
+    "㬱"
+   ]
+  },
+  "tam": {
+   "tones": [
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "am",
+   "char_count": 8,
+   "examples": [
+    "凼",
+    "榃",
+    "氹"
+   ]
+  },
+  "tan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "an",
+   "char_count": 15,
+   "examples": [
+    "䵍",
+    "吞",
+    "呑"
+   ]
+  },
+  "tang": {
+   "tones": [
+    "1",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "ang",
+   "char_count": 31,
+   "examples": [
+    "㬺",
+    "䒅",
+    "䕨"
+   ]
+  },
+  "tap": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "ap",
+   "char_count": 2,
+   "examples": [
+    "𠸊",
+    "𬢿"
+   ]
+  },
+  "tau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "au",
+   "char_count": 29,
+   "examples": [
+    "㖣",
+    "㢏",
+    "㪗"
+   ]
+  },
+  "tek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "ek",
+   "char_count": 3,
+   "examples": [
+    "踢",
+    "𨆉",
+    "𮛗"
+   ]
+  },
+  "teng": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "eng",
+   "char_count": 7,
+   "examples": [
+    "㕔",
+    "厅",
+    "厛"
+   ]
+  },
+  "teoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "eoi",
+   "char_count": 51,
+   "examples": [
+    "㞂",
+    "㞜",
+    "㢈"
+   ]
+  },
+  "teon": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "5"
+   ],
+   "onset": "t",
+   "final": "eon",
+   "char_count": 16,
+   "examples": [
+    "䝎",
+    "䵎",
+    "䵯"
+   ]
+  },
+  "teot": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "eot",
+   "char_count": 5,
+   "examples": [
+    "䠈",
+    "捸",
+    "涋"
+   ]
+  },
+  "ti": {
+   "tones": [
+    "4"
+   ],
+   "onset": "t",
+   "final": "i",
+   "char_count": 1,
+   "examples": [
+    "𢚖"
+   ]
+  },
+  "tik": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "ik",
+   "char_count": 25,
+   "examples": [
+    "㥂",
+    "㧹",
+    "䢰"
+   ]
+  },
+  "tim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "im",
+   "char_count": 29,
+   "examples": [
+    "㖭",
+    "㤁",
+    "㬲"
+   ]
+  },
+  "tin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "in",
+   "char_count": 65,
+   "examples": [
+    "㙉",
+    "㥏",
+    "㧂"
+   ]
+  },
+  "ting": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "ing",
+   "char_count": 76,
+   "examples": [
+    "㓅",
+    "㷚",
+    "㹶"
+   ]
+  },
+  "tip": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "ip",
+   "char_count": 12,
+   "examples": [
+    "㤐",
+    "䩞",
+    "䴴"
+   ]
+  },
+  "tit": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "it",
+   "char_count": 14,
+   "examples": [
+    "䥫",
+    "蛈",
+    "鉄"
+   ]
+  },
+  "tiu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "iu",
+   "char_count": 62,
+   "examples": [
+    "㟘",
+    "㬸",
+    "㸠"
+   ]
+  },
+  "to": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "o",
+   "char_count": 78,
+   "examples": [
+    "㯐",
+    "㰐",
+    "㼠"
+   ]
+  },
+  "toi": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "oi",
+   "char_count": 37,
+   "examples": [
+    "㒗",
+    "㙵",
+    "㣍"
+   ]
+  },
+  "tok": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "ok",
+   "char_count": 29,
+   "examples": [
+    "乇",
+    "仛",
+    "侂"
+   ]
+  },
+  "tong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "ong",
+   "char_count": 101,
+   "examples": [
+    "㑽",
+    "㓥",
+    "㙶"
+   ]
+  },
+  "tou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "onset": "t",
+   "final": "ou",
+   "char_count": 158,
+   "examples": [
+    "㐋",
+    "㚐",
+    "㞵"
+   ]
+  },
+  "tuk": {
+   "tones": [
+    "1"
+   ],
+   "onset": "t",
+   "final": "uk",
+   "char_count": 7,
+   "examples": [
+    "䛢",
+    "痜",
+    "禿"
+   ]
+  },
+  "tung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "onset": "t",
+   "final": "ung",
+   "char_count": 86,
+   "examples": [
+    "㖯",
+    "㖰",
+    "㛚"
+   ]
+  },
+  "tyun": {
+   "tones": [
+    "1",
+    "2",
+    "4"
+   ],
+   "onset": "t",
+   "final": "yun",
+   "char_count": 47,
+   "examples": [
+    "㩔",
+    "㩛",
+    "㬾"
+   ]
+  },
+  "tyut": {
+   "tones": [
+    "3"
+   ],
+   "onset": "t",
+   "final": "yut",
+   "char_count": 6,
+   "examples": [
+    "侻",
+    "挩",
+    "捝"
+   ]
+  },
+  "uk": {
+   "tones": [
+    "1"
+   ],
+   "onset": "",
+   "final": "uk",
+   "char_count": 4,
+   "examples": [
+    "䑁",
+    "剭",
+    "屋"
+   ]
+  },
+  "ung": {
+   "tones": [
+    "3"
+   ],
+   "onset": "",
+   "final": "ung",
+   "char_count": 7,
+   "examples": [
+    "䐥",
+    "䔨",
+    "瓮"
+   ]
+  },
+  "waa": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "aa",
+   "char_count": 77,
+   "examples": [
+    "㕦",
+    "㖞",
+    "㟆"
+   ]
+  },
+  "waai": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "w",
+   "final": "aai",
+   "char_count": 22,
+   "examples": [
+    "㗏",
+    "䃶",
+    "䴜"
+   ]
+  },
+  "waak": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "w",
+   "final": "aak",
+   "char_count": 37,
+   "examples": [
+    "㓰",
+    "㖪",
+    "㗲"
+   ]
+  },
+  "waan": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "aan",
+   "char_count": 67,
+   "examples": [
+    "㘤",
+    "㡲",
+    "㶎"
+   ]
+  },
+  "waang": {
+   "tones": [
+    "1",
+    "4"
+   ],
+   "onset": "w",
+   "final": "aang",
+   "char_count": 13,
+   "examples": [
+    "㶇",
+    "䬖",
+    "䬝"
+   ]
+  },
+  "waat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "w",
+   "final": "aat",
+   "char_count": 17,
+   "examples": [
+    "㱧",
+    "䀑",
+    "䁊"
+   ]
+  },
+  "wai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ai",
+   "char_count": 288,
+   "examples": [
+    "㒞",
+    "㕀",
+    "㕟"
+   ]
+  },
+  "wak": {
+   "tones": [
+    "6"
+   ],
+   "onset": "w",
+   "final": "ak",
+   "char_count": 1,
+   "examples": [
+    "𤷇"
+   ]
+  },
+  "wan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "an",
+   "char_count": 210,
+   "examples": [
+    "㒚",
+    "㚃",
+    "㛡"
+   ]
+  },
+  "wang": {
+   "tones": [
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ang",
+   "char_count": 46,
+   "examples": [
+    "㘢",
+    "㙆",
+    "㢬"
+   ]
+  },
+  "wat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "w",
+   "final": "at",
+   "char_count": 49,
+   "examples": [
+    "䖇",
+    "䖦",
+    "䮇"
+   ]
+  },
+  "we": {
+   "tones": [
+    "5"
+   ],
+   "onset": "w",
+   "final": "e",
+   "char_count": 1,
+   "examples": [
+    "𠾭"
+   ]
+  },
+  "wen": {
+   "tones": [
+    "1"
+   ],
+   "onset": "w",
+   "final": "en",
+   "char_count": 1,
+   "examples": [
+    "𨋍"
+   ]
+  },
+  "wet": {
+   "tones": [
+    "1"
+   ],
+   "onset": "w",
+   "final": "et",
+   "char_count": 1,
+   "examples": [
+    "𠿭"
+   ]
+  },
+  "wik": {
+   "tones": [
+    "6"
+   ],
+   "onset": "w",
+   "final": "ik",
+   "char_count": 21,
+   "examples": [
+    "㚜",
+    "㽣",
+    "䈅"
+   ]
+  },
+  "wing": {
+   "tones": [
+    "1",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ing",
+   "char_count": 48,
+   "examples": [
+    "㘇",
+    "㮠",
+    "咏"
+   ]
+  },
+  "wit": {
+   "tones": [
+    "1"
+   ],
+   "onset": "w",
+   "final": "it",
+   "char_count": 1,
+   "examples": [
+    "𫺖"
+   ]
+  },
+  "wo": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "o",
+   "char_count": 60,
+   "examples": [
+    "㕿",
+    "㳡",
+    "㶽"
+   ]
+  },
+  "wok": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ok",
+   "char_count": 31,
+   "examples": [
+    "㦜",
+    "㬦",
+    "㯉"
+   ]
+  },
+  "wong": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ong",
+   "char_count": 86,
+   "examples": [
+    "㒬",
+    "㞷",
+    "㣴"
+   ]
+  },
+  "wu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "6"
+   ],
+   "onset": "w",
+   "final": "u",
+   "char_count": 145,
+   "examples": [
+    "㕆",
+    "㗅",
+    "㝬"
+   ]
+  },
+  "wui": {
+   "tones": [
+    "1",
+    "2",
+    "4",
+    "6"
+   ],
+   "onset": "w",
+   "final": "ui",
+   "char_count": 67,
+   "examples": [
+    "㑹",
+    "㛱",
+    "㞧"
+   ]
+  },
+  "wun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "w",
+   "final": "un",
+   "char_count": 82,
+   "examples": [
+    "㐾",
+    "㛟",
+    "㣪"
+   ]
+  },
+  "wut": {
+   "tones": [
+    "6"
+   ],
+   "onset": "w",
+   "final": "ut",
+   "char_count": 9,
+   "examples": [
+    "㓉",
+    "䄆",
+    "䄑"
+   ]
+  },
+  "zaa": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aa",
+   "char_count": 78,
+   "examples": [
+    "㗬",
+    "㦋",
+    "㪥"
+   ]
+  },
+  "zaai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aai",
+   "char_count": 21,
+   "examples": [
+    "㗍",
+    "㩟",
+    "㪰"
+   ]
+  },
+  "zaak": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aak",
+   "char_count": 70,
+   "examples": [
+    "㖽",
+    "㟙",
+    "㭙"
+   ]
+  },
+  "zaam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aam",
+   "char_count": 44,
+   "examples": [
+    "㪠",
+    "㴴",
+    "䁪"
+   ]
+  },
+  "zaan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aan",
+   "char_count": 81,
+   "examples": [
+    "㜺",
+    "㣶",
+    "㻵"
+   ]
+  },
+  "zaang": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aang",
+   "char_count": 11,
+   "examples": [
+    "㬹",
+    "䂻",
+    "䦶"
+   ]
+  },
+  "zaap": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aap",
+   "char_count": 64,
+   "examples": [
+    "㗱",
+    "㠄",
+    "㠎"
+   ]
+  },
+  "zaat": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aat",
+   "char_count": 20,
+   "examples": [
+    "㞉",
+    "㦫",
+    "㭮"
+   ]
+  },
+  "zaau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "aau",
+   "char_count": 24,
+   "examples": [
+    "㐍",
+    "㕚",
+    "㷹"
+   ]
+  },
+  "zai": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ai",
+   "char_count": 75,
+   "examples": [
+    "㨈",
+    "㸄",
+    "㿃"
+   ]
+  },
+  "zak": {
+   "tones": [
+    "1"
+   ],
+   "onset": "z",
+   "final": "ak",
+   "char_count": 16,
+   "examples": [
+    "㳁",
+    "仄",
+    "侧"
+   ]
+  },
+  "zam": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "am",
+   "char_count": 47,
+   "examples": [
+    "㘰",
+    "㯢",
+    "㴆"
+   ]
+  },
+  "zan": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "an",
+   "char_count": 58,
+   "examples": [
+    "㣀",
+    "䂦",
+    "䃌"
+   ]
+  },
+  "zang": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ang",
+   "char_count": 53,
+   "examples": [
+    "㽪",
+    "䋫",
+    "䎖"
+   ]
+  },
+  "zap": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ap",
+   "char_count": 18,
+   "examples": [
+    "卙",
+    "執",
+    "慹"
+   ]
+  },
+  "zat": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "z",
+   "final": "at",
+   "char_count": 51,
+   "examples": [
+    "㑑",
+    "㑵",
+    "㜱"
+   ]
+  },
+  "zau": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "au",
+   "char_count": 140,
+   "examples": [
+    "㑇",
+    "㑳",
+    "㔌"
+   ]
+  },
+  "ze": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6"
+   ],
+   "onset": "z",
+   "final": "e",
+   "char_count": 49,
+   "examples": [
+    "㓔",
+    "㗯",
+    "㴬"
+   ]
+  },
+  "zek": {
+   "tones": [
+    "3"
+   ],
+   "onset": "z",
+   "final": "ek",
+   "char_count": 14,
+   "examples": [
+    "䑾",
+    "䞠",
+    "坧"
+   ]
+  },
+  "zeng": {
+   "tones": [
+    "2",
+    "6"
+   ],
+   "onset": "z",
+   "final": "eng",
+   "char_count": 6,
+   "examples": [
+    "丼",
+    "井",
+    "汫"
+   ]
+  },
+  "zeoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "eoi",
+   "char_count": 121,
+   "examples": [
+    "㐨",
+    "㗓",
+    "㘧"
+   ]
+  },
+  "zeon": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "eon",
+   "char_count": 140,
+   "examples": [
+    "㑓",
+    "㑺",
+    "㕙"
+   ]
+  },
+  "zeot": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "z",
+   "final": "eot",
+   "char_count": 16,
+   "examples": [
+    "㰵",
+    "䘚",
+    "䯿"
+   ]
+  },
+  "zi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "i",
+   "char_count": 387,
+   "examples": [
+    "㚄",
+    "㜽",
+    "㞢"
+   ]
+  },
+  "zik": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ik",
+   "char_count": 109,
+   "examples": [
+    "㑡",
+    "㒱",
+    "㘉"
+   ]
+  },
+  "zim": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "im",
+   "char_count": 49,
+   "examples": [
+    "㐃",
+    "䀡",
+    "䇝"
+   ]
+  },
+  "zin": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "in",
+   "char_count": 134,
+   "examples": [
+    "㜊",
+    "㞡",
+    "㠭"
+   ]
+  },
+  "zing": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ing",
+   "char_count": 107,
+   "examples": [
+    "㠞",
+    "㡠",
+    "㡧"
+   ]
+  },
+  "zip": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ip",
+   "char_count": 44,
+   "examples": [
+    "㡇",
+    "㫸",
+    "㴺"
+   ]
+  },
+  "zit": {
+   "tones": [
+    "1",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "it",
+   "char_count": 73,
+   "examples": [
+    "㦢",
+    "㨗",
+    "㨩"
+   ]
+  },
+  "ziu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "iu",
+   "char_count": 64,
+   "examples": [
+    "㐒",
+    "㡽",
+    "㩰"
+   ]
+  },
+  "zo": {
+   "tones": [
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "o",
+   "char_count": 25,
+   "examples": [
+    "㘴",
+    "㝾",
+    "䐢"
+   ]
+  },
+  "zoek": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "oek",
+   "char_count": 52,
+   "examples": [
+    "㓸",
+    "㣿",
+    "㩱"
+   ]
+  },
+  "zoeng": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "oeng",
+   "char_count": 105,
+   "examples": [
+    "㙣",
+    "㢓",
+    "㢡"
+   ]
+  },
+  "zoi": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "oi",
+   "char_count": 29,
+   "examples": [
+    "㘽",
+    "㢤",
+    "㦲"
+   ]
+  },
+  "zok": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ok",
+   "char_count": 39,
+   "examples": [
+    "㑅",
+    "㘀",
+    "㤰"
+   ]
+  },
+  "zong": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ong",
+   "char_count": 61,
+   "examples": [
+    "㘸",
+    "㛇",
+    "㮜"
+   ]
+  },
+  "zou": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ou",
+   "char_count": 53,
+   "examples": [
+    "㡟",
+    "㯾",
+    "㷮"
+   ]
+  },
+  "zuk": {
+   "tones": [
+    "1",
+    "6"
+   ],
+   "onset": "z",
+   "final": "uk",
+   "char_count": 86,
+   "examples": [
+    "㔉",
+    "㛩",
+    "㞺"
+   ]
+  },
+  "zung": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "ung",
+   "char_count": 193,
+   "examples": [
+    "㑖",
+    "㕬",
+    "㘒"
+   ]
+  },
+  "zyu": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "yu",
+   "char_count": 115,
+   "examples": [
+    "㗟",
+    "㦵",
+    "㧣"
+   ]
+  },
+  "zyun": {
+   "tones": [
+    "1",
+    "2",
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "yun",
+   "char_count": 76,
+   "examples": [
+    "㸇",
+    "㼷",
+    "䂎"
+   ]
+  },
+  "zyut": {
+   "tones": [
+    "3",
+    "6"
+   ],
+   "onset": "z",
+   "final": "yut",
+   "char_count": 52,
+   "examples": [
+    "㔃",
+    "㱀",
+    "䮕"
+   ]
+  }
+ },
+ "undecomposable": []
+}
