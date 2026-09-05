@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.2](https://github.com/metasequoiaime/MSIME-Windows/compare/v0.1.1...v0.1.2) (2026-09-05)
+
+
+### Bug Fixes
+
+* **ci:** match native Windows job names to the required checks ([1e7632b](https://github.com/metasequoiaime/MSIME-Windows/commit/1e7632b564f272c7b1e356fbe4b15fb53c73e42c))
+* connect Windows monorepo to consolidated Engine voice and data ([b690980](https://github.com/metasequoiaime/MSIME-Windows/commit/b690980ab80e3f8619f15546c95276dc9205b964))
+* finish local monorepo packaging and required Windows checks ([e1946bb](https://github.com/metasequoiaime/MSIME-Windows/commit/e1946bbec8c9ad2003ba3a64a7f8777f967be08a))
+* **installer:** use Engine tables in the local monorepo layout ([5f8d75d](https://github.com/metasequoiaime/MSIME-Windows/commit/5f8d75d79e3d6fd3ae2e2cb4008594fa91b6e705))
+
 ## [0.1.1](https://github.com/metasequoiaime/MSIME-Windows/compare/v0.1.0...v0.1.1) (2026-09-05)
 
 
