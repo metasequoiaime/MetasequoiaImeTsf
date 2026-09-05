@@ -195,6 +195,7 @@ set(SRC_FILES
     "./src/voice-input/system_audio_muter.h"
     "./src/voice-input/doubao_asr_client.cpp"
     "./src/voice-input/doubao_asr_client.h"
+    "./src/voice-input/voice_batch_protocol.cpp"
     "./src/voice-input/voice_providers.cpp"
     "./src/voice-input/voice_providers.h"
     "./src/voice-input/wave_overlay.cpp"
@@ -218,7 +219,7 @@ target_include_directories(${PROJECT_NAME}
     "${MSIME_VENDOR_DIR}/MetasequoiaImeEngine/voice/third_party/miniaudio"
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE MetasequoiaIme::Engine MetasequoiaIme::VoiceCapture)
+target_link_libraries(${PROJECT_NAME} PRIVATE MetasequoiaIme::Engine MetasequoiaIme::Voice MetasequoiaIme::VoiceCapture)
 target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3 fmt::fmt spdlog::spdlog Boost::locale Boost::json nlohmann_json::nlohmann_json)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenCC::OpenCC)
 add_dependencies(${PROJECT_NAME} Dictionaries)

@@ -1,9 +1,13 @@
 #include <msime/voice/audio_capture.h>
+#include <msime/voice/provider_protocol.h>
+#include <msime/voice/stt_service.h>
+#include <limits>
 
 #include "voice_input_service.h"
 #include "config/ime_config.h"
 #include "doubao_asr_client.h"
 #include "voice_providers.h"
+#include "voice_batch_protocol.h"
 #include "ipc/ipc.h"
 #include "system_audio_muter.h"
 #include "utils/common_utils.h"
@@ -350,42 +354,16 @@ LRESULT CALLBACK KeyboardHookProc(int code, WPARAM wparam, LPARAM lparam)
     return CallNextHookEx(g_keyboard_hook, code, wparam, lparam);
 }
 
-void AppendU16(std::vector<std::uint8_t> &out, std::uint16_t value)
-{
-    out.push_back(static_cast<std::uint8_t>(value));
-    out.push_back(static_cast<std::uint8_t>(value >> 8));
-}
-
-void AppendU32(std::vector<std::uint8_t> &out, std::uint32_t value)
-{
-    for (int shift = 0; shift < 32; shift += 8) out.push_back(static_cast<std::uint8_t>(value >> shift));
-}
-
-std::vector<std::uint8_t> MakeWav(const std::vector<float> &samples)
-{
-    std::vector<std::uint8_t> pcm;
-    pcm.reserve(samples.size() * 2);
-    for (float sample : samples)
-    {
-        const float clamped = (std::max)(-1.0f, (std::min)(1.0f, sample));
-        AppendU16(pcm, static_cast<std::uint16_t>(static_cast<std::int16_t>(clamped * 32767.0f)));
-    }
-    std::vector<std::uint8_t> wav;
-    wav.insert(wav.end(), {'R', 'I', 'F', 'F'});
-    AppendU32(wav, static_cast<std::uint32_t>(36 + pcm.size()));
-    wav.insert(wav.end(), {'W', 'A', 'V', 'E', 'f', 'm', 't', ' '});
-    AppendU32(wav, 16); AppendU16(wav, 1); AppendU16(wav, 1);
-    AppendU32(wav, kSampleRate); AppendU32(wav, kSampleRate * 2); AppendU16(wav, 2); AppendU16(wav, 16);
-    wav.insert(wav.end(), {'d', 'a', 't', 'a'});
-    AppendU32(wav, static_cast<std::uint32_t>(pcm.size()));
-    wav.insert(wav.end(), pcm.begin(), pcm.end());
-    return wav;
-}
-
 size_t WriteResponse(char *data, size_t size, size_t count, void *user)
 {
-    static_cast<std::string *>(user)->append(data, size * count);
-    return size * count;
+    constexpr size_t limit = 1024 * 1024;
+    if (size && count > (std::numeric_limits<size_t>::max)() / size) return 0;
+    const size_t length = size * count;
+    auto &response = *static_cast<std::string *>(user);
+    if (length > limit - response.size()) return 0;
+    try { response.append(data, length); }
+    catch (...) { return 0; }
+    return length;
 }
 
 size_t WriteHeader(char *data, size_t size, size_t count, void *user)
@@ -420,19 +398,6 @@ bool IsSiliconFlowAsr(const VoiceInputConfig &config)
             ch = static_cast<char>(ch - 'A' + 'a');
     }
     return provider == "siliconflow";
-}
-
-std::vector<float> PadAsrAudio(const std::vector<float> &samples)
-{
-    constexpr std::size_t kPadFrames = kSampleRate / 5; // 200 ms
-    std::vector<float> padded;
-    padded.reserve(samples.size() + kPadFrames * 2);
-    padded.insert(padded.end(), kPadFrames, 0.0f);
-    padded.insert(padded.end(), samples.begin(), samples.end());
-    padded.insert(padded.end(), kPadFrames, 0.0f);
-    if (padded.size() < kSampleRate)
-        padded.resize(kSampleRate, 0.0f);
-    return padded;
 }
 
 struct RecognitionResult
@@ -484,7 +449,15 @@ RecognitionResult Recognize(const std::vector<float> &samples, const VoiceInputC
     if (model_name.empty())
         return {{}, "ASR 模型名为空。"};
     const bool siliconflow = IsSiliconFlowAsr(config);
-    const auto wav = MakeWav(siliconflow ? PadAsrAudio(samples) : samples);
+    metasequoia::voice::MultipartRequest payload;
+    try
+    {
+        payload = VoiceInput::BuildBatchTranscription(samples, config);
+    }
+    catch (const metasequoia::voice::VoiceError &)
+    {
+        return {{}, "录音数据无效或超过 20 MiB 上传限制。"};
+    }
     const int attempts = siliconflow ? 2 : 1;
     std::string response;
     std::string trace_id;
@@ -505,27 +478,12 @@ RecognitionResult Recognize(const std::vector<float> &samples, const VoiceInputC
         headers = curl_slist_append(headers, ("Authorization: Bearer " + asr_token).c_str());
         // Some gateways 500 on libcurl's default Expect: 100-continue.
         headers = curl_slist_append(headers, "Expect:");
-        curl_mime *mime = curl_mime_init(curl);
-        curl_mimepart *file = curl_mime_addpart(mime);
-        curl_mime_name(file, "file");
-        curl_mime_filename(file, "audio.wav");
-        curl_mime_type(file, "audio/wav");
-        curl_mime_data(file, reinterpret_cast<const char *>(wav.data()), wav.size());
-        curl_mimepart *model = curl_mime_addpart(mime);
-        curl_mime_name(model, "model");
-        curl_mime_data(model, model_name.c_str(), CURL_ZERO_TERMINATED);
-        // SiliconFlow's /audio/transcriptions schema only accepts file + model.
-        // Sending Whisper's language field makes it return 400 and we previously
-        // swallowed that as an empty transcript.
-        if (!siliconflow && (config.language == "zh-cn" || config.language == "en"))
-        {
-            curl_mimepart *language = curl_mime_addpart(mime);
-            curl_mime_name(language, "language");
-            curl_mime_data(language, config.language == "zh-cn" ? "zh" : "en", CURL_ZERO_TERMINATED);
-        }
+        headers = curl_slist_append(headers, ("Content-Type: " + payload.content_type).c_str());
         curl_easy_setopt(curl, CURLOPT_URL, config.asr_endpoint.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+        curl_easy_setopt(curl, CURLOPT_POST, 1L);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.body.data());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t>(payload.body.size()));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResponse);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteHeader);
@@ -538,7 +496,6 @@ RecognitionResult Recognize(const std::vector<float> &samples, const VoiceInputC
         result = curl_easy_perform(curl);
         http_status = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
-        curl_mime_free(mime);
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
         if (result == CURLE_OK && http_status < 500)
@@ -549,7 +506,7 @@ RecognitionResult Recognize(const std::vector<float> &samples, const VoiceInputC
         const char *detail = curl_error[0] ? curl_error : curl_easy_strerror(result);
         return {{}, std::string("语音识别请求失败：") + detail};
     }
-    if (http_status >= 400)
+    if (http_status < 200 || http_status >= 300)
     {
         std::string detail = JsonErrorMessage(response);
         if (detail.empty())
@@ -564,10 +521,7 @@ RecognitionResult Recognize(const std::vector<float> &samples, const VoiceInputC
     }
     try
     {
-        const auto json = nlohmann::json::parse(response);
-        if (json.contains("text") && json["text"].is_string())
-            return {json["text"].get<std::string>(), {}};
-        return {{}, "语音识别返回了无法解析的结果。"};
+        return {metasequoia::voice::parse_transcription(response), {}};
     }
     catch (...)
     {
@@ -585,36 +539,30 @@ std::string Polish(const std::string &text, const VoiceInputConfig &config)
 {
     if (!ShouldPolish(text, config)) return text;
     const std::string polish_token = VoiceInput::ResolvePolishToken(config);
+    std::string payload;
+    try { payload = VoiceInput::BuildBatchPolish(text, config); }
+    catch (...) { return text; }
     CURL *curl = curl_easy_init();
     if (!curl) return text;
-    const std::string model_name = VoiceInput::ResolvePolishModel(config);
-    nlohmann::json body = {
-        {"model", model_name},
-        {"stream", false},
-        {"messages",
-         {{{"role", "system"}, {"content", VoiceInput::ResolvePolishSystemPrompt(config)}},
-          {{"role", "user"}, {"content", VoiceInput::WrapAsrUserMessage(text)}}}}};
-    if (config.polish_provider == "siliconflow")
-        body["enable_thinking"] = false;
-    else if (config.polish_provider == "deepseek")
-        body["thinking"] = {{"type", "disabled"}};
-    const std::string payload = body.dump();
     std::string response;
     curl_slist *headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
     headers = curl_slist_append(headers, ("Authorization: Bearer " + polish_token).c_str());
     curl_easy_setopt(curl, CURLOPT_URL, config.polish_endpoint.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t>(payload.size()));
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResponse);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
     // Polishing is optional: if it cannot finish promptly, abort the request and
     // let the caller commit the original ASR text returned below.
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, kPolishTimeoutMs);
     const CURLcode result = curl_easy_perform(curl);
+    long http_status = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_status);
     curl_slist_free_all(headers); curl_easy_cleanup(curl);
-    if (result != CURLE_OK) return text;
-    try { return nlohmann::json::parse(response).at("choices").at(0).at("message").value("content", text); }
+    if (result != CURLE_OK || http_status < 200 || http_status >= 300) return text;
+    try { return metasequoia::voice::parse_polished_text(response); }
     catch (...) { return text; }
 }
 

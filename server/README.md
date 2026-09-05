@@ -95,3 +95,7 @@ The server process includes a few built-in global shortcuts that are useful duri
 ![](https://i.postimg.cc/L96qQZT8/image.png)
 
 ![](https://i.postimg.cc/FNcz9QTv/image.png)
+
+## Shared voice providers
+
+The server links Engine VoiceCapture and Voice. WAV encoding and batch transcription/polish codecs come from the public library; Windows keeps provider configuration, SiliconFlow padding/retry behavior and Doubao streaming. Batch uploads are bounded to 20 MiB and responses to 1 MiB. Failed or empty polish responses retain the original transcript.

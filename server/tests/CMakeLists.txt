@@ -36,6 +36,8 @@ set(TEST_SOURCE_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_ipc_protocol_constants.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_voice_composition_pipe.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_voice_providers.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/test_voice_batch_protocol.cpp"
+    "${CMAKE_SOURCE_DIR}/src/voice-input/voice_batch_protocol.cpp"
     "${CMAKE_SOURCE_DIR}/src/voice-input/voice_providers.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_floating_toolbar_visibility_policy.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test_terminal_deactivation_policy.cpp"
@@ -63,6 +65,8 @@ target_include_directories(${TEST_EXECUTABLE_NAME}
 target_link_libraries(${TEST_EXECUTABLE_NAME}
     PRIVATE
     MetasequoiaIme::Engine
+    MetasequoiaIme::Voice
+    nlohmann_json::nlohmann_json
     fmt::fmt
     spdlog::spdlog
     Boost::locale
