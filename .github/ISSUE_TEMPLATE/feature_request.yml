@@ -22,7 +22,7 @@ body:
         - Server / 引擎服务 / MSIME-Server
         - 设置界面 / Settings
         - 候选窗 UI / Candidate UI
-        - 词典 / MSIME-Dict
+        - 词典 / MSIME-Engine/dictionary
         - 辅助码 / MSIME-Engine
         - 安装器 / Installer
         - 文档 / 官网
